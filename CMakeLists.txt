@@ -1,0 +1,31 @@
+cmake_minimum_required(VERSION 3.7)
+project(gl)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_EXE_LINKER_FLAGS "-lglfw3 -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo")
+
+aux_source_directory(./ SOURCE_FILES)
+aux_source_directory(./deps OTHER_SRC_FILES)
+aux_source_directory(./base OTHER_SRC_FILES)
+aux_source_directory(./ui OTHER_SRC_FILES)
+aux_source_directory(./ext OTHER_SRC_FILES)
+aux_source_directory(./ext/glm OTHER_SRC_FILES)
+aux_source_directory(./render OTHER_SRC_FILES)
+list(APPEND SOURCE_FILES ${OTHER_SRC_FILES})
+
+include_directories(${PROJECT_SOURCE_DIR}/deps)
+include_directories(${PROJECT_SOURCE_DIR}/glfw)
+include_directories(${PROJECT_SOURCE_DIR}/base)
+include_directories(${PROJECT_SOURCE_DIR}/ui)
+include_directories(${PROJECT_SOURCE_DIR}/ext)
+include_directories(${PROJECT_SOURCE_DIR}/render)
+link_directories(${PROJECT_SOURCE_DIR}/glfw)
+link_directories(${PROJECT_SOURCE_DIR}/deps)
+link_directories(${PROJECT_SOURCE_DIR}/base)
+link_directories(${PROJECT_SOURCE_DIR}/ui)
+link_directories(${PROJECT_SOURCE_DIR}/ext/glm)
+link_directories(${PROJECT_SOURCE_DIR}/render)
+
+add_executable(gl ${SOURCE_FILES} entity/Entity.cpp entity/Entity.h component/Component.cpp component/Component.h system/System.cpp system/System.h ui/Cube.cpp ui/Cube.h render/Render.cpp render/Render.h render/Camera.cpp render/Camera.h render/ShaderCache.cpp render/ShaderCache.h)
+
+target_link_libraries(gl glfw3.a)
