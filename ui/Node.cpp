@@ -63,9 +63,15 @@ void Node::onExit() {}
 
 void Node::cleanup() {}
 
-void Node::draw(vec4 &transform) {}
+void Node::draw(const mat4 &transform) {
+}
 
-void Node::visit() {}
+void Node::visit(const mat4 &parentTransform) {
+    draw(parentTransform);
+    for (Node *child : _children) {
+        child->visit(parentTransform);
+    }
+}
 
 void Node::update(float delta) {}
 

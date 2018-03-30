@@ -11,6 +11,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "Geometry.h"
 
 class Scene;
 
@@ -28,6 +29,8 @@ public:
 
     GLFWwindow *getWindow() const { return _window; }
 
+    const Size &getWinSize() { return _winSize; }
+
     void renderScene(Scene *scene);
 
     virtual void release();
@@ -38,6 +41,7 @@ protected:
     bool initWithRect(int x, int y, int width, int height);
 
     GLFWwindow *_window;
+    Size _winSize;
 };
 
 #endif /* GLView_h */

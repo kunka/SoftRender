@@ -1,4 +1,6 @@
 #include "Scene.h"
+#include "Render.h"
+#include "Log.h"
 
 Scene::Scene()
         : _isRunning(false) {
@@ -17,18 +19,19 @@ Scene::~Scene() {
 bool Scene::init() {
     _defaultCamera = new Camera();
     _defaultCamera->initDefault();
+    _cameras.push_back(_defaultCamera);
     addChild(_defaultCamera);
 
     return true;
 }
 
-void Scene::ignoreTouchEvent() {
-
-}
-
-void Scene::draw(glm::vec4 &transform) {
+void Scene::render(Render *render) {
+    log("render");
+    mat4 transform;
     for (const auto *camera : _cameras) {
-
+        for (Node *child : _children) {
+            child->visit(transform);
+        }
     }
 }
 

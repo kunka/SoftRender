@@ -19,7 +19,7 @@ protected:
 
     virtual bool init();
 
-    virtual void draw() override;
+//    virtual void draw(mat4& transform) override;
 
 private:
     unsigned int VAO;

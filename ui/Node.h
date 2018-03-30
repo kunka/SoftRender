@@ -37,9 +37,9 @@ public:
 
     virtual void cleanup();
 
-    virtual void draw(vec4 &transform);
+    virtual void draw(const mat4 &transform);
 
-    virtual void visit();
+    virtual void visit(const mat4& parentTransform);
 
     virtual void update(float delta);
 

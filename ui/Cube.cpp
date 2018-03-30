@@ -107,6 +107,6 @@ bool Cube::init() {
     return true;
 }
 
-void Cube::draw() {
-
-}
+//void Cube::draw() {
+//
+//}

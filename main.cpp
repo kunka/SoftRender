@@ -17,6 +17,10 @@
 #include "getopt.h"
 
 #include "Application.h"
+#include "GLView.h"
+#include "Director.h"
+#include "Scene.h"
+#include "CustomDraw.h"
 
 ////#include "TriangleDemo.h"
 ////#include "TextureDemo.h"
@@ -79,14 +83,22 @@
 //}
 
 int main(int argc, char **argv) {
-    auto ret = Application::getInstance()->run();
-    if (ret == 0) {
-        printf("Application run success");
-    } else {
-        printf("Application run fail");
-    }
-    return ret;
+    auto app = Application::getInstance();
+    app->applicationDidFinishLaunching([&]() {
+        auto glView = GLView::createWithRect(0, 0, 200, 200);
+        Director::getInstance()->setGLView(glView);
 
+        app->setUpdateInterval(1.0f);
+
+        Scene *scene = Scene::create();
+        CustomDraw *draw = new CustomDraw;
+        scene->addChild(draw);
+        Director::getInstance()->runWithScene(scene);
+        return true;
+    });
+    app->run();
+    app->stop();
+    return 0;
 
 //    int decorated = GLFW_FALSE;
 //    int running = GLFW_TRUE;

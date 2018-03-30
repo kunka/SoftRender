@@ -11,9 +11,11 @@
 #include <stdlib.h>
 #include "Application.h"
 #include "Render.h"
+#include "Director.h"
+#include "Log.h"
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-    printf("key_callback: key(%d), action(%d),mods(%d)", key, action, mods);
+    logf("key_callback: key(%d), action(%d),mods(%d)", key, action, mods);
     if (action != GLFW_PRESS)
         return;
 
@@ -25,7 +27,7 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
             break;
         }
         case GLFW_KEY_ESCAPE: {
-            Application::getInstance()->release();
+            glfwSetWindowShouldClose(window, GLFW_TRUE);
             break;
         }
         default:
@@ -40,19 +42,18 @@ static void error_callback(int error, const char *description) {
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
-    printf("framebuffer_size_callback: %d, %d", width, height);
+    logf("framebuffer_size_callback: %d, %d", width, height);
     glViewport(0, 0, width, height);
 }
 
 void window_size_callback(GLFWwindow *window, int width, int height) {
-    printf("window_size_callback: %d, %d", width, height);
+    logf("window_size_callback: %d, %d", width, height);
 }
 
 GLView::GLView() {
 }
 
 GLView::~GLView() {
-    glfwTerminate();
 }
 
 GLView *GLView::createWithRect(int x, int y, int width, int height) {
@@ -66,7 +67,7 @@ GLView *GLView::createWithRect(int x, int y, int width, int height) {
 bool GLView::initWithRect(int x, int y, int width, int height) {
     glfwSetErrorCallback(error_callback);
     if (!glfwInit()) {
-        printf("Failed to initialize GLFW");
+        log("Failed to initialize GLFW");
         return false;
     }
     glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
@@ -78,13 +79,13 @@ bool GLView::initWithRect(int x, int y, int width, int height) {
     glfwWindowHint(GLFW_FLOATING, GL_TRUE);
     GLFWwindow *window = glfwCreateWindow(width, height, "GL", NULL, NULL);
     if (!window) {
-        printf("Failed to create GLFW window");
+        log("Failed to create GLFW window");
         glfwTerminate();
         return false;
     }
     glfwMakeContextCurrent(window);
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-        printf("Failed to initialize GLAD");
+        log("Failed to initialize GLAD");
         glfwTerminate();
         return false;
     }
@@ -96,7 +97,9 @@ bool GLView::initWithRect(int x, int y, int width, int height) {
     _window = window;
     int realW = 0, realH = 0;
     glfwGetWindowSize(window, &realW, &realH);
-    printf("GLView::initWithRect(%d,%d,%d,%d), realSize=(%d,%d)", x, y, width, height, realW, realH);
+    _winSize.width = realW;
+    _winSize.height = realH;
+    logf("GLView::initWithRect(%d,%d,%d,%d), winSize=(%d,%d)", x, y, width, height, realW, realH);
 
     return true;
 }

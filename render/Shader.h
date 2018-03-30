@@ -16,8 +16,8 @@
 #include <sstream>
 #include <iostream>
 
-extern const char *shader_positionColor_vert;
-extern const char *shader_positionColor_frag;
+//extern const char *shader_positionColor_vert;
+//extern const char *shader_positionColor_frag;
 
 class Shader {
 public:

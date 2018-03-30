@@ -6,20 +6,21 @@
 #include "Camera.h"
 #include <vector>
 
+class Render;
+
 class Scene : public Node {
 public:
     static Scene *create();
 
-    void ignoreTouchEvent();
-
     bool isRunning() { return _isRunning; }
 
-    virtual void draw(glm::vec4 &transform) override;
+    void render(Render *render);
+
+
+    virtual ~Scene();
 
 protected:
     Scene();
-
-    virtual ~Scene();
 
     virtual bool init();
 

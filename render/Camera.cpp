@@ -20,7 +20,7 @@ void Camera::initPerspective(float fovy, float aspect, float zNear, float zFar) 
 void Camera::lookAt(const vec3 &target, const vec3 &up) {
     _target = target;
     _up = up;
-    _view = lookAt(_position, target, up);
+    _view = glm::lookAt(_position, target, up);
 }
 
 void Camera::initDefault() {
@@ -30,3 +30,10 @@ void Camera::initDefault() {
     lookAt(vec3(0, 10, 0), vec3(0, 1, 0));
 }
 
+const mat4 &Camera::getProjectionMatrix() {
+    return _projection;
+}
+
+const mat4 &Camera::getViewMatrix() {
+    return _view;
+}

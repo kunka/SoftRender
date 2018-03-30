@@ -31,9 +31,9 @@ public:
 
     void popScene();
 
-    void popToRootScene();
+//    void popToRootScene();
 
-    void popToSceneStackLevel(int level);
+//    void popToSceneStackLevel(int level);
 
     void replaceScene(Scene *scene);
 
@@ -45,11 +45,11 @@ public:
 
     void mainLoop();
 
-    const Size &getWinSize() { return _winSize; }
+    const Size &getWinSize() { return _glView->getWinSize(); }
 
     GLView *getGLView() { return _glView; }
 
-    GLView *createGLView();
+    void setGLView(GLView *glView);
 
 protected:
     void setNextScene();
@@ -59,7 +59,6 @@ protected:
     std::vector<Scene *> _scenesStack;
     GLView *_glView;
     Render *_render;
-    Size _winSize;
     static Director *s_director;
 };
 

@@ -1,6 +1,10 @@
 #ifndef __APPLICATION_H__
 #define __APPLICATION_H__
 
+#include <functional>
+
+typedef std::function<bool()> OnApplicationDidFinishLaunching;
+
 class Application {
 public:
     static Application *getInstance();
@@ -9,17 +13,19 @@ public:
 
     virtual ~Application();
 
-    virtual bool applicationDidFinishLaunching();
+    void applicationDidFinishLaunching(
+            OnApplicationDidFinishLaunching callback) { _applicationDidFinishLaunching = callback; }
 
-    virtual void setUpdateInterval(float interval);
+    void setUpdateInterval(float interval);
 
     int run();
 
-    void release();
+    void stop();
 
 protected:
     static Application *s_application;
     long _interval;  //micro second
+    OnApplicationDidFinishLaunching _applicationDidFinishLaunching;
 };
 
 #endif  // end of __APPLICATION_H__;

@@ -1,17 +1,15 @@
 #include "Application.h"
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include "Director.h"
 #include <sys/time.h>
 #include <unistd.h>
+#include "Log.h"
 
-static long getCurrentMillSecond() {
-    long lLastTime = 0;
-    struct timeval stCurrentTime;
-
-    gettimeofday(&stCurrentTime, NULL);
-    lLastTime = stCurrentTime.tv_sec * 1000 + stCurrentTime.tv_usec * 0.001; // milliseconds
-    return lLastTime;
+static long nowInMS() {
+    long ret = 0;
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    ret = now.tv_sec * 1000 + now.tv_usec / 1000;
+    return ret;
 }
 
 Application *Application::s_application = nullptr;
@@ -23,52 +21,44 @@ Application *Application::getInstance() {
     return s_application;
 }
 
-Application::Application() : _interval(1.0f / 1.0f * 1000.0f) {
+Application::Application() : _interval(1000 / 60) {
 
 }
 
 Application::~Application() {
 }
 
-bool Application::applicationDidFinishLaunching() {
-    printf("Application::applicationDidFinishLaunching");
-    if (Director::getInstance()->createGLView()) {
-        return true;
-    }
-    return false;
-}
-
 int Application::run() {
-    if (!applicationDidFinishLaunching()) {
+    if (!_applicationDidFinishLaunching()) {
+        log("Application::run fail");
         return 1;
     }
+    log("Application::run");
 
-    long lastTime = 0L;
-    long curTime = 0L;
+    long last, now;
     auto director = Director::getInstance();
     auto glView = director->getGLView();
 
-    while (!glView->windowShouldClose()) {
-        lastTime = getCurrentMillSecond();
+    while (glView && !glView->windowShouldClose()) {
+        last = nowInMS();
 
         director->mainLoop();  // handle event logic and draw
 
-        curTime = getCurrentMillSecond();
-        if (curTime - lastTime < _interval) {
-            usleep(static_cast<useconds_t>((_interval - curTime + lastTime) * 1000));
+        now = nowInMS();
+        if (now - last < _interval) {
+            usleep(static_cast<useconds_t>((_interval - now + last) * 1000));
         }
     }
-    director->release();
 
     return 0;
 }
 
 void Application::setUpdateInterval(float interval) {
-    _interval = interval * 1000.0f;
+    _interval = long(interval * 1000.0f);
 }
 
-void Application::release() {
-    printf("Application::release");
-    auto glView = Director::getInstance()->getGLView();
-    glView->windowShouldClose();
+void Application::stop() {
+    log("Application::stop");
+    auto director = Director::getInstance();
+    director->release();
 }

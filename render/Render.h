@@ -5,7 +5,6 @@
 #ifndef GL_RENDER_H
 #define GL_RENDER_H
 
-
 #include <vector>
 #include <glm/glm.hpp>
 

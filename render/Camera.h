@@ -28,6 +28,10 @@ public:
 
     void initDefault();
 
+    const mat4 &getProjectionMatrix();
+
+    const mat4 &getViewMatrix();
+
 protected:
     void initPerspective(float fieldOfView, float aspectRatio, float nearPlane, float farPlane);
 
