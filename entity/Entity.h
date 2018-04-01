@@ -14,15 +14,15 @@ class Component;
 class Entity {
 
 public:
-    virtual void update(float delta) {};
-
-    virtual void fixedUpdate(float delta) {};
-
-    bool addComponent(Component *component);
-
-    bool removeComponent(Component *component);
-
-    Component *findComponent(const std::string &name);
+//    virtual void update(float delta) {};
+//
+//    virtual void fixedUpdate(float delta) {};
+//
+//    bool addComponent(Component *component);
+//
+//    bool removeComponent(Component *component);
+//
+//    Component *findComponent(const std::string &name);
 
 protected:
     std::vector<Component *> components;

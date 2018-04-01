@@ -85,7 +85,7 @@
 int main(int argc, char **argv) {
     auto app = Application::getInstance();
     app->applicationDidFinishLaunching([&]() {
-        auto glView = GLView::createWithRect(0, 0, 200, 200);
+        auto glView = GLView::createWithRect(0, 0, 500, 500);
         Director::getInstance()->setGLView(glView);
 
         app->setUpdateInterval(1.0f);
