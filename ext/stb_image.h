@@ -1641,7 +1641,7 @@ static stbi_uc *stbi__hdr_to_ldr(float   *data, int x, int y, int comp)
 typedef struct
 {
     stbi_uc  fast[1 << FAST_BITS];
-    // weirdly, repacking this into AoS is a 10% speed loss, instead of a win
+    // weirdly, repacking this into AoS is a 10% speed loss, instead of a win32
     stbi__uint16 code[256];
     stbi_uc  values[256];
     stbi_uc  size[257];

@@ -39,13 +39,13 @@ link_directories(${PROJECT_SOURCE_DIR}/render)
 link_directories(${PROJECT_SOURCE_DIR}/samples)
 link_directories(${PROJECT_SOURCE_DIR}/math)
 if (MINGW)
-    link_directories(${PROJECT_SOURCE_DIR}/glfw/win)
+    link_directories(${PROJECT_SOURCE_DIR}/glfw/win32)
 endif(MINGW)
 
 if(APPLE)
     link_directories(${PROJECT_SOURCE_DIR}/glfw/mac)
 endif(APPLE)
 
-add_executable(gl ${SOURCE_FILES} entity/Entity.cpp entity/Entity.h component/Component.cpp component/Component.h system/System.cpp system/System.h ui/Cube.cpp ui/Cube.h render/Render.cpp render/Render.h render/Camera.cpp render/Camera.h render/ShaderCache.cpp render/ShaderCache.h samples/CustomDraw.cpp samples/CustomDraw.h base/Log.cpp base/Log.h gk.h)
+add_executable(gl ${SOURCE_FILES} entity/Entity.cpp entity/Entity.h component/Component.cpp component/Component.h system/System.cpp system/System.h ui/Cube.cpp ui/Cube.h render/Render.cpp render/Render.h render/Camera.cpp render/Camera.h render/ShaderCache.cpp render/ShaderCache.h samples/CustomDraw.cpp samples/CustomDraw.h base/Log.cpp base/Log.h gk.h samples/Triangle.h samples/Triangle.cpp  samples/Rectangle.h samples/Rectangle.cpp samples/Texture.cpp samples/Texture.h)
 
 target_link_libraries(gl glfw3.a)
