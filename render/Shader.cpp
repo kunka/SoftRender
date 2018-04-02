@@ -8,17 +8,17 @@
 
 #include "Shader.h"
 //#include "shaders.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+using namespace glm;
 
 Shader::Shader() {
 
 }
 
 void Shader::loadStr(const char *vertexStr, const char *fragmentStr) {
-    // 2. compile shaders
     unsigned int vertex, fragment;
-//    int success;
-//    char infoLog[512];
-    // vertex shader
     vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vertexStr, NULL);
     glCompileShader(vertex);
@@ -91,8 +91,12 @@ void Shader::setFloat(const std::string &name, float value) const {
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
-void Shader::setVec4(const std::string &name, const glm::vec4 &vec4) const {
+void Shader::setVec4(const std::string &name, const vec4 &vec4) const {
     glUniform4f(glGetUniformLocation(ID, name.c_str()), vec4.x, vec4.y, vec4.z, vec4.a);
+}
+
+void Shader::setMat4(const std::string &name, const mat4 &mat4) const {
+    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat4));
 }
 
 // utility function for checking shader compilation/linking errors.

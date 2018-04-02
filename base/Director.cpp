@@ -37,7 +37,6 @@ void Director::setGLView(GLView *glView) {
 
 void Director::drawScene() {
     if (_runningScene) {
-        log("drawScene");
         _runningScene->render(_render);
     }
 }

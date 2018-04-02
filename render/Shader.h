@@ -43,6 +43,8 @@ public:
 
     void setVec4(const std::string &name, const glm::vec4 &vec4) const;
 
+    void setMat4(const std::string &name, const glm::mat4 &mat4) const;
+
 private:
     // utility function for checking shader compilation/linking errors.
     // ------------------------------------------------------------------------

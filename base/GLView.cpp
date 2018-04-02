@@ -75,7 +75,9 @@ bool GLView::initWithRect(int x, int y, int width, int height) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
     glfwWindowHint(GLFW_FLOATING, GL_TRUE);
     GLFWwindow *window = glfwCreateWindow(width, height, "GL", NULL, NULL);
     if (!window) {

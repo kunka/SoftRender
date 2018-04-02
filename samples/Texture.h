@@ -11,6 +11,7 @@ TEST_NODE_BEGIN(Texture)
 
     protected:
         unsigned int texture;
+        unsigned int texture2;
 
 TEST_NODE_END(Texture)
 

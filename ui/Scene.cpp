@@ -2,6 +2,8 @@
 #include "Render.h"
 #include "Log.h"
 
+using namespace glm;
+
 Scene::Scene()
         : _isRunning(false) {
 }
@@ -26,7 +28,6 @@ bool Scene::init() {
 }
 
 void Scene::render(Render *render) {
-    log("render");
     mat4 transform;
     for (const auto *camera : _cameras) {
         for (Node *child : _children) {

@@ -10,6 +10,7 @@
 #include <vector>
 #include "Shader.h"
 #include "Log.h"
+#include "Director.h"
 
 #define TEST_NODE_BEGIN(__CLASS__) \
 namespace gltest{ \
@@ -35,6 +36,7 @@ protected:
     unsigned int VAO;
     unsigned int VBO;
     unsigned int EBO;
+    unsigned int texture;
 };
 
 #endif //GL_CUSTOMDRAW_H

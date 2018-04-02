@@ -5,6 +5,8 @@
 #include "Camera.h"
 #include "Director.h"
 
+using namespace glm;
+
 Camera *Camera::createPerspective(float fovy, float aspect, float zNear, float zFar) {
     Camera *camera = new Camera();
     camera->initPerspective(fovy, aspect, zNear, zFar);

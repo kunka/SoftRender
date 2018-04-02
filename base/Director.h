@@ -9,8 +9,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Geometry.h"
 
-using namespace glm;
-
 class Render;
 
 class Director {

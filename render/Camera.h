@@ -10,8 +10,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-using namespace glm;
-
 class Camera : public Node {
 public:
     /**
@@ -24,22 +22,22 @@ public:
 public:
     static Camera *createPerspective(float fieldOfView, float aspectRatio, float nearPlane, float farPlane);
 
-    virtual void lookAt(const vec3 &target, const vec3 &up = vec3(0, 1, 0));
+    virtual void lookAt(const glm::vec3 &target, const glm::vec3 &up = glm::vec3(0, 1, 0));
 
     void initDefault();
 
-    const mat4 &getProjectionMatrix();
+    const glm::mat4 &getProjectionMatrix();
 
-    const mat4 &getViewMatrix();
+    const glm::mat4 &getViewMatrix();
 
 protected:
     void initPerspective(float fieldOfView, float aspectRatio, float nearPlane, float farPlane);
 
 private:
-    mat4 _projection;
-    mat4 _view;
-    vec3 _target;
-    vec3 _up;
+    glm::mat4 _projection;
+    glm::mat4 _view;
+    glm::vec3 _target;
+    glm::vec3 _up;
 };
 
 #endif //GL_CAMERA_H

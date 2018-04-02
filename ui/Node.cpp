@@ -1,5 +1,8 @@
 #include "Node.h"
 
+using namespace glm;
+using namespace std;
+
 Node::Node() {
 }
 
