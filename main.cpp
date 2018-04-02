@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 #ifdef __APPLE__
         auto glView = GLView::createWithRect(0, 0, 200, 150);
 #else
-        auto glView = GLView::createWithRect(0, 0, 400, 300);
+        auto glView = GLView::createWithRect(0, 0, 600, 450);
 #endif
         Director::getInstance()->setGLView(glView);
 

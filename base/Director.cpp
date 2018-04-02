@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Render.h"
 #include "Log.h"
+#include "Input.h"
 
 using namespace std;
 Director *Director::s_director = nullptr;
@@ -36,6 +37,7 @@ void Director::setGLView(GLView *glView) {
 }
 
 void Director::processInput(float delta) {
+    Input::getInstance()->update(delta);
     if (_runningScene) {
         _runningScene->fixedUpdate(Application::getInstance()->getUpdateInterval());
         _runningScene->update(delta);

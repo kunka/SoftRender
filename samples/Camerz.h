@@ -15,6 +15,8 @@ TEST_NODE_BEGIN(Camerz)
         vec3 cameraPos;
         vec3 cameraDir;
         vec3 cameraUp;
+        float pitch;
+        float yaw;
         mat4 model;
         mat4 view;
         mat4 projection;

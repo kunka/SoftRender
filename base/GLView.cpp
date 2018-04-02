@@ -13,26 +13,10 @@
 #include "Render.h"
 #include "Director.h"
 #include "Log.h"
+#include "Input.h"
 
-static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-//    logf("key_callback: key(%d), action(%d),mods(%d)", key, action, mods);
-    if (action != GLFW_PRESS)
-        return;
-
-    switch (key) {
-        case GLFW_KEY_LEFT: {
-            break;
-        }
-        case GLFW_KEY_RIGHT: {
-            break;
-        }
-        case GLFW_KEY_ESCAPE: {
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
-            break;
-        }
-        default:
-            break;
-    }
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+    Input::getInstance()->onScrollCallback(xoffset, yoffset);
 }
 
 static void error_callback(int error, const char *description) {
@@ -91,7 +75,9 @@ bool GLView::initWithRect(int x, int y, int width, int height) {
         glfwTerminate();
         return false;
     }
-    glfwSetKeyCallback(window, key_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetScrollCallback(window, scroll_callback);
+
     glfwSetWindowPos(window, x, y);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetWindowSizeCallback(window, window_size_callback);

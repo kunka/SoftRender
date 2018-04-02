@@ -4,6 +4,7 @@
 
 #include "Camerz.h"
 #include "stb_image.h"
+#include "Input.h"
 
 TEST_NODE_IMP_BEGIN
 
@@ -158,19 +159,40 @@ void main()
 
         // unbind
         glBindVertexArray(0);
+
+        pitch = 0;
+        yaw = -90;
     }
 
     void Camerz::fixedUpdate(float delta) {
-        GLFWwindow *window = Director::getInstance()->getGLView()->getWindow();
+        Input *input = Input::getInstance();
         float cameraSpeed = delta * 3;
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        // move
+        if (input->isKeyPressed(GLFW_KEY_W))
             cameraPos += cameraSpeed * cameraDir;
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        if (input->isKeyPressed(GLFW_KEY_S))
             cameraPos -= cameraSpeed * cameraDir;
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        if (input->isKeyPressed(GLFW_KEY_A))
             cameraPos -= glm::normalize(glm::cross(cameraDir, cameraUp)) * cameraSpeed;
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        if (input->isKeyPressed(GLFW_KEY_D))
             cameraPos += glm::normalize(glm::cross(cameraDir, cameraUp)) * cameraSpeed;
+
+        // pitch and yaw
+        vec2 deltaP = input->getMousePosDelta();
+        if (deltaP.x != 0 && deltaP.y != 0) {
+            float sensitivity = delta * 3;
+            yaw += deltaP.x * sensitivity;
+            pitch += deltaP.y * sensitivity;
+
+            if (pitch > 45.0f) pitch = 45.0f;
+            if (pitch < -45.0f) pitch = -45.0f;
+
+            glm::vec3 front;
+            front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+            front.y = sin(glm::radians(pitch));
+            front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+            cameraDir = glm::normalize(front);
+        }
     }
 
     void Camerz::draw(const mat4 &transform) {
