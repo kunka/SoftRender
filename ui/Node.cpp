@@ -76,7 +76,17 @@ void Node::visit(const mat4 &parentTransform) {
     }
 }
 
-void Node::update(float delta) {}
+void Node::fixedUpdate(float delta) {
+    for (Node *child : _children) {
+        child->fixedUpdate(delta);
+    }
+}
+
+void Node::update(float delta) {
+    for (Node *child : _children) {
+        child->update(delta);
+    }
+}
 
 void Node::addChild(Node *child) {
     _children.push_back(child);

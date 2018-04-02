@@ -2,12 +2,12 @@
 // Created by huangkun on 02/04/2018.
 //
 
-#include "Cubes.h"
+#include "Camerz.h"
 #include "stb_image.h"
 
 TEST_NODE_IMP_BEGIN
 
-    Cubes::Cubes() {
+    Camerz::Camerz() {
         const char *vert = R"(
 #version 330 core
 layout (location = 0) in vec3 a_position;
@@ -144,7 +144,10 @@ void main()
         auto &size = Director::getInstance()->getWinSize();
         projection = glm::perspective(glm::radians(60.0f), (float) size.width / (float) size.height, 0.1f, 100.0f);
 
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -4.0f));
+        cameraPos = vec3(0.0f, 0.0f, 4.0f);
+        cameraDir = vec3(0.0f, 0.0f, -1.0f);
+        cameraUp = vec3(0.0f, 1.0f, 0.0f);
+        view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
 
         shader.use();
         shader.setInt("ourTexture", 0);
@@ -157,7 +160,20 @@ void main()
         glBindVertexArray(0);
     }
 
-    void Cubes::draw(const mat4 &transform) {
+    void Camerz::fixedUpdate(float delta) {
+        GLFWwindow *window = Director::getInstance()->getGLView()->getWindow();
+        float cameraSpeed = delta * 3;
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            cameraPos += cameraSpeed * cameraDir;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            cameraPos -= cameraSpeed * cameraDir;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            cameraPos -= glm::normalize(glm::cross(cameraDir, cameraUp)) * cameraSpeed;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            cameraPos += glm::normalize(glm::cross(cameraDir, cameraUp)) * cameraSpeed;
+    }
+
+    void Camerz::draw(const mat4 &transform) {
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -168,6 +184,10 @@ void main()
 
         shader.use();
         glBindVertexArray(VAO);
+
+        // use WSAD to controll
+        view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
+        shader.setMat4("view", view);
 
         // x center
         model = glm::mat4();
@@ -206,7 +226,7 @@ void main()
         glBindVertexArray(0);
     }
 
-    Cubes::~Cubes() {
+    Camerz::~Camerz() {
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
     }

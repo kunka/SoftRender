@@ -38,6 +38,8 @@ public:
 
     virtual void visit(const glm::mat4 &parentTransform);
 
+    virtual void fixedUpdate(float delta);
+
     virtual void update(float delta);
 
     virtual void addChild(Node *child);

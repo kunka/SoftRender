@@ -16,7 +16,9 @@ public:
     void applicationDidFinishLaunching(
             OnApplicationDidFinishLaunching callback) { _applicationDidFinishLaunching = callback; }
 
-    void setUpdateInterval(float interval);
+    void setUpdateInterval(float interval); // seconds
+
+    float getUpdateInterval() { return _interval / 1000.0f; }
 
     int run();
 

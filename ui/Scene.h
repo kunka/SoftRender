@@ -16,7 +16,6 @@ public:
 
     void render(Render *render);
 
-
     virtual ~Scene();
 
 protected:

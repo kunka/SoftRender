@@ -35,14 +35,20 @@ int Application::run() {
     }
     log("Application::run");
 
-    long last, now;
+    long last, now = 0;
+    float delta;
     auto director = Director::getInstance();
     auto glView = director->getGLView();
 
     while (glView && !glView->windowShouldClose()) {
         last = nowInMS();
+        if (now == 0) {
+            delta = _interval / 1000.0f;
+        } else {
+            delta = (last - now) / 1000.0f;
+        }
 
-        director->mainLoop();  // handle event logic and draw
+        director->mainLoop(delta);  // handle event logic and draw
 
         now = nowInMS();
         if (now - last < _interval) {

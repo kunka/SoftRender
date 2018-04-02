@@ -7,15 +7,9 @@
 //
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 #include <iostream>
-#include <unistd.h>
 #include <Camera.h>
-#include "getopt.h"
 
 #include "Application.h"
 #include "GLView.h"
@@ -27,6 +21,7 @@
 #include "Texture.h"
 #include "MVP.h"
 #include "Cubes.h"
+#include "Camerz.h"
 
 #define CREATE_TEST_SCENE(__CLASS__) \
 Scene *scene = Scene::create(); \
@@ -44,13 +39,14 @@ int main(int argc, char **argv) {
 #endif
         Director::getInstance()->setGLView(glView);
 
-        app->setUpdateInterval(1.0f);
+        app->setUpdateInterval(1.0f / 60);
 
 //        CREATE_TEST_SCENE(Triangle);
 //        CREATE_TEST_SCENE(Rectangle);
 //        CREATE_TEST_SCENE(Texture);
 //        CREATE_TEST_SCENE(MVP);
-        CREATE_TEST_SCENE(Cubes);
+//        CREATE_TEST_SCENE(Cubes);
+        CREATE_TEST_SCENE(Camerz);
 
         return true;
     });

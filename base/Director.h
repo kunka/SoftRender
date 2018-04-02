@@ -39,9 +39,9 @@ public:
 
     void drawScene();
 
-    void processInput();
+    void processInput(float delta);
 
-    void mainLoop();
+    void mainLoop(float delta);
 
     const Size &getWinSize() { return _glView->getWinSize(); }
 

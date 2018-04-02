@@ -15,7 +15,7 @@
 #include "Log.h"
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-    logf("key_callback: key(%d), action(%d),mods(%d)", key, action, mods);
+//    logf("key_callback: key(%d), action(%d),mods(%d)", key, action, mods);
     if (action != GLFW_PRESS)
         return;
 

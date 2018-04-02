@@ -35,6 +35,13 @@ void Director::setGLView(GLView *glView) {
     _glView = glView;
 }
 
+void Director::processInput(float delta) {
+    if (_runningScene) {
+        _runningScene->fixedUpdate(Application::getInstance()->getUpdateInterval());
+        _runningScene->update(delta);
+    }
+}
+
 void Director::drawScene() {
     if (_runningScene) {
         _runningScene->render(_render);
@@ -126,7 +133,7 @@ void Director::release() {
 void Director::setNextScene() {
 }
 
-void Director::mainLoop() {
+void Director::mainLoop(float delta) {
     // switch scene
     if (_nextScene) {
         _runningScene = _nextScene;
@@ -135,11 +142,8 @@ void Director::mainLoop() {
 
     // check and call events and swap the buffers
     _glView->pollEvents();
-    processInput();
+    processInput(delta);
     // rendering commands here
     drawScene();
     _glView->swapBuffers();
-}
-
-void Director::processInput() {
 }
