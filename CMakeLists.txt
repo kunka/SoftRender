@@ -45,6 +45,6 @@ if (APPLE)
     link_directories(${PROJECT_SOURCE_DIR}/glfw/mac)
 endif (APPLE)
 
-add_executable(gl ${SOURCE_FILES})
+add_executable(gl ${SOURCE_FILES} samples/PointLight.cpp samples/PointLight.h samples/Spotlight.cpp samples/Spotlight.h)
 
 target_link_libraries(gl glfw3.a)

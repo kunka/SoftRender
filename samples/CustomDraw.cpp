@@ -23,7 +23,7 @@ CustomDraw::~CustomDraw() {
 
 void CustomDraw::fixedUpdate(float delta) {
     Input *input = Input::getInstance();
-    float cameraSpeed = delta * 3;
+    float cameraSpeed = delta * 5;
     // move
     if (input->isKeyPressed(GLFW_KEY_W))
         cameraPos += cameraSpeed * cameraDir;
@@ -37,7 +37,7 @@ void CustomDraw::fixedUpdate(float delta) {
     // pitch and yaw
     vec2 deltaP = input->getMousePosDelta();
     if (deltaP.x != 0 && deltaP.y != 0) {
-        float sensitivity = delta * 3;
+        float sensitivity = delta * 5;
         yaw += deltaP.x * sensitivity;
         pitch += deltaP.y * sensitivity;
 

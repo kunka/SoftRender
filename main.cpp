@@ -26,6 +26,8 @@
 #include "Materials.h"
 #include "LightingMaps.h"
 #include "DirectionalLight.h"
+#include "PointLight.h"
+#include "Spotlight.h"
 
 #define CREATE_TEST_SCENE(__CLASS__) \
 Scene *scene = Scene::create(); \
@@ -54,7 +56,9 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(BasicLighting);
 //        CREATE_TEST_SCENE(Materials);
 //        CREATE_TEST_SCENE(LightingMaps);
-        CREATE_TEST_SCENE(DirectionalLight);
+//        CREATE_TEST_SCENE(DirectionalLight);
+//        CREATE_TEST_SCENE(PointLight);
+        CREATE_TEST_SCENE(Spotlight);
 
         return true;
     });
