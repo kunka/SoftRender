@@ -16,5 +16,4 @@ TEST_NODE_BEGIN(LightingMaps)
 TEST_NODE_END(LightingMaps)
 
 
-
 #endif //GL_LIGHTINGMAPS_H
