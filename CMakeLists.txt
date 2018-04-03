@@ -45,6 +45,6 @@ if (APPLE)
     link_directories(${PROJECT_SOURCE_DIR}/glfw/mac)
 endif (APPLE)
 
-add_executable(gl ${SOURCE_FILES} samples/Camerz.cpp samples/Camerz.h base/Input.cpp base/Input.h samples/BasicLighting.cpp samples/BasicLighting.h)
+add_executable(gl ${SOURCE_FILES} samples/Camerz.cpp samples/Camerz.h base/Input.cpp base/Input.h samples/BasicLighting.cpp samples/BasicLighting.h samples/Materials.cpp samples/Materials.h)
 
 target_link_libraries(gl glfw3.a)

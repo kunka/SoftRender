@@ -12,6 +12,9 @@ CustomDraw::CustomDraw() {
     view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
     pitch = 0;
     yaw = -90;
+
+    auto &size = Director::getInstance()->getWinSize();
+    projection = glm::perspective(glm::radians(60.0f), (float) size.width / (float) size.height, 0.1f, 100.0f);
 }
 
 CustomDraw::~CustomDraw() {
