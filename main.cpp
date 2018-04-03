@@ -24,6 +24,7 @@
 #include "Camerz.h"
 #include "BasicLighting.h"
 #include "Materials.h"
+#include "LightingMaps.h"
 
 #define CREATE_TEST_SCENE(__CLASS__) \
 Scene *scene = Scene::create(); \
@@ -50,7 +51,8 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(Cubes);
 //        CREATE_TEST_SCENE(Camerz);
 //        CREATE_TEST_SCENE(BasicLighting);
-        CREATE_TEST_SCENE(Materials);
+//        CREATE_TEST_SCENE(Materials);
+        CREATE_TEST_SCENE(LightingMaps);
 
         return true;
     });
