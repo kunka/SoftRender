@@ -31,12 +31,23 @@ public:
 
     ~CustomDraw();
 
+    virtual void fixedUpdate(float delta) override;
+
 protected:
     Shader shader;
     unsigned int VAO;
     unsigned int VBO;
     unsigned int EBO;
+    unsigned int lightVAO;
     unsigned int texture;
+    mat4 model;
+    mat4 view;
+    mat4 projection;
+    vec3 cameraPos;
+    vec3 cameraDir;
+    vec3 cameraUp;
+    float pitch;
+    float yaw;
 };
 
 #endif //GL_CUSTOMDRAW_H

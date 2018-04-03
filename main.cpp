@@ -22,6 +22,7 @@
 #include "MVP.h"
 #include "Cubes.h"
 #include "Camerz.h"
+#include "BasicLighting.h"
 
 #define CREATE_TEST_SCENE(__CLASS__) \
 Scene *scene = Scene::create(); \
@@ -46,7 +47,8 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(Texture);
 //        CREATE_TEST_SCENE(MVP);
 //        CREATE_TEST_SCENE(Cubes);
-        CREATE_TEST_SCENE(Camerz);
+//        CREATE_TEST_SCENE(Camerz);
+        CREATE_TEST_SCENE(BasicLighting);
 
         return true;
     });

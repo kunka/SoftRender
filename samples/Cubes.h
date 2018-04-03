@@ -9,9 +9,6 @@
 
 TEST_NODE_BEGIN(Cubes)
 
-        mat4 model;
-        mat4 view;
-        mat4 projection;
         unsigned int texture2;
 
 TEST_NODE_END(Cubes)
