@@ -7,7 +7,7 @@
 /*
 #define GLM_MESSAGES
 #include <glm/glm.hpp>
-#include <glm/ext.hpp>
+#include <glm/extrnal.hpp>
 #include <limits>
 
 struct material
