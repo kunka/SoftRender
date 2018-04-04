@@ -346,7 +346,7 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
 
         glBindVertexArray(VAO);
 
-        // use WSAD to controll
+        // use WSAD to control
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
 
         for (int i = 0; i < 4; i++) {

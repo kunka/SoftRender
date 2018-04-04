@@ -237,7 +237,7 @@ void main()
 
         glBindVertexArray(VAO);
 
-        // use WSAD to controll
+        // use WSAD to control
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
 
         glActiveTexture(GL_TEXTURE0);

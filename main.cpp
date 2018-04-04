@@ -16,19 +16,21 @@
 #include "Director.h"
 #include "Scene.h"
 
-#include "Triangle.h"
-#include "Rectangle.h"
-#include "Texture.h"
-#include "MVP.h"
-#include "Cubes.h"
-#include "Camerz.h"
-#include "BasicLighting.h"
-#include "Materials.h"
-#include "LightingMaps.h"
-#include "DirectionalLight.h"
-#include "PointLight.h"
-#include "Spotlight.h"
-#include "MultipleLights.h"
+#include "samples/Triangle.h"
+#include "samples/Rectangle.h"
+#include "samples/Texture.h"
+#include "samples/MVP.h"
+#include "samples/Cubes.h"
+#include "samples/Camerz.h"
+#include "samples/BasicLighting.h"
+#include "samples/Materials.h"
+#include "samples/LightingMaps.h"
+#include "samples/DirectionalLight.h"
+#include "samples/PointLight.h"
+#include "samples/Spotlight.h"
+#include "samples/MultipleLights.h"
+#include "samples/ModelLoad.h"
+
 
 #define CREATE_TEST_SCENE(__CLASS__) \
 Scene *scene = Scene::create(); \
@@ -60,7 +62,8 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(DirectionalLight);
 //        CREATE_TEST_SCENE(PointLight);
 //        CREATE_TEST_SCENE(Spotlight);
-        CREATE_TEST_SCENE(MultipleLights);
+//        CREATE_TEST_SCENE(MultipleLights);
+        CREATE_TEST_SCENE(ModelLoad);
 
         return true;
     });
