@@ -165,7 +165,7 @@ void main()
             log("Failed to load texture");
             return;
         } else {
-            logf("Texture width = %d, height = %d", width, height);
+            log("Texture width = %d, height = %d", width, height);
         }
 
         glGenTextures(1, &texture);
@@ -185,7 +185,7 @@ void main()
             log("Failed to load texture2");
             return;
         } else {
-            logf("Texture2 width = %d, height = %d", width2, height2);
+            log("Texture2 width = %d, height = %d", width2, height2);
         }
 
         glGenTextures(1, &texture2);

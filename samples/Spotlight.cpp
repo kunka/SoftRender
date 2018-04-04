@@ -30,17 +30,6 @@ void main()
 }
 )";
 
-        const char *light_frag = R"(
-#version 330 core
-out vec4 FragColor;
-uniform vec3 lightColor;
-
-void main()
-{
-    FragColor = vec4(lightColor, 1.0f);
-}
-)";
-
         const char *frag = R"(
 #version 330 core
 in vec3 Normal;
@@ -61,6 +50,7 @@ struct Light {
 vec3 position;
 vec3 direction;
 float cutOff;
+float outerCutOff;
 
 vec3 ambient;
 vec3 diffuse;
@@ -74,52 +64,45 @@ uniform Light light;
 
 void main()
 {
-//    vec3 lightDir = normalize(light.position - FragPos);
-//     // check if lighting is inside the spotlight cone
-//    float theta = dot(lightDir, normalize(-light.direction));
-//
-//    if(theta > light.cutOff)
-//    {
-//        float distance = length(light.position - FragPos);
-//        float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
-//
-//        vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
-//
-//        vec3 norm = normalize(Normal);
-//        float diff = max(dot(norm, lightDir), 0.0);
-//        vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
-//
-//        vec3 viewDir = normalize(viewPos - FragPos);
-//        vec3 reflectDir = reflect(-lightDir, norm);
-//        float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-//        vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
-//
-//        FragColor = vec4(attenuation*(diffuse + specular) + ambient, 1.0);
-//    }
-//    else
-//    {
-//        // use ambient light
-//        vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
-//        FragColor = vec4(ambient, 1.0);
-//    }
+    vec3 lightDir = normalize(light.position - FragPos);
+     // check if lighting is inside the spotlight cone
+    float theta = dot(lightDir, normalize(-light.direction));
 
-    vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
+    if(theta > light.outerCutOff)
+    {
+        // soft edges
+        float intensity = 1.0;
+        if(theta < light.cutOff)
+        {
+            float epsilon = light.outerCutOff - light.cutOff ;
+            intensity = clamp((light.outerCutOff - theta) / epsilon, 0.0, 1.0);
+        }
 
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(-light.direction);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
+        float distance = length(light.position - FragPos);
+        float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
-    vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+        vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
 
-    FragColor = vec4(diffuse + ambient + specular, 1.0);
+        vec3 norm = normalize(Normal);
+        float diff = max(dot(norm, lightDir), 0.0);
+        vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
+
+        vec3 viewDir = normalize(viewPos - FragPos);
+        vec3 reflectDir = reflect(-lightDir, norm);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+        vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+
+        FragColor = vec4(attenuation*(diffuse + specular) * intensity + ambient, 1.0);
+    }
+    else
+    {
+        // use ambient light
+        vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
+        FragColor = vec4(ambient, 1.0);
+    }
 }
 )";
         shader.loadStr(vert, frag);
-        lightShader.loadStr(vert, light_frag);
 
         float vertices[] = {
                 // positions          // normals           // texture coords
@@ -182,16 +165,6 @@ void main()
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
-        // light obj
-        glGenVertexArrays(1, &lightVAO);
-        glBindVertexArray(lightVAO);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
-        glEnableVertexAttribArray(0);
-
         // texture
         stbi_set_flip_vertically_on_load(true); // flipY
 
@@ -201,7 +174,7 @@ void main()
             log("Failed to load texture");
             return;
         } else {
-            logf("Texture width = %d, height = %d", width, height);
+            log("Texture width = %d, height = %d", width, height);
         }
 
         glGenTextures(1, &texture);
@@ -221,7 +194,7 @@ void main()
             log("Failed to load texture2");
             return;
         } else {
-            logf("Texture2 width = %d, height = %d", width2, height2);
+            log("Texture2 width = %d, height = %d", width2, height2);
         }
 
         glGenTextures(1, &texture2);
@@ -250,10 +223,7 @@ void main()
         shader.setFloat("light.linear", 0.09f);
         shader.setFloat("light.quadratic", 0.032f);
         shader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
-
-        lightShader.use();
-        lightShader.setMat4("projection", projection);
-        lightShader.setVec3("lightColor", vec3(1.0f, 1.0f, 1.0f));
+        shader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
 
         glEnable(GL_DEPTH_TEST);
 
@@ -269,18 +239,6 @@ void main()
 
         // use WSAD to controll
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
-
-        // light obj
-        vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
-        vec3 lightPos = cameraPos;
-        lightShader.use();
-        model = glm::mat4();
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2, 0.2f, 0.2f));
-        lightShader.setMat4("model", model);
-        lightShader.setMat4("view", view);
-        lightShader.setVec3("lightColor", lightColor);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -301,9 +259,8 @@ void main()
         };
         shader.use();
         shader.setVec3("light.position", cameraPos);
-//        shader.setVec3("light.direction", cameraDir);
-        shader.setVec3("light.direction", vec3(-0.2f, -1.0f, -0.3f));
-3        shader.setMat4("view", view);
+        shader.setVec3("light.direction", cameraDir);
+        shader.setMat4("view", view);
         shader.setVec3("viewPos", cameraPos);
         for (unsigned int i = 0; i < 10; i++) {
             model = glm::mat4();
@@ -319,7 +276,6 @@ void main()
 
     Spotlight::~Spotlight() {
         glDeleteVertexArrays(1, &VAO);
-        glDeleteVertexArrays(1, &lightVAO);
         glDeleteBuffers(1, &VBO);
     }
 TEST_NODE_IMP_END

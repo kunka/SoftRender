@@ -50,7 +50,7 @@ void main()
             log("Failed to load texture");
             return;
         } else {
-            logf("Texture width = %d, height = %d", width, height);
+            log("Texture width = %d, height = %d", width, height);
         }
 
         float vertices[] = {

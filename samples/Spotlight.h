@@ -9,7 +9,6 @@
 
 TEST_NODE_BEGIN(Spotlight)
 
-        Shader lightShader;
         unsigned int texture2;
 
 TEST_NODE_END(Spotlight)

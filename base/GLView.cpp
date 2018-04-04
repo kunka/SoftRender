@@ -26,12 +26,12 @@ static void error_callback(int error, const char *description) {
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
-    logf("framebuffer_size_callback: %d, %d", width, height);
+    log("framebuffer_size_callback: %d, %d", width, height);
     glViewport(0, 0, width, height);
 }
 
 void window_size_callback(GLFWwindow *window, int width, int height) {
-    logf("window_size_callback: %d, %d", width, height);
+    log("window_size_callback: %d, %d", width, height);
 }
 
 GLView::GLView() {
@@ -87,7 +87,7 @@ bool GLView::initWithRect(int x, int y, int width, int height) {
     glfwGetWindowSize(window, &realW, &realH);
     _winSize.width = realW;
     _winSize.height = realH;
-    logf("GLView::initWithRect(%d,%d,%d,%d), winSize=(%d,%d)", x, y, width, height, realW, realH);
+    log("GLView::initWithRect(%d,%d,%d,%d), winSize=(%d,%d)", x, y, width, height, realW, realH);
 
     return true;
 }

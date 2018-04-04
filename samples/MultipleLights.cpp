@@ -1,13 +1,26 @@
 //
-// Created by Administrator on 2018/4/3 0003.
+// Created by huangkun on 04/04/2018.
 //
 
-#include "PointLight.h"
+#include "MultipleLights.h"
 #include "stb_image.h"
 
 TEST_NODE_IMP_BEGIN
 
-    PointLight::PointLight() {
+    glm::vec3 pointLightPositions[] = {
+            glm::vec3(0.7f, 0.2f, 2.0f),
+            glm::vec3(2.3f, -3.3f, -4.0f),
+            glm::vec3(-4.0f, -2.0f, -6.0f),
+            glm::vec3(0.0f, 0.0f, -3.0f)
+    };
+    glm::vec3 pointLightColors[] = {
+            glm::vec3(1.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 1.0f),
+            glm::vec3(0.0f, 1.0f, 1.0f)
+    };
+
+    MultipleLights::MultipleLights() {
         const char *vert = R"(
 #version 330 core
 layout (location = 0) in vec3 a_position;
@@ -30,6 +43,7 @@ void main()
 }
 )";
 
+
         const char *light_frag = R"(
 #version 330 core
 out vec4 FragColor;
@@ -40,7 +54,6 @@ void main()
     FragColor = vec4(lightColor, 1.0f);
 }
 )";
-
         const char *frag = R"(
 #version 330 core
 in vec3 Normal;
@@ -57,8 +70,31 @@ float shininess;
 uniform Material material;
 in vec2 TexCoords;
 
-struct Light {
+struct DirLight {
+vec3 direction;
+vec3 ambient;
+vec3 diffuse;
+vec3 specular;
+};
+uniform DirLight dirLight;
+
+struct PointLight {
+       vec3 position;
+       float constant;
+       float linear;
+       float quadratic;
+       vec3 ambient;
+       vec3 diffuse;
+       vec3 specular;
+   };
+#define NR_POINT_LIGHTS 4
+uniform PointLight pointLights[NR_POINT_LIGHTS];
+
+struct SpotLight {
 vec3 position;
+vec3 direction;
+float cutOff;
+float outerCutOff;
 
 vec3 ambient;
 vec3 diffuse;
@@ -68,27 +104,103 @@ float constant;
 float linear;
 float quadratic;
 };
-uniform Light light;
+#define NR_SPOT_LIGHTS 1
+uniform SpotLight spotLights[NR_SPOT_LIGHTS];
+
+vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
+vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir);
 
 void main()
+{
+    vec3 norm = normalize(Normal);
+    vec3 viewDir = normalize(viewPos - FragPos);
+
+//    // phase 1: Directional lighting
+    vec3 result = calcDirLight(dirLight, norm, viewDir);
+
+    // phase 2: Point lights
+    for(int i = 0; i < NR_POINT_LIGHTS; i++)
+        result += calcPointLight(pointLights[i], norm, FragPos, viewDir);
+
+    // phase 3: Spot light
+    for(int i = 0; i < NR_SPOT_LIGHTS; i++)
+        result += calcSpotLight(spotLights[i], norm, FragPos, viewDir);
+
+    FragColor = vec4(result, 1.0);
+}
+
+vec3 calcDirLight(DirLight light, vec3 norm, vec3 viewDir)
+{
+    vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
+
+    vec3 lightDir = normalize(-light.direction);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
+
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+
+    return diffuse + ambient + specular;
+}
+
+vec3 calcPointLight(PointLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
 {
     float distance = length(light.position - FragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
     vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
 
-    vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(light.position - FragPos);
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
 
-    vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
 
-    FragColor = vec4(attenuation*(diffuse + ambient + specular), 1.0);
+    return attenuation*(diffuse + ambient + specular);
 }
+
+vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
+{
+     // check if lighting is inside the spotlight cone
+    vec3 lightDir = normalize(light.position - FragPos);
+    float theta = dot(lightDir, normalize(-light.direction));
+
+    if(theta > light.outerCutOff)
+    {
+        // soft edges
+        float intensity = 1.0;
+        if(theta < light.cutOff)
+        {
+            float epsilon = light.outerCutOff - light.cutOff ;
+            intensity = clamp((light.outerCutOff - theta) / epsilon, 0.0, 1.0);
+        }
+
+        float distance = length(light.position - FragPos);
+        float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
+        vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
+
+        float diff = max(dot(norm, lightDir), 0.0);
+        vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
+
+        vec3 reflectDir = reflect(-lightDir, norm);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+        vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+
+        return attenuation*(diffuse + specular) * intensity + ambient;
+    }
+    else
+    {
+        // use ambient light
+        vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
+        return ambient;
+    }
+}
+
 )";
         shader.loadStr(vert, frag);
         lightShader.loadStr(vert, light_frag);
@@ -154,16 +266,6 @@ void main()
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
-        // light obj
-        glGenVertexArrays(1, &lightVAO);
-        glBindVertexArray(lightVAO);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
-        glEnableVertexAttribArray(0);
-
         // texture
         stbi_set_flip_vertically_on_load(true); // flipY
 
@@ -207,6 +309,17 @@ void main()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         stbi_image_free(data2);
 
+        // point light obj
+        glGenVertexArrays(1, &lightVAO);
+        glBindVertexArray(lightVAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+        glEnableVertexAttribArray(0);
+
+
         auto &size = Director::getInstance()->getWinSize();
         projection = glm::perspective(glm::radians(60.0f), (float) size.width / (float) size.height, 0.1f, 100.0f);
 
@@ -215,16 +328,11 @@ void main()
         shader.setInt("material.diffuse", 0);
         shader.setInt("material.specular", 1);
         shader.setFloat("material.shininess", 32.0f);
-        shader.setVec3("light.ambient", vec3(0.2f, 0.2f, 0.2f));
-        shader.setVec3("light.diffuse", vec3(0.5f, 0.5f, 0.5f)); // darken the light a bit to fit the scene
-        shader.setVec3("light.specular", vec3(1.0f, 1.0f, 1.0f));
-        shader.setFloat("light.constant", 1.0f);
-        shader.setFloat("light.linear", 0.09f);
-        shader.setFloat("light.quadratic", 0.032f);
-
-        lightShader.use();
-        lightShader.setMat4("projection", projection);
-        lightShader.setVec3("lightColor", vec3(1.0f, 1.0f, 1.0f));
+        // directional light
+        shader.setVec3("dirLight.direction", vec3(-0.2f, -1.0f, -0.3f));
+        shader.setVec3("dirLight.ambient", vec3(0.05f, 0.05f, 0.05f));
+        shader.setVec3("dirLight.diffuse", vec3(0.4f, 0.4f, 0.4f));
+        shader.setVec3("dirLight.specular", vec3(0.5f, 0.5f, 0.5f));
 
         glEnable(GL_DEPTH_TEST);
 
@@ -232,7 +340,7 @@ void main()
         glBindVertexArray(0);
     }
 
-    void PointLight::draw(const mat4 &transform) {
+    void MultipleLights::draw(const mat4 &transform) {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -241,17 +349,20 @@ void main()
         // use WSAD to controll
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
 
-        // light obj
-        vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
-        vec3 lightPos = glm::vec3(0.0f, 0.0f, -2.0f);
-        lightShader.use();
-        model = glm::mat4();
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2, 0.2f, 0.2f));
-        lightShader.setMat4("model", model);
-        lightShader.setMat4("view", view);
-        lightShader.setVec3("lightColor", lightColor);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for (int i = 0; i < 4; i++) {
+            // light obj
+            vec3 lightColor = pointLightColors[i];
+            vec3 lightPos = pointLightPositions[i];
+            lightShader.use();
+            model = glm::mat4();
+            model = glm::translate(model, lightPos);
+            model = glm::scale(model, glm::vec3(0.2, 0.2f, 0.2f));
+            lightShader.setMat4("projection", projection);
+            lightShader.setMat4("model", model);
+            lightShader.setMat4("view", view);
+            lightShader.setVec3("lightColor", lightColor);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -271,7 +382,35 @@ void main()
                 glm::vec3(-1.3f, 1.0f, -1.5f)
         };
         shader.use();
-        shader.setVec3("light.position", lightPos);
+
+        const char *name;
+        for (int i = 0; i < 4; i++) {
+            name = formatString("pointLights[%d].position", i);
+            shader.setVec3(name, pointLightPositions[i]);
+            name = formatString("pointLights[%d].ambient", i);
+            shader.setVec3(name, vec3(0.2f, 0.2f, 0.2f) * pointLightColors[i]);
+            name = formatString("pointLights[%d].diffuse", i);
+            shader.setVec3(name, vec3(0.5f, 0.5f, 0.5f) * pointLightColors[i]);
+            name = formatString("pointLights[%d].specular", i);
+            shader.setVec3(name, vec3(1.0f, 1.0f, 1.0f) * pointLightColors[i]);
+            name = formatString("pointLights[%d].constant", i);
+            shader.setFloat(name, 1.0f);
+            name = formatString("pointLights[%d].linear", i);
+            shader.setFloat(name, 0.09f);
+            name = formatString("pointLights[%d].quadratic", i);
+            shader.setFloat(name, 0.032f);
+        }
+
+        shader.setVec3("spotLights[0].ambient", vec3(0.0f, 0.0f, 0.0f));
+        shader.setVec3("spotLights[0].diffuse", vec3(1.0f, 1.0f, 1.0f)); // darken the light a bit to fit the scene
+        shader.setVec3("spotLights[0].specular", vec3(1.0f, 1.0f, 1.0f));
+        shader.setFloat("spotLights[0].constant", 1.0f);
+        shader.setFloat("spotLights[0].linear", 0.09f);
+        shader.setFloat("spotLights[0].quadratic", 0.032f);
+        shader.setFloat("spotLights[0].cutOff", glm::cos(glm::radians(9.0f)));
+        shader.setFloat("spotLights[0].outerCutOff", glm::cos(glm::radians(12.0f)));
+        shader.setVec3("spotLights[0].position", cameraPos);
+        shader.setVec3("spotLights[0].direction", cameraDir);
         shader.setMat4("view", view);
         shader.setVec3("viewPos", cameraPos);
         for (unsigned int i = 0; i < 10; i++) {
@@ -286,7 +425,7 @@ void main()
         glBindVertexArray(0);
     }
 
-    PointLight::~PointLight() {
+    MultipleLights::~MultipleLights() {
         glDeleteVertexArrays(1, &VAO);
         glDeleteVertexArrays(1, &lightVAO);
         glDeleteBuffers(1, &VBO);
