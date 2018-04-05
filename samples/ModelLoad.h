@@ -12,6 +12,7 @@
 TEST_NODE_BEGIN(ModelLoad)
 
         Model *modelObject;
+        Shader lightShader;
 
 TEST_NODE_END(ModelLoad)
 
