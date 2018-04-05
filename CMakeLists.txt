@@ -39,6 +39,8 @@ link_directories(${PROJECT_SOURCE_DIR}/math)
 
 if (MINGW)
     link_directories(extrnal/glfw/win32)
+    link_directories(extrnal/assimp/win32)
+    link_directories(extrnal/zlib/win32)
 endif (MINGW)
 if (APPLE)
     link_directories(extrnal/glfw/mac)
