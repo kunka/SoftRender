@@ -7,19 +7,6 @@
 
 TEST_NODE_IMP_BEGIN
 
-    glm::vec3 pointLightPositions[] = {
-            glm::vec3(0.7f, 0.2f, 2.0f),
-            glm::vec3(2.3f, -3.3f, -4.0f),
-            glm::vec3(-4.0f, -2.0f, -6.0f),
-            glm::vec3(0.0f, 0.0f, -3.0f)
-    };
-    glm::vec3 pointLightColors[] = {
-            glm::vec3(1.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 1.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 1.0f),
-            glm::vec3(0.0f, 1.0f, 1.0f)
-    };
-
     MultipleLights::MultipleLights() {
         const char *vert = R"(
 #version 330 core
@@ -250,12 +237,13 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
                 -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
         };
 
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
 
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
         glEnableVertexAttribArray(0);
@@ -313,9 +301,14 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
         glGenVertexArrays(1, &lightVAO);
         glBindVertexArray(lightVAO);
 
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
         glEnableVertexAttribArray(0);
 
+        // unbind
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         auto &size = Director::getInstance()->getWinSize();
         projection = glm::perspective(glm::radians(60.0f), (float) size.width / (float) size.height, 0.1f, 100.0f);
@@ -332,20 +325,29 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
         shader.setVec3("dirLight.specular", vec3(0.5f, 0.5f, 0.5f));
 
         glEnable(GL_DEPTH_TEST);
-
-        // unbind
-        glBindVertexArray(0);
     }
 
     void MultipleLights::draw(const mat4 &transform) {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glBindVertexArray(VAO);
+        static glm::vec3 pointLightPositions[] = {
+                glm::vec3(0.7f, 0.2f, 2.0f),
+                glm::vec3(2.3f, -3.3f, -4.0f),
+                glm::vec3(-4.0f, -2.0f, -6.0f),
+                glm::vec3(0.0f, 0.0f, -3.0f)
+        };
+        static glm::vec3 pointLightColors[] = {
+                glm::vec3(1.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, 1.0f, 0.0f),
+                glm::vec3(0.0f, 0.0f, 1.0f),
+                glm::vec3(0.0f, 1.0f, 1.0f)
+        };
 
         // use WSAD to control
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
 
+        glBindVertexArray(lightVAO);
         for (int i = 0; i < 4; i++) {
             // light obj
             vec3 lightColor = pointLightColors[i];
@@ -360,6 +362,8 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
             lightShader.setVec3("lightColor", lightColor);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        glBindVertexArray(VAO);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -380,7 +384,7 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
         };
         shader.use();
 
-        const char *name;
+        std::string name;
         for (int i = 0; i < 4; i++) {
             name = formatString("pointLights[%d].position", i);
             shader.setVec3(name, pointLightPositions[i]);
@@ -418,8 +422,6 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
             shader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-
-        glBindVertexArray(0);
     }
 
     MultipleLights::~MultipleLights() {

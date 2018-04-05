@@ -18,7 +18,7 @@ void log(const char *format, ...) {
     printf("\n");
 }
 
-const char *formatString(const char *format, ...) {
+std::string formatString(const char *format, ...) {
     char buff[MAX_FORMAT_LENGTH];
     va_list args;
     va_start(args, format);

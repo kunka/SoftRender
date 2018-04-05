@@ -5,8 +5,10 @@
 #ifndef GL_LOG_H
 #define GL_LOG_H
 
+#include <string>
+
 void log(const char *format, ...);
 
-const char *formatString(const char *format, ...);
+std::string formatString(const char *format, ...);
 
 #endif //GL_LOG_H

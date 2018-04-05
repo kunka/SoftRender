@@ -138,12 +138,12 @@ void main()
                 -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
         };
 
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
-
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
         glEnableVertexAttribArray(0);
@@ -159,10 +159,13 @@ void main()
         glBindVertexArray(lightVAO);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
         glEnableVertexAttribArray(0);
+
+        // unbind
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         // texture
         stbi_set_flip_vertically_on_load(true); // flipY
@@ -227,16 +230,11 @@ void main()
         lightShader.setVec3("lightColor", vec3(1.0f, 1.0f, 1.0f));
 
         glEnable(GL_DEPTH_TEST);
-
-        // unbind
-        glBindVertexArray(0);
     }
 
     void PointLight::draw(const mat4 &transform) {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glBindVertexArray(VAO);
 
         // use WSAD to control
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
@@ -251,12 +249,16 @@ void main()
         lightShader.setMat4("model", model);
         lightShader.setMat4("view", view);
         lightShader.setVec3("lightColor", lightColor);
+
+        glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
+
+        glBindVertexArray(VAO);
 
         glm::vec3 cubePositions[] = {
                 glm::vec3(0.0f, 0.0f, 0.0f),
@@ -282,8 +284,6 @@ void main()
             shader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-
-        glBindVertexArray(0);
     }
 
     PointLight::~PointLight() {
