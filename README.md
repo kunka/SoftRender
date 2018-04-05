@@ -1,4 +1,4 @@
-Build Assimp
+Build Assimp + Zlib
 CMake + MINGW32
 
 Enabled formats: 3DS B3D OBJ BLEND FBX 3D
@@ -6,3 +6,7 @@ Disabled formats: AC ASE ASSBIN ASSXML BVH COLLADA DXF CSM HMP IRRMESH IRR LWO L
 Configuring done
 
 cmake --build cmake-build-debug --target assimp -- -j 8
+
+OSX
+CMake
+Add CMAKE_BUILD_TYPE  Release
