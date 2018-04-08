@@ -1,13 +1,13 @@
 //
-// Created by Administrator on 2018/4/7 0007.
+// Created by huangkun on 08/04/2018.
 //
 
-#include "DepthTest.h"
+#include "Blending.h"
 #include "stb_image.h"
 
 TEST_NODE_IMP_BEGIN
 
-    DepthTest::DepthTest() {
+    Blending::Blending() {
         const char *vert = R"(
 #version 330 core
 layout (location = 0) in vec3 a_position;
@@ -31,23 +31,9 @@ out vec4 FragColor;
 
 uniform sampler2D ourTexture;
 
-float near = 0.1;
-float far = 5.0; // use a closer dis, the box isn't too far away.
-float LinearizeDepth(float depth)
-{
-    float z = depth * 2.0 - 1.0; // back to NDC
-    return (2.0 * near * far) / (far + near - z * (far - near));
-}
-
 void main()
 {
-    //Visualizing the depth buffer
-//  FragColor = vec4(vec3(gl_FragCoord.z), 1.0); // white, closer depth almost equal to 1.0
-    float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for
-    FragColor = vec4(vec3(depth), 1.0);
-
-     // Normal display
-//    FragColor = texture(ourTexture, texCoord);
+    FragColor = texture(ourTexture, texCoord);
 }
 )";
         shader.loadStr(vert, frag);
@@ -173,7 +159,7 @@ void main()
 
         glGenTextures(1, &texture2);
         glBindTexture(GL_TEXTURE_2D, texture2);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width2, height2, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width2, height2, 0, GL_RGB, GL_UNSIGNED_BYTE, data2);
         glGenerateMipmap(GL_TEXTURE_2D);
         // set the texture wrapping/filtering options (on the currently bound texture object)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -188,7 +174,7 @@ void main()
         projection = glm::perspective(glm::radians(60.0f), (float) size.width / (float) size.height, 0.1f, 100.0f);
         shader.use();
         shader.setMat4("projection", projection);
-        cameraPos = vec3(0.0f, 2.0f, 4.0f);
+        cameraPos = vec3(0.0f, 1.0f, 3.0f);
         cameraDir = vec3(0.0f, 0.0f, 0.0f) - cameraPos;
 
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
@@ -205,7 +191,7 @@ void main()
         // glDepthFunc(GL_ALWAYS);
     }
 
-    void DepthTest::draw(const mat4 &transform) {
+    void Blending::draw(const mat4 &transform) {
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -229,13 +215,6 @@ void main()
         shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        // x center
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 1.0f));
-        model = glm::scale(model, vec3(2, 1, 1));
-        shader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
         // plane
         shader.setInt("ourTexture", 0);
         model = glm::mat4();
@@ -247,7 +226,7 @@ void main()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 
-    DepthTest::~DepthTest() {
+    Blending::~Blending() {
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
         glDeleteVertexArrays(1, &planeVAO);

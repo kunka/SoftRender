@@ -61,7 +61,7 @@ void main()
         }
 
         int width2, height2, nrChannels2;
-        unsigned char *data2 = stbi_load("../res/plane.jpg", &width2, &height2, &nrChannels2, 0);
+        unsigned char *data2 = stbi_load("../res/metal.png", &width2, &height2, &nrChannels2, 0);
         if (!data2) {
             log("Failed to load texture2");
             return;
@@ -156,6 +156,8 @@ void main()
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
+        glBindVertexArray(0);
+
 
         // Images
         glGenTextures(1, &texture);
@@ -170,7 +172,7 @@ void main()
 
         glGenTextures(1, &texture2);
         glBindTexture(GL_TEXTURE_2D, texture2);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width2, height2, 0, GL_RGB, GL_UNSIGNED_BYTE, data2);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width2, height2, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
         glGenerateMipmap(GL_TEXTURE_2D);
         // set the texture wrapping/filtering options (on the currently bound texture object)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -182,11 +184,16 @@ void main()
         stbi_image_free(data);
 
         auto &size = Director::getInstance()->getWinSize();
-        projection = glm::perspective(glm::radians(60.0f), (float) size.width / (float) size.height, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
         shader.use();
         shader.setMat4("projection", projection);
         cameraPos = vec3(0.0f, 2.0f, 4.0f);
         cameraDir = vec3(0.0f, 0.0f, 0.0f) - cameraPos;
+
+        view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
+        glm::quat quat = glm::quat_cast(view);
+        vec3 angles = eulerAngles(quat);
+        pitch = -degrees(angles.x);
 
         outlineShader.use();
         outlineShader.setMat4("projection", projection);
@@ -209,8 +216,13 @@ void main()
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, vec3(8, 6, 1));
         shader.setMat4("model", model);
-        glBindTexture(GL_TEXTURE_2D, texture2);
+        // use WSAD to control
+        view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
+        shader.setMat4("view", view);
+
         glBindVertexArray(planeVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 
@@ -218,12 +230,10 @@ void main()
         glStencilMask(0xFF);
 
         glBindVertexArray(VAO);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         shader.use();
         shader.setInt("ourTexture", 0);
-        // use WSAD to control
-        view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
-        shader.setMat4("view", view);
 
         // left behind
         model = glm::mat4();
@@ -275,7 +285,7 @@ void main()
         outlineShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        // rese
+        // reset
         glStencilMask(0xFF);
         glEnable(GL_DEPTH_TEST);
     }
