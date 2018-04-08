@@ -31,6 +31,7 @@
 #include "samples/MultipleLights.h"
 #include "samples/ModelLoad.h"
 #include "samples/DepthTest.h"
+#include "samples/StencilTest.h"
 
 
 #define CREATE_TEST_SCENE(__CLASS__) \
@@ -65,7 +66,8 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(Spotlight);
 //        CREATE_TEST_SCENE(MultipleLights);
 //        CREATE_TEST_SCENE(ModelLoad);
-        CREATE_TEST_SCENE(DepthTest);
+//        CREATE_TEST_SCENE(DepthTest);
+        CREATE_TEST_SCENE(StencilTest);
 
         return true;
     });
