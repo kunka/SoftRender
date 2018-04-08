@@ -36,7 +36,23 @@ void main()
     FragColor = texture(ourTexture, texCoord);
 }
 )";
+        const char *grass_frag = R"(
+#version 330 core
+in vec2 texCoord;
+out vec4 FragColor;
+
+uniform sampler2D ourTexture;
+
+void main()
+{
+    vec4 texColor = texture(ourTexture, texCoord);
+    if(texColor.a < 0.05)
+        discard;
+    FragColor = texColor;
+}
+)";
         shader.loadStr(vert, frag);
+        grassShader.loadStr(vert, grass_frag);
 
         stbi_set_flip_vertically_on_load(true); // flipY
 
@@ -56,6 +72,15 @@ void main()
             return;
         } else {
             log("Texture2 width = %d, height = %d", width2, height2);
+        }
+
+        int width3, height3, nrChannels3;
+        unsigned char *data3 = stbi_load("../res/grass.png", &width3, &height3, &nrChannels3, 0);
+        if (!data3) {
+            log("Failed to load texture3");
+            return;
+        } else {
+            log("Texture3 width = %d, height = %d", width3, height3);
         }
 
         float vertices[] = {
@@ -167,13 +192,29 @@ void main()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+        glGenTextures(1, &texture3);
+        glBindTexture(GL_TEXTURE_2D, texture3);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width3, height3, 0, GL_RGBA, GL_UNSIGNED_BYTE, data3);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        // set the texture wrapping/filtering options (on the currently bound texture object)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data3);
         stbi_image_free(data2);
         stbi_image_free(data);
 
         auto &size = Director::getInstance()->getWinSize();
         projection = glm::perspective(glm::radians(60.0f), (float) size.width / (float) size.height, 0.1f, 100.0f);
         shader.use();
+        shader.setInt("ourTexture", 0);
         shader.setMat4("projection", projection);
+        grassShader.use();
+        grassShader.setInt("ourTexture", 0);
+        grassShader.setMat4("projection", projection);
+
         cameraPos = vec3(0.0f, 1.0f, 3.0f);
         cameraDir = vec3(0.0f, 0.0f, 0.0f) - cameraPos;
 
@@ -182,13 +223,7 @@ void main()
         vec3 angles = eulerAngles(quat);
         pitch = -degrees(angles.x);
 
-        // Depth cal
-        // F_depth = (1/z−1/near) / (1/far−1/near)
-
         glEnable(GL_DEPTH_TEST);
-        // see different kind of depth func
-        glDepthFunc(GL_LESS); // default
-        // glDepthFunc(GL_ALWAYS);
     }
 
     void Blending::draw(const mat4 &transform) {
@@ -198,7 +233,6 @@ void main()
         glBindVertexArray(VAO);
         glBindTexture(GL_TEXTURE_2D, texture);
         shader.use();
-        shader.setInt("ourTexture", 0);
         // use WSAD to control
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
         shader.setMat4("view", view);
@@ -224,6 +258,25 @@ void main()
         glBindTexture(GL_TEXTURE_2D, texture2);
         glBindVertexArray(planeVAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // grass
+        grassShader.use();
+        grassShader.setMat4("view", view);
+        grassShader.setInt("ourTexture", 0);
+        std::vector<glm::vec3> vegetation;
+        vegetation.push_back(glm::vec3(-1.5f, 0.5f, -0.48f));
+        vegetation.push_back(glm::vec3(1.5f, 0.5f, 0.51f));
+        vegetation.push_back(glm::vec3(0.0f, 0.5f, 0.7f));
+        vegetation.push_back(glm::vec3(-0.3f, 0.5f, -2.3f));
+        vegetation.push_back(glm::vec3(0.5f, 0.5f, -0.6f));
+
+        glBindTexture(GL_TEXTURE_2D, texture3);
+        for (unsigned int i = 0; i < vegetation.size(); i++) {
+            model = glm::mat4();
+            model = glm::translate(model, vegetation[i]);
+            grassShader.setMat4("model", model);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
     }
 
     Blending::~Blending() {

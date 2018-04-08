@@ -41,8 +41,8 @@ void CustomDraw::fixedUpdate(float delta) {
         yaw += deltaP.x * sensitivity;
         pitch += deltaP.y * sensitivity;
 
-        if (pitch > 45.0f) pitch = 45.0f;
-        if (pitch < -45.0f) pitch = -45.0f;
+        if (pitch > 89.0f) pitch = 45.0f;
+        if (pitch < -89.0f) pitch = -45.0f;
 
         glm::vec3 front;
         front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));

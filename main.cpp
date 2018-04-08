@@ -68,8 +68,8 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(MultipleLights);
 //        CREATE_TEST_SCENE(ModelLoad);
 //        CREATE_TEST_SCENE(DepthTest);
-        CREATE_TEST_SCENE(StencilTest);
-//        CREATE_TEST_SCENE(Blending);
+//        CREATE_TEST_SCENE(StencilTest);
+        CREATE_TEST_SCENE(Blending);
 
         return true;
     });
