@@ -62,47 +62,47 @@ void main()
         float vertices[] = {
                 // postions        // texture coords
                 // Back face
-                -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // Bottom-left
-                0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
-                0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // bottom-right
-                0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
-                -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // bottom-left
-                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
+                -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // Bottom-left
+                0.5f, 0.5f, -0.5f, 1.0f, 1.0f, // top-right
+                0.5f, -0.5f, -0.5f, 1.0f, 0.0f, // bottom-right
+                0.5f, 0.5f, -0.5f, 1.0f, 1.0f, // top-right
+                -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom-left
+                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
                 // Front face
-                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
-                0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
-                0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
-                0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
-                -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // top-left
-                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
+                0.5f, -0.5f, 0.5f, 1.0f, 0.0f, // bottom-right
+                0.5f, 0.5f, 0.5f, 1.0f, 1.0f, // top-right
+                0.5f, 0.5f, 0.5f, 1.0f, 1.0f, // top-right
+                -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, // top-left
+                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
                 // Left face
-                -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
-                -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-left
-                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
-                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
-                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
-                -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
+                -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, // top-right
+                -0.5f, 0.5f, -0.5f, 1.0f, 1.0f, // top-left
+                -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
+                -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
+                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-right
+                -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, // top-right
                 // Right face
-                0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
-                0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
-                0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
-                0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
-                0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
-                0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+                0.5f, 0.5f, 0.5f, 1.0f, 0.0f, // top-left
+                0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-right
+                0.5f, 0.5f, -0.5f, 1.0f, 1.0f, // top-right
+                0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-right
+                0.5f, 0.5f, 0.5f, 1.0f, 0.0f, // top-left
+                0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
                 // Bottom face
-                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
-                0.5f, -0.5f, -0.5f,  1.0f, 1.0f, // top-left
-                0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
-                0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
-                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
-                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
+                -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // top-right
+                0.5f, -0.5f, -0.5f, 1.0f, 1.0f, // top-left
+                0.5f, -0.5f, 0.5f, 1.0f, 0.0f, // bottom-left
+                0.5f, -0.5f, 0.5f, 1.0f, 0.0f, // bottom-left
+                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-right
+                -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // top-right
                 // Top face
-                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
-                0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
-                0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
-                0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
-                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
-                -0.5f,  0.5f,  0.5f,  0.0f, 0.0f  // bottom-left
+                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
+                0.5f, 0.5f, 0.5f, 1.0f, 0.0f, // bottom-right
+                0.5f, 0.5f, -0.5f, 1.0f, 1.0f, // top-right
+                0.5f, 0.5f, 0.5f, 1.0f, 0.0f, // bottom-right
+                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
+                -0.5f, 0.5f, 0.5f, 0.0f, 0.0f  // bottom-left
         };
 
         glGenVertexArrays(1, &VAO);
@@ -140,9 +140,6 @@ void main()
 
         stbi_image_free(data2);
         stbi_image_free(data);
-
-        auto &size = Director::getInstance()->getWinSize();
-        projection = glm::perspective(glm::radians(60.0f), (float) size.width / (float) size.height, 0.1f, 100.0f);
 
         view = glm::translate(view, glm::vec3(0.0f, 0.0f, -4.0f));
 
