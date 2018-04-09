@@ -10,7 +10,8 @@
 TEST_NODE_BEGIN(Blending)
 
         unsigned int texture2;
-        unsigned int texture3;
+        unsigned int textureGrass;
+        unsigned int textureWindow;
         Shader grassShader;
         unsigned int planeVAO;
         unsigned int planeVBO;

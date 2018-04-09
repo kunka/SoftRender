@@ -4,6 +4,7 @@
 
 #include "Blending.h"
 #include "stb_image.h"
+#include <map>
 
 TEST_NODE_IMP_BEGIN
 
@@ -46,8 +47,8 @@ uniform sampler2D ourTexture;
 void main()
 {
     vec4 texColor = texture(ourTexture, texCoord);
-    if(texColor.a < 0.05)
-        discard;
+//    if(texColor.a < 0.05)
+//        discard;
     FragColor = texColor;
 }
 )";
@@ -77,10 +78,19 @@ void main()
         int width3, height3, nrChannels3;
         unsigned char *data3 = stbi_load("../res/grass.png", &width3, &height3, &nrChannels3, 0);
         if (!data3) {
-            log("Failed to load texture3");
+            log("Failed to load textureGrass");
             return;
         } else {
-            log("Texture3 width = %d, height = %d", width3, height3);
+            log("textureGrass width = %d, height = %d", width3, height3);
+        }
+
+        int width4, height4, nrChannels4;
+        unsigned char *data4 = stbi_load("../res/blending_transparent_window.png", &width4, &height4, &nrChannels4, 0);
+        if (!data4) {
+            log("Failed to load texture4");
+            return;
+        } else {
+            log("texture4 width = %d, height = %d", width4, height4);
         }
 
         float vertices[] = {
@@ -192,8 +202,8 @@ void main()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        glGenTextures(1, &texture3);
-        glBindTexture(GL_TEXTURE_2D, texture3);
+        glGenTextures(1, &textureGrass);
+        glBindTexture(GL_TEXTURE_2D, textureGrass);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width3, height3, 0, GL_RGBA, GL_UNSIGNED_BYTE, data3);
         glGenerateMipmap(GL_TEXTURE_2D);
         // set the texture wrapping/filtering options (on the currently bound texture object)
@@ -202,6 +212,17 @@ void main()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+        glGenTextures(1, &textureWindow);
+        glBindTexture(GL_TEXTURE_2D, textureWindow);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width4, height4, 0, GL_RGBA, GL_UNSIGNED_BYTE, data4);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        // set the texture wrapping/filtering options (on the currently bound texture object)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data4);
         stbi_image_free(data3);
         stbi_image_free(data2);
         stbi_image_free(data);
@@ -215,7 +236,7 @@ void main()
         grassShader.setInt("ourTexture", 0);
         grassShader.setMat4("projection", projection);
 
-        cameraPos = vec3(0.0f, 1.0f, 3.0f);
+        cameraPos = vec3(0.0f, 1.5f, 3.0f);
         cameraDir = vec3(0.0f, 0.0f, 0.0f) - cameraPos;
 
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
@@ -224,6 +245,9 @@ void main()
         pitch = -degrees(angles.x);
 
         glEnable(GL_DEPTH_TEST);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     void Blending::draw(const mat4 &transform) {
@@ -270,11 +294,36 @@ void main()
         vegetation.push_back(glm::vec3(-0.3f, 0.5f, -2.3f));
         vegetation.push_back(glm::vec3(0.5f, 0.5f, -0.6f));
 
-        glBindTexture(GL_TEXTURE_2D, texture3);
+//        glBindTexture(GL_TEXTURE_2D, textureGrass);
+//        for (unsigned int i = 0; i < vegetation.size(); i++) {
+//            model = glm::mat4();
+//            model = glm::translate(model, vegetation[i]);
+//            grassShader.setMat4("model", model);
+//            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+//        }
+
+//        glBindTexture(GL_TEXTURE_2D, textureWindow);
+//        for (unsigned int i = 0; i < vegetation.size(); i++) {
+//            model = glm::mat4();
+//            model = glm::translate(model, vegetation[i]);
+//            grassShader.setMat4("model", model);
+//            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+//        }
+
+//        1. Draw all opaque objects first.
+//        2. Sort all the transparent objects.
+//        3. Draw all the transparent objects in sorted order.
+        glBindTexture(GL_TEXTURE_2D, textureWindow);
+        std::map<float, glm::vec3> sorted;
         for (unsigned int i = 0; i < vegetation.size(); i++) {
+            float distance = glm::distance(cameraPos, vegetation.at(i));
+            sorted[distance] = vegetation[i];
+        }
+        for (std::map<float, glm::vec3>::reverse_iterator it = sorted.rbegin(); it != sorted.
+                rend(); ++it) {
             model = glm::mat4();
-            model = glm::translate(model, vegetation[i]);
-            grassShader.setMat4("model", model);
+            model = glm::translate(model, it->second);
+            shader.setMat4("model", model);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
     }
