@@ -20,6 +20,15 @@ public: \
     ~__CLASS__(); \
     virtual void draw(const mat4 &transform) override;
 
+#define TEST_NODE_BEGIN2(__CLASS__, __SUPER_CLASS__) \
+namespace gltest{ \
+class __CLASS__ : public __SUPER_CLASS__{ \
+public: \
+    __CLASS__(); \
+    ~__CLASS__(); \
+    virtual void draw(const mat4 &transform) override;
+
+
 #define TEST_NODE_END(__CLASS__) };};
 
 #define TEST_NODE_IMP_BEGIN namespace gltest{

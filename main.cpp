@@ -33,6 +33,7 @@
 #include "samples/DepthTest.h"
 #include "samples/StencilTest.h"
 #include "samples/Blending.h"
+#include "samples/FaceCulling.h"
 
 
 #define CREATE_TEST_SCENE(__CLASS__) \
@@ -69,7 +70,8 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(ModelLoad);
 //        CREATE_TEST_SCENE(DepthTest);
 //        CREATE_TEST_SCENE(StencilTest);
-        CREATE_TEST_SCENE(Blending);
+//        CREATE_TEST_SCENE(Blending);
+        CREATE_TEST_SCENE(FaceCulling);
 
         return true;
     });
