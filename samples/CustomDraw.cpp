@@ -14,7 +14,7 @@ CustomDraw::CustomDraw() {
     yaw = -90;
 
     auto &size = Director::getInstance()->getWinSize();
-    projection = glm::perspective(glm::radians(60.0f), (float) size.width / (float) size.height, 0.1f, 100.0f);
+    projection = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
 }
 
 CustomDraw::~CustomDraw() {

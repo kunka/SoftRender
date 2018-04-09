@@ -48,19 +48,89 @@ void main()
     FragColor = texture(ourTexture, texCoord);
 }
 )";
+        const char *frame_frag = R"(
+#version 330 core
+in vec2 texCoord;
+out vec4 FragColor;
+
+uniform sampler2D ourTexture;
+
+const float offset = 1.0 / 300.0;
+
+void main()
+{
+    // Origin
+//    FragColor = texture(ourTexture, texCoord);
+
+    // Inversion
+//    FragColor = vec4(vec3(1.0 - texture(ourTexture, texCoord)), 1.0);
+
+    // GrayScale
+//    FragColor = texture(ourTexture, texCoord);
+//    float average = 0.2126 * FragColor.r + 0.7152 * FragColor.g + 0.0722 * FragColor.b;
+//    FragColor = vec4(average, average, average, 1.0);
+
+    // Kernel Effects
+      vec2 offsets[9] = vec2[](
+           vec2(-offset, offset), // top-left
+           vec2( 0.0f,    offset), // top-center
+           vec2( offset, offset), // top-right
+           vec2(-offset, 0.0f), // center-left
+           vec2( 0.0f,    0.0f), // center-center
+           vec2( offset, 0.0f), // center-right
+           vec2(-offset, -offset), // bottom-left
+           vec2( 0.0f, -offset), // bottom-center
+           vec2( offset, -offset) // bottom-right
+      );
+
+//       float kernel[9] = float[](
+//           -1, -1, -1,
+//           -1, 9, -1,
+//           -1, -1, -1
+//        );
+
+        // Blur
+//       float kernel[9] = float[](
+//            1.0 / 16, 2.0 / 16, 1.0 / 16,
+//            2.0 / 16, 4.0 / 16, 2.0 / 16,
+//            1.0 / 16, 2.0 / 16, 1.0 / 16
+//        );
+
+        // Edge detection
+       float kernel[9] = float[](
+            1.0 , 1.0, 1.0,
+            1.0 , -8.0, 1.0,
+            1.0 , 1.0, 1.0
+        );
+
+       vec3 sampleTex[9];
+       for(int i = 0; i < 9; i++)
+       {
+           sampleTex[i] = vec3(texture(ourTexture, texCoord.st + offsets[i]));
+       }
+       vec3 col = vec3(0.0);
+       for(int i = 0; i < 9; i++)
+           col += sampleTex[i] * kernel[i];
+       FragColor = vec4(col, 1.0);
+}
+)";
+
         shader.loadStr(vert, frag);
-        frameShader.loadStr(frame_vert, frag);
+        frameShader.loadStr(frame_vert, frame_frag);
 
         shader.use();
+        shader.setInt("ourTexture", 0);
         shader.setMat4("projection", projection);
         cameraPos = vec3(0.0f, 2.0f, 4.0f);
         cameraDir = vec3(0.0f, 0.0f, 0.0f) - cameraPos;
+
+        frameShader.use();
+        frameShader.setInt("ourTexture", 0);
 
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
         glm::quat quat = glm::quat_cast(view);
         vec3 angles = eulerAngles(quat);
         pitch = -degrees(angles.x);
-        yaw = -degrees(angles.y);
 
 
         float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -85,9 +155,6 @@ void main()
 
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *) (2 * sizeof(float)));
         glEnableVertexAttribArray(1);
-
-        frameShader.use();
-        frameShader.setInt("ourTexture", 0);
 
         glGenFramebuffers(1, &FBO);
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -125,7 +192,6 @@ void main()
         glBindVertexArray(VAO);
         glBindTexture(GL_TEXTURE_2D, texture);
         shader.use();
-        shader.setInt("ourTexture", 0);
         // use WSAD to control
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
         shader.setMat4("view", view);
