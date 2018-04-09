@@ -184,8 +184,6 @@ void main()
         stbi_image_free(data2);
         stbi_image_free(data);
 
-        auto &size = Director::getInstance()->getWinSize();
-        projection = glm::perspective(glm::radians(60.0f), (float) size.width / (float) size.height, 0.1f, 100.0f);
         shader.use();
         shader.setMat4("projection", projection);
         cameraPos = vec3(0.0f, 2.0f, 4.0f);

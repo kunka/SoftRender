@@ -10,8 +10,6 @@
 
 TEST_NODE_BEGIN2(FaceCulling, Cubes)
 
-        unsigned int texture2;
-
 TEST_NODE_END(FaceCulling)
 
 
