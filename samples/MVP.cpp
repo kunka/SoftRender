@@ -37,7 +37,7 @@ uniform sampler2D ourTexture;
 
 void main()
 {
-    FragColor = texture(ourTexture, texCoord);
+    FragColor = texture(ourTexture, texCoord) * ourColor;
 }
 )";
         shader.loadStr(vert, frag);
@@ -100,7 +100,7 @@ void main()
         auto &size = Director::getInstance()->getWinSize();
         projection = glm::perspective(glm::radians(60.0f), (float) size.width / (float) size.height, 0.1f, 100.0f);
 
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -1.0f));
 
         model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -122,6 +122,9 @@ void main()
         glBindTexture(GL_TEXTURE_2D, texture);
 
         shader.use();
+        view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
+        shader.setMat4("view", view);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);

@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(Blending);
 //        CREATE_TEST_SCENE(FaceCulling);
 //        CREATE_TEST_SCENE(FrameBuffer);
-        CREATE_TEST_SCENE(CubeMaps);
+//        CREATE_TEST_SCENE(CubeMaps);
 
         return true;
     });
