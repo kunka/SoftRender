@@ -63,6 +63,9 @@ bool GLView::initWithRect(int x, int y, int width, int height) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
     glfwWindowHint(GLFW_FLOATING, GL_TRUE);
+    // MSAA
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
     GLFWwindow *window = glfwCreateWindow(width, height, "GL", NULL, NULL);
     if (!window) {
         log("Failed to create GLFW window");

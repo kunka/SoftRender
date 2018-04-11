@@ -48,7 +48,7 @@ if (APPLE)
     link_directories(extrnal/zlib/mac)
 endif (APPLE)
 
-add_executable(gl ${SOURCE_FILES} samples/AdvancedGLSL.cpp samples/AdvancedGLSL.h samples/GeometryShader.cpp samples/GeometryShader.h)
+add_executable(gl ${SOURCE_FILES} samples/AdvancedGLSL.cpp samples/AdvancedGLSL.h samples/GeometryShader.cpp samples/GeometryShader.h samples/AntiAliasing.cpp samples/AntiAliasing.h samples/BlinnPhongLighting.cpp samples/BlinnPhongLighting.h)
 
 target_link_libraries(gl glfw3.a assimp.a zlibstatic.a)
 
