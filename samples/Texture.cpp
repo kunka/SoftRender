@@ -3,7 +3,9 @@
 //
 
 #include "Texture.h"
+
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
 
 TEST_NODE_IMP_BEGIN
@@ -86,10 +88,6 @@ void main()
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-        glGenBuffers(1, &EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *) 0);
         glEnableVertexAttribArray(0);
 
@@ -98,6 +96,10 @@ void main()
 
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *) (7 * sizeof(float)));
         glEnableVertexAttribArray(2);
+
+        glGenBuffers(1, &EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);

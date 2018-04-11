@@ -36,6 +36,7 @@
 #include "samples/FaceCulling.h"
 #include "samples/FrameBuffer.h"
 #include "samples/CubeMaps.h"
+#include "samples/AdvancedData.h"
 
 
 #define CREATE_TEST_SCENE(__CLASS__) \
@@ -76,6 +77,7 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(FaceCulling);
 //        CREATE_TEST_SCENE(FrameBuffer);
 //        CREATE_TEST_SCENE(CubeMaps);
+        CREATE_TEST_SCENE(AdvancedData);
 
         return true;
     });
