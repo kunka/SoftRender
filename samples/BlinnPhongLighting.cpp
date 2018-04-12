@@ -3,7 +3,7 @@
 //
 
 #include "BlinnPhongLighting.h"
-#include "stb_image.h"
+#include "Input.h"
 
 TEST_NODE_IMP_BEGIN
 
@@ -45,7 +45,6 @@ in VS_OUT {
 
 struct Material {
 sampler2D diffuse;
-float shininess;
 };
 uniform Material material;
 
@@ -60,6 +59,7 @@ uniform Light light;
 uniform vec3 viewPos;
 
 out vec4 FragColor;
+uniform bool blinn;
 
 void main()
 {
@@ -72,11 +72,20 @@ void main()
     vec3 diffuse = light.diffuse * diff * color;
 
     vec3 viewDir = normalize(viewPos - fs_in.FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    float spec = 0;
+    if(blinn)
+    {
+        vec3 halfwayDir = normalize(lightDir + viewDir);
+        spec = pow(max(dot(norm, halfwayDir), 0.0), 16.0);
+    }
+    else
+    {
+        vec3 reflectDir = reflect(-lightDir, norm);
+        spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0);
+    }
     vec3 specular = light.specular * spec;
 
-    FragColor = vec4(color, 1.0);//vec4(diffuse + ambient + specular, 1.0);
+    FragColor = vec4(diffuse + ambient + specular, 1.0);
 }
 )";
 
@@ -109,36 +118,21 @@ void main()
         glEnableVertexAttribArray(2);
 
         // texture
-        stbi_set_flip_vertically_on_load(true); // flipY
+        texture = loadTexture("../res/wood.png");
 
-        int width, height, nrChannels;
-        unsigned char *data = stbi_load("../res/wood.png", &width, &height, &nrChannels, 0);
-        if (!data) {
-            log("Failed to load texture");
-            return;
-        } else {
-            log("Texture width = %d, height = %d", width, height);
-        }
-
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        // set the texture wrapping/filtering options (on the currently bound texture object)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        stbi_image_free(data);
+        cameraPos = vec3(0.0f, 0.0f, 3.0f);
+        cameraDir = vec3(0.0f, 0.0f, -1.0f);
+        glm::quat quat = glm::quat_cast(view);
+        vec3 angles = eulerAngles(quat);
+        pitch = -degrees(angles.x);
 
         shader.use();
         shader.setMat4("projection", projection);
         shader.setInt("material.diffuse", 0);
-        shader.setFloat("material.shininess", 32.0f);
         shader.setVec3("light.ambient", vec3(0.05f, 0.05f, 0.05f));
         shader.setVec3("light.diffuse", vec3(1.0f, 1.0f, 1.0f));
-        shader.setVec3("light.specular", vec3(0.3f, 0.3f, 0.3f));
-        shader.setVec3("light.position", vec3(0, 1, 0));
+        shader.setVec3("light.specular", vec3(0.5f, 0.5f, 0.5f));
+        shader.setVec3("light.position", vec3(0, 0, 0));
 
         glEnable(GL_DEPTH_TEST);
     }
@@ -156,11 +150,24 @@ void main()
         model = glm::mat4();
         shader.setMat4("model", model);
         shader.setVec3("viewPos", cameraPos);
+        shader.setInt("blinn", blinn);
 
         glBindVertexArray(VAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+
+    void BlinnPhongLighting::fixedUpdate(float delta) {
+        CustomDraw::fixedUpdate(delta);
+        Input *input = Input::getInstance();
+        if (input->isKeyPressed(GLFW_KEY_B) == GLFW_PRESS && !blinnKeyPressed) {
+            blinn = !blinn;
+            blinnKeyPressed = true;
+        }
+        if (input->isKeyPressed(GLFW_KEY_B) == GLFW_RELEASE) {
+            blinnKeyPressed = false;
+        }
     }
 
     BlinnPhongLighting::~BlinnPhongLighting() {

@@ -42,7 +42,10 @@ public:
 
     virtual void fixedUpdate(float delta) override;
 
+    unsigned int loadTexture(const std::string &path);
+
 protected:
+
     Shader shader;
     unsigned int VAO;
     unsigned int VBO;

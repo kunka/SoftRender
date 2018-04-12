@@ -51,24 +51,6 @@ void main()
 
         stbi_set_flip_vertically_on_load(true); // flipY
 
-        int width, height, nrChannels;
-        unsigned char *data = stbi_load("../res/container.jpg", &width, &height, &nrChannels, 0);
-        if (!data) {
-            log("Failed to load texture");
-            return;
-        } else {
-            log("Texture width = %d, height = %d", width, height);
-        }
-
-        int width2, height2, nrChannels2;
-        unsigned char *data2 = stbi_load("../res/smile.png", &width2, &height2, &nrChannels2, 0);
-        if (!data2) {
-            log("Failed to load texture2");
-            return;
-        } else {
-            log("Texture2 width = %d, height = %d", width2, height2);
-        }
-
         float vertices[] = {
                 // postions       // colors              // texture coords
                 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f, // top right
@@ -101,37 +83,14 @@ void main()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        // set the texture wrapping/filtering options (on the currently bound texture object)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glGenTextures(1, &texture2);
-        glBindTexture(GL_TEXTURE_2D, texture2);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width2, height2, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        // set the texture wrapping/filtering options (on the currently bound texture object)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data2);
-        stbi_image_free(data);
+        texture = loadTexture("../res/container.jpg");
+        texture2 = loadTexture("../res/smile.png");
 
         shader.use();
 //        glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0); // set it manually
-//        ourShader.setInt("texture2", 1); // or with shader class
+//        shader.setInt("texture2", 1); // or with shader class
         shader.setInt("ourTexture", 0);
         shader.setInt("ourTexture2", 1);
-
-        // unbind
-        glBindVertexArray(0);
     }
 
     void Texture::draw(const mat4 &transform) {

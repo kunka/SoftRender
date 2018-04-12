@@ -11,6 +11,10 @@
 TEST_NODE_BEGIN(BlinnPhongLighting)
 
         Shader bpShader;
+        bool blinn = false;
+        bool blinnKeyPressed = false;
+
+        virtual void fixedUpdate(float delta) override;
 
 TEST_NODE_END(BlinnPhongLighting)
 

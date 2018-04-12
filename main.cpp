@@ -40,6 +40,7 @@
 #include "samples/AdvancedGLSL.h"
 #include "samples/AntiAliasing.h"
 #include "samples/BlinnPhongLighting.h"
+#include "samples/GammaCorrection.h"
 
 
 #define CREATE_TEST_SCENE(__CLASS__) \
@@ -83,7 +84,8 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(AdvancedData);
 //        CREATE_TEST_SCENE(AdvancedGLSL);
 //        CREATE_TEST_SCENE(AntiAliasing);
-        CREATE_TEST_SCENE(BlinnPhongLighting);
+//        CREATE_TEST_SCENE(BlinnPhongLighting);
+        CREATE_TEST_SCENE(GammaCorrection);
 
         return true;
     });
