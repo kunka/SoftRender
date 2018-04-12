@@ -45,6 +45,8 @@ public:
 
     const Size &getWinSize() { return _glView->getWinSize(); }
 
+    const Size &getFrameBufferSize() { return _glView->getFrameBufferSize(); }
+
     GLView *getGLView() { return _glView; }
 
     void setGLView(GLView *glView);

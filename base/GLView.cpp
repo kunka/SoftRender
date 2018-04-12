@@ -86,11 +86,15 @@ bool GLView::initWithRect(int x, int y, int width, int height) {
     glfwSetWindowSizeCallback(window, window_size_callback);
     glfwShowWindow(window);
     _window = window;
-    int realW = 0, realH = 0;
-    glfwGetWindowSize(window, &realW, &realH);
-    _winSize.width = realW;
-    _winSize.height = realH;
-    log("GLView::initWithRect(%d,%d,%d,%d), winSize=(%d,%d)", x, y, width, height, realW, realH);
+    int w = 0, h = 0;
+    glfwGetWindowSize(window, &w, &h);
+    _winSize.width = w;
+    _winSize.height = h;
+    glfwGetFramebufferSize(window, &w, &h);
+    _frameBufferSize.width = w;
+    _frameBufferSize.height = h;
+    log("GLView::initWithRect(%d,%d,%d,%d), winSize(%.0f,%.0f), frameBufferSize(%.0f,%.0f)", x, y, width, height,
+        _winSize.width, _winSize.height, _frameBufferSize.width, _frameBufferSize.height);
 
     return true;
 }

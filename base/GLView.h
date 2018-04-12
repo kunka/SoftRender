@@ -31,6 +31,8 @@ public:
 
     const Size &getWinSize() { return _winSize; }
 
+    const Size &getFrameBufferSize() { return _frameBufferSize; }
+
     void renderScene(Scene *scene);
 
     virtual void release();
@@ -42,6 +44,7 @@ protected:
 
     GLFWwindow *_window;
     Size _winSize;
+    Size _frameBufferSize;
 };
 
 #endif /* GLView_h */

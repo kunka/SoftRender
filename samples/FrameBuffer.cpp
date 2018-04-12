@@ -60,7 +60,7 @@ const float offset = 1.0 / 300.0;
 void main()
 {
     // Origin
-//    FragColor = texture(ourTexture, texCoord);
+    FragColor = texture(ourTexture, texCoord);
 
     // Inversion
 //    FragColor = vec4(vec3(1.0 - texture(ourTexture, texCoord)), 1.0);
@@ -97,21 +97,21 @@ void main()
 //        );
 
         // Edge detection
-       float kernel[9] = float[](
-            1.0 , 1.0, 1.0,
-            1.0 , -8.0, 1.0,
-            1.0 , 1.0, 1.0
-        );
-
-       vec3 sampleTex[9];
-       for(int i = 0; i < 9; i++)
-       {
-           sampleTex[i] = vec3(texture(ourTexture, texCoord.st + offsets[i]));
-       }
-       vec3 col = vec3(0.0);
-       for(int i = 0; i < 9; i++)
-           col += sampleTex[i] * kernel[i];
-       FragColor = vec4(col, 1.0);
+//       float kernel[9] = float[](
+//            1.0 , 1.0, 1.0,
+//            1.0 , -8.0, 1.0,
+//            1.0 , 1.0, 1.0
+//        );
+//
+//       vec3 sampleTex[9];
+//       for(int i = 0; i < 9; i++)
+//       {
+//           sampleTex[i] = vec3(texture(ourTexture, texCoord.st + offsets[i]));
+//       }
+//       vec3 col = vec3(0.0);
+//       for(int i = 0; i < 9; i++)
+//           col += sampleTex[i] * kernel[i];
+//       FragColor = vec4(col, 1.0);
 }
 )";
 
@@ -159,14 +159,14 @@ void main()
         glGenFramebuffers(1, &FBO);
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-        auto &size = Director::getInstance()->getWinSize();
+        auto &size = Director::getInstance()->getFrameBufferSize();
         // create a color attachment texture
-        glGenTextures(1, &textureColorbuffer);
-        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+        glGenTextures(1, &textureColorBuffer);
+        glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.width, size.height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorBuffer, 0);
         // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
         unsigned int rbo;
         glGenRenderbuffers(1, &rbo);
@@ -179,7 +179,7 @@ void main()
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             log("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
     }
 
     void FrameBuffer::draw(const mat4 &transform) {
@@ -229,6 +229,7 @@ void main()
         // now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+
         glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
         // clear all relevant buffers
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -237,7 +238,7 @@ void main()
 
         frameShader.use();
         glBindVertexArray(quadVAO);
-        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+        glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
         // use the color attachment texture as the texture of the quad plane
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }

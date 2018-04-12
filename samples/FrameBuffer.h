@@ -11,7 +11,7 @@
 TEST_NODE_BEGIN2(FrameBuffer, DepthTest)
 
         unsigned int FBO;
-        unsigned int textureColorbuffer;
+        unsigned int textureColorBuffer;
         unsigned int quadVAO;
         unsigned int quadVBO;
         Shader frameShader;
