@@ -8,8 +8,6 @@
 
 #include "CustomDraw.h"
 
-#include "CustomDraw.h"
-
 TEST_NODE_BEGIN(DepthTest)
 
         unsigned int texture2;

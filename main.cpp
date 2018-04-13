@@ -41,6 +41,7 @@
 #include "samples/AntiAliasing.h"
 #include "samples/BlinnPhongLighting.h"
 #include "samples/GammaCorrection.h"
+#include "samples/ShadowMapping.h"
 
 
 #define CREATE_TEST_SCENE(__CLASS__) \
@@ -79,13 +80,14 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(StencilTest);
 //        CREATE_TEST_SCENE(Blending);
 //        CREATE_TEST_SCENE(FaceCulling);
-        CREATE_TEST_SCENE(FrameBuffer);
+//        CREATE_TEST_SCENE(FrameBuffer);
 //        CREATE_TEST_SCENE(CubeMaps);
 //        CREATE_TEST_SCENE(AdvancedData);
 //        CREATE_TEST_SCENE(AdvancedGLSL);
 //        CREATE_TEST_SCENE(AntiAliasing);
 //        CREATE_TEST_SCENE(BlinnPhongLighting);
 //        CREATE_TEST_SCENE(GammaCorrection);
+        CREATE_TEST_SCENE(ShadowMapping);
 
         return true;
     });

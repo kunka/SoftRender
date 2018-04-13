@@ -51,6 +51,10 @@ void CustomDraw::fixedUpdate(float delta) {
         front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
         cameraDir = glm::normalize(front);
     }
+
+    if (input->isKeyPressed(GLFW_KEY_P))
+        log("cameraPos(%.0f,%.0f,%.0f), cameraDir(%.02f,%.02f,%.02f), cameraUp(%.0f,%.0f,%.0f)", cameraPos.x, cameraPos.y,
+            cameraPos.z, cameraDir.x, cameraDir.y, cameraDir.z, cameraUp.x, cameraUp.y, cameraUp.z);
 }
 
 // utility function for loading a 2D texture from file
