@@ -6,7 +6,7 @@
 
 TEST_NODE_IMP_BEGIN
 
-    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
     ShadowMapping::ShadowMapping() {
         const char *vert = R"(
@@ -98,7 +98,7 @@ void main()
 #version 330 core
 out vec4 FragColor;
 
-uniform bool visual;
+uniform int visual;
 uniform sampler2D depthMap;
 
 
@@ -118,12 +118,23 @@ float LinearizeDepth(float depth)
 
 void main()
 {
-    if (visual)
+    if (visual == 1)
     {
         //Visualizing the depth buffer
+        float depth = LinearizeDepth(gl_FragCoord.z) / far;
+    }
+    else if (visual == 2)
+    {
         float depth = texture(depthMap, fs_in.TexCoords).r;
-//        float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
-        FragColor = vec4(vec3(depth), 1.0);
+//        depth = LinearizeDepth(depth) / far;    // perspective
+    if (depth == 0)
+{
+        FragColor = vec4(vec3(1.0,0,0), 1.0);     // orthographic
+}
+else
+{
+        FragColor = vec4(vec3(depth), 1.0);     // orthographic
+}
     }
     else
     {
@@ -251,7 +262,7 @@ void main()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
+        // attach depth texture as FBO's depth buffer
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
         glDrawBuffer(GL_NONE);
@@ -321,39 +332,43 @@ void main()
 //        glClear(GL_DEPTH_BUFFER_BIT);
 //        auto &size = Director::getInstance()->getWinSize();
 //        mat4 pj = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
+////        mat4 pj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 10.0f);
 //        mat4 vw = glm::lookAt(vec3(-1.5, 4, -2), vec3(0, 0, 0), vec3(0, 1, 0));
 //        depthShader.use();
 //        depthShader.setMat4("projection", pj);
 //        depthShader.setMat4("view", vw);
-//        depthShader.setInt("visual", true);
+//        depthShader.setInt("visual", 1);
 //        renderScene(depthShader);
 
+        auto &size = Director::getInstance()->getFrameBufferSize();
+//        SHADOW_WIDTH = (unsigned int)size.width;
+//        SHADOW_HEIGHT = (unsigned int)size.height;
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         // light matrix
-        auto &size = Director::getInstance()->getFrameBufferSize();
         mat4 pj = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
         mat4 vw = glm::lookAt(vec3(-1.5, 4, -2), vec3(0, 0, 0), vec3(0, 1, 0));
         depthShader.use();
         depthShader.setMat4("projection", pj);
         depthShader.setMat4("view", vw);
-        depthShader.setInt("visual", false);
+        depthShader.setInt("visual", 0);
         renderScene(depthShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // visual depth
         glViewport(0, 0, size.width, size.height);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthMapFBO);
-        depthShader.setInt("visual", true);
+        depthShader.setInt("visual", 2);
         depthShader.setInt("depthMap", 0);
         glBindVertexArray(quadVAO);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
 
 /////////////////////////////// scene with shadow //////////////////////
         // render to depth map
@@ -385,6 +400,8 @@ void main()
 
     void ShadowMapping::renderScene(Shader &shader) {
         glBindVertexArray(VAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
         model = glm::mat4();
         model = glm::translate(model, glm::vec3(-1.0f, 2.0f, -1.0f));
         shader.setMat4("model", model);
