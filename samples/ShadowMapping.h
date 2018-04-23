@@ -19,7 +19,10 @@ TEST_NODE_BEGIN(ShadowMapping)
         Shader depthShader;
         Shader shadowShader;
 
-        void renderScene(Shader &shader);
+        void renderScene(Shader &shader, bool faceCulling = false);
+
+        unsigned int renderType;
+        vec3 lightPos;
 
 TEST_NODE_END(ShadowMapping)
 

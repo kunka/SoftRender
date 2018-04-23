@@ -57,8 +57,6 @@ vec3 specular;
 uniform Light light;
 
 uniform vec3 viewPos;
-uniform sampler2D ourTexture;
-uniform sampler2D depthMap;
 
 void main()
 {
@@ -75,22 +73,7 @@ void main()
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 16.0);
     vec3 specular = light.specular * spec;
 
-    float depthValue = texture(depthMap, fs_in.TexCoords).r;
-
     FragColor = vec4(diffuse + ambient + specular, 1.0);
-}
-)";
-
-        const char *shadow_vert = R"(
-#version 330 core
-layout (location = 0) in vec3 a_position;
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-void main()
-{
-    gl_Position = projection * view * model * vec4(a_position, 1.0);
 }
 )";
 
@@ -121,82 +104,132 @@ void main()
     if (visual == 1)
     {
         //Visualizing the depth buffer
-        float depth = LinearizeDepth(gl_FragCoord.z) / far;
+//        float depth = LinearizeDepth(gl_FragCoord.z) / far; //perspective
+        float depth = gl_FragCoord.z;                         // orthographic
+        FragColor = vec4(vec3(depth), 1.0);
     }
     else if (visual == 2)
     {
         float depth = texture(depthMap, fs_in.TexCoords).r;
 //        depth = LinearizeDepth(depth) / far;    // perspective
-    if (depth == 0)
-{
-        FragColor = vec4(vec3(1.0,0,0), 1.0);     // orthographic
-}
-else
-{
-        FragColor = vec4(vec3(depth), 1.0);     // orthographic
-}
+        FragColor = vec4(vec3(depth), 1.0);
     }
     else
     {
-        discard;
     }
 }
 )";
         const char *shadow_frag = R"(
 #version 330 core
+out vec4 FragColor;
+
+in VS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+} fs_in;
+
+struct Material {
+sampler2D diffuse;
+};
+uniform Material material;
+
+struct Light {
+vec3 position;
+vec3 ambient;
+vec3 diffuse;
+vec3 specular;
+};
+uniform Light light;
+
+uniform vec3 viewPos;
+uniform sampler2D depthMap;
+uniform mat4 lightSpaceMatrix;
+
+float inShadow(vec4 fragPosLightSpace, float bias)
+{
+    // [-1, 1]
+    vec3 projCoords = fragPosLightSpace.xyz/fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+
+    // [0, 1]
+    float depthInDepthMap = texture(depthMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    return currentDepth - bias > depthInDepthMap ? 1.0 : 0.0;
+}
 
 void main()
 {
+    vec3 color = texture(material.diffuse, fs_in.TexCoords).rgb;
+    vec3 ambient = light.ambient * color;
+
+    vec3 norm = normalize(fs_in.Normal);
+    vec3 lightDir = normalize(light.position - fs_in.FragPos);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = light.diffuse * diff * color;
+
+    vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(norm, halfwayDir), 0.0), 16.0);
+    vec3 specular = light.specular * spec;
+
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fs_in.FragPos, 1.0);
+    float bias = max(0.05 * (1.0 - dot(norm, lightDir)), 0.005);
+
+    float shadow = inShadow(fragPosLightSpace, bias);
+    FragColor = vec4(ambient + (1.0 - shadow) * (diffuse + specular), 1.0);
 }
 )";
 
         shader.loadStr(vert, frag);
         depthShader.loadStr(vert, depth_frag);
-        shadowShader.loadStr(shadow_vert, shadow_frag);
+        shadowShader.loadStr(vert, shadow_frag);
 
         float vertices[] = {
-                // positions          // normals           // texture coords
-                -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-                0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-                0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-                0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-                -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
-                -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-
-                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-                0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-                0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-                0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-                -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-
-                -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-                -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-                -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-                -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-                -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-
-                0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-                0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-                0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-                0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-                0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-
-                -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-                0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
-                0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-                0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-                -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-                -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-
-                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-                0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-                0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-                0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-                -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
+                // back face
+                -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -0.5f, 0.0f, 0.0f, // bottom-left
+                0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -0.5f, 0.5f, 0.5f, // top-right
+                0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -0.5f, 0.5f, 0.0f, // bottom-right
+                0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -0.5f, 0.5f, 0.5f, // top-right
+                -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -0.5f, 0.0f, 0.0f, // bottom-left
+                -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -0.5f, 0.0f, 0.5f, // top-left
+                // front face
+                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, // bottom-left
+                0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.5f, 0.0f, // bottom-right
+                0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, // top-right
+                0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, // top-right
+                -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.0f, 0.5f, // top-left
+                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, // bottom-left
+                // left face
+                -0.5f, 0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f, // top-right
+                -0.5f, 0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.5f, // top-left
+                -0.5f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.5f, // bottom-left
+                -0.5f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.5f, // bottom-left
+                -0.5f, -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-right
+                -0.5f, 0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f, // top-right
+                // right face
+                0.5f, 0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.0f, // top-left
+                0.5f, -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.5f, // bottom-right
+                0.5f, 0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.5f, // top-right
+                0.5f, -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.5f, // bottom-right
+                0.5f, 0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.0f, // top-left
+                0.5f, -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
+                // bottom face
+                -0.5f, -0.5f, -0.5f, 0.0f, -0.5f, 0.0f, 0.0f, 0.5f, // top-right
+                0.5f, -0.5f, -0.5f, 0.0f, -0.5f, 0.0f, 0.5f, 0.5f, // top-left
+                0.5f, -0.5f, 0.5f, 0.0f, -0.5f, 0.0f, 0.5f, 0.0f, // bottom-left
+                0.5f, -0.5f, 0.5f, 0.0f, -0.5f, 0.0f, 0.5f, 0.0f, // bottom-left
+                -0.5f, -0.5f, 0.5f, 0.0f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom-right
+                -0.5f, -0.5f, -0.5f, 0.0f, -0.5f, 0.0f, 0.0f, 0.5f, // top-right
+                // top face
+                -0.5f, 0.5f, -0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 0.5f, // top-left
+                0.5f, 0.5f, 0.5f, 0.0f, 0.5f, 0.0f, 0.5f, 0.0f, // bottom-right
+                0.5f, 0.5f, -0.5f, 0.0f, 0.5f, 0.0f, 0.5f, 0.5f, // top-right
+                0.5f, 0.5f, 0.5f, 0.0f, 0.5f, 0.0f, 0.5f, 0.0f, // bottom-right
+                -0.5f, 0.5f, -0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 0.5f, // top-left
+                -0.5f, 0.5f, 0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f  // bottom-left
         };
 
         glGenVertexArrays(1, &VAO);
@@ -273,6 +306,7 @@ void main()
         // visual depth quad
         float quadVertices[] = {
                 // positions       // normals(uselsss) // texture Coords
+                // to use the same vert shader
                 -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
                 -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
                 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
@@ -297,14 +331,23 @@ void main()
         texture = loadTexture("../res/container.jpg");
         texture2 = loadTexture("../res/wood.png");
 
+        lightPos = vec3(-2, 4, -3);
         shader.use();
         shader.setMat4("projection", projection);
         shader.setInt("material.diffuse", 0);
-        shader.setInt("ourTexture", 0);
         shader.setVec3("light.ambient", vec3(0.2f, 0.2f, 0.2f));
         shader.setVec3("light.diffuse", vec3(1.0f, 1.0f, 1.0f));
         shader.setVec3("light.specular", vec3(0.5f, 0.5f, 0.5f));
-        shader.setVec3("light.position", vec3(-1.5, 4, -2));
+        shader.setVec3("light.position", lightPos);
+
+        shadowShader.use();
+        shadowShader.setMat4("projection", projection);
+        shadowShader.setInt("material.diffuse", 0);
+        shadowShader.setVec3("light.ambient", vec3(0.2f, 0.2f, 0.2f));
+        shadowShader.setVec3("light.diffuse", vec3(1.0f, 1.0f, 1.0f));
+        shadowShader.setVec3("light.specular", vec3(0.5f, 0.5f, 0.5f));
+        shadowShader.setVec3("light.position", lightPos);
+
 
         cameraPos = vec3(0.3f, 4.0f, 5.0f);
         cameraDir = vec3(0.0f, 2.0f, 0.0f) - cameraPos;
@@ -318,87 +361,118 @@ void main()
     }
 
     void ShadowMapping::draw(const mat4 &transform) {
-/////////////////////////////// origin scene without shadow //////////////////////
-        // render scene
-//        glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//        shader.use();
-//        shader.setMat4("projection", projection);
-//        view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
-//        shader.setMat4("view", view);
-//        renderScene(shader);
-///////////////////////////// depth //////////////////////
-        // light matrix
-//        glClear(GL_DEPTH_BUFFER_BIT);
-//        auto &size = Director::getInstance()->getWinSize();
-//        mat4 pj = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
-////        mat4 pj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 10.0f);
-//        mat4 vw = glm::lookAt(vec3(-1.5, 4, -2), vec3(0, 0, 0), vec3(0, 1, 0));
-//        depthShader.use();
-//        depthShader.setMat4("projection", pj);
-//        depthShader.setMat4("view", vw);
-//        depthShader.setInt("visual", 1);
-//        renderScene(depthShader);
+        renderType = 3;
 
-        auto &size = Director::getInstance()->getFrameBufferSize();
-//        SHADOW_WIDTH = (unsigned int)size.width;
-//        SHADOW_HEIGHT = (unsigned int)size.height;
-        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        switch (renderType) {
+            case 0 : {
+                // render origin scene without shadow
+                glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                shader.use();
+                view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
+                shader.setMat4("view", view);
+                shader.setVec3("viewPos", cameraPos);
+                renderScene(shader);
+                break;
+            }
+            case 1: {
+                // visual depth 1
+                // light matrix
+                glClear(GL_DEPTH_BUFFER_BIT);
+                auto &size = Director::getInstance()->getWinSize();
+//                mat4 pj = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
+                mat4 pj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
+                mat4 vw = glm::lookAt(lightPos, vec3(0), vec3(0, 1, 0));
+                depthShader.use();
+                depthShader.setMat4("projection", pj);
+                depthShader.setMat4("view", vw);
+                depthShader.setInt("visual", 1);
+                renderScene(depthShader);
+                break;
+            }
+            case 2: {
+                // visual depth by depth map
+                // render to depth map
+                auto &size = Director::getInstance()->getFrameBufferSize();
+                glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+                glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+                glClear(GL_DEPTH_BUFFER_BIT);
 
-        // light matrix
-        mat4 pj = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
-        mat4 vw = glm::lookAt(vec3(-1.5, 4, -2), vec3(0, 0, 0), vec3(0, 1, 0));
-        depthShader.use();
-        depthShader.setMat4("projection", pj);
-        depthShader.setMat4("view", vw);
-        depthShader.setInt("visual", 0);
-        renderScene(depthShader);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//                mat4 pj = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
+                mat4 pj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
+                mat4 vw = glm::lookAt(lightPos, vec3(0, 0, 0), vec3(0, 1, 0));
+                depthShader.use();
+                depthShader.setMat4("projection", pj);
+                depthShader.setMat4("view", vw);
+                depthShader.setInt("visual", 0);
+                renderScene(depthShader);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        // visual depth
-        glViewport(0, 0, size.width, size.height);
-//        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                // reset viewport
+                glViewport(0, 0, size.width, size.height);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, depthMapFBO);
-        depthShader.setInt("visual", 2);
-        depthShader.setInt("depthMap", 0);
-        glBindVertexArray(quadVAO);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        glBindVertexArray(0);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, depthMapFBO);
+                // reset transform
+                depthShader.setMat4("projection", glm::mat4());
+                depthShader.setMat4("view", glm::mat4());
+                depthShader.setMat4("model", glm::mat4());
+                depthShader.setInt("visual", 2);
+                depthShader.setInt("depthMap", 0);
+                glBindVertexArray(quadVAO);
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+                glBindVertexArray(0);
+                break;
+            }
+            case 3: {
+                // render scene with shadow
+                // render to depth map
+                auto &size = Director::getInstance()->getFrameBufferSize();
+                glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+                glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+                glClear(GL_DEPTH_BUFFER_BIT);
 
-/////////////////////////////// scene with shadow //////////////////////
-        // render to depth map
-//        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-//        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-//        glClear(GL_DEPTH_BUFFER_BIT);
-//
-//        // light matrix
-//        auto &size = Director::getInstance()->getWinSize();
-//        mat4 pj = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
-//        mat4 vw = glm::lookAt(vec3(-1.5, 4, -2), vec3(0, 0, 0), vec3(0, 1, 0));
-//        depthShader.use();
-//        depthShader.setMat4("projection", pj);
-//        depthShader.setMat4("view", vw);
-//        renderScene(depthShader);
-//
-//        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//
-//
-//        shader.use();
-//        shader.setMat4("projection", projection);
-//        view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
-//        shader.setMat4("view", view);
-//        glActiveTexture(GL_TEXTURE1);
-//        glBindTexture(GL_TEXTURE_2D, depthMapFBO);
-//        shader.setInt("depthMap", 0);
-//        renderScene(shader);
+//                mat4 pj = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
+                mat4 pj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
+                mat4 vw = glm::lookAt(lightPos, vec3(0, 0, 0), vec3(0, 1, 0));
+                depthShader.use();
+                depthShader.setMat4("projection", pj);
+                depthShader.setMat4("view", vw);
+                depthShader.setInt("visual", 0);
+//                glEnable(GL_CULL_FACE);
+//                glCullFace(GL_FRONT); // fix peter panning
+//                renderScene(depthShader, true);
+                renderScene(depthShader);
+//                glDisable(GL_CULL_FACE);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+                // reset viewport
+                glViewport(0, 0, size.width, size.height);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, depthMapFBO);
+                shadowShader.use();
+                shadowShader.setInt("depthMap", 1);
+                shadowShader.setMat4("lightSpaceMatrix", pj * vw);
+                view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
+                shadowShader.setMat4("view", view);
+                shadowShader.setVec3("viewPos", cameraPos);
+                renderScene(shadowShader);
+                break;
+            }
+            default:
+                break;
+        }
     }
 
-    void ShadowMapping::renderScene(Shader &shader) {
+    void ShadowMapping::renderScene(Shader &shader, bool faceCulling) {
+        if (faceCulling) {
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT); // fix peter panning
+        }
+
         glBindVertexArray(VAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -414,9 +488,13 @@ void main()
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         model = glm::mat4();
-        model = glm::translate(model, glm::vec3(-1.5f, 0.5f, 0.0f));
+        model = glm::translate(model, glm::vec3(-2.0f, 0.5f, 0.0f));
         shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        if (faceCulling) {
+            glDisable(GL_CULL_FACE);
+        }
 
         // plane
         model = glm::mat4();
