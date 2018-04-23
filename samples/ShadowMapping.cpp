@@ -152,12 +152,29 @@ float inShadow(vec4 fragPosLightSpace, float bias)
     vec3 projCoords = fragPosLightSpace.xyz/fragPosLightSpace.w;
     // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
+    if (projCoords.z > 1.0) // over sampling
+        return 0;
 
-    // [0, 1]
-    float depthInDepthMap = texture(depthMap, projCoords.xy).r;
+    // PCF
     float currentDepth = projCoords.z;
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(depthMap, 0);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(depthMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+        }
+     }
+    shadow /= 9.0;
+    return shadow;
 
-    return currentDepth - bias > depthInDepthMap ? 1.0 : 0.0;
+//    // [0, 1]
+//    float depthInDepthMap = texture(depthMap, projCoords.xy).r;
+//    float currentDepth = projCoords.z;
+//
+//    return currentDepth - bias > depthInDepthMap ? 1.0 : 0.0;
 }
 
 void main()
@@ -293,8 +310,10 @@ void main()
                      NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
         // attach depth texture as FBO's depth buffer
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
