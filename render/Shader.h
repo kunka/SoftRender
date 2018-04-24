@@ -15,9 +15,19 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "Log.h"
 
 //extern const char *shader_positionColor_vert;
 //extern const char *shader_positionColor_frag;
+
+#define CHECK_GL_ERROR_DEBUG() \
+    do { \
+        GLenum __error = glGetError(); \
+        if(__error) { \
+            log("OpenGL error 0x%04X in %s %s %d\n", __error, __FILE__, __FUNCTION__, __LINE__); \
+        } \
+    } while (false)
+
 
 class Shader {
 public:

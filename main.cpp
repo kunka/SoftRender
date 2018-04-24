@@ -43,6 +43,8 @@
 #include "samples/GammaCorrection.h"
 #include "samples/ShadowMapping.h"
 
+#include "samples/alg/AStar.h"
+
 
 #define CREATE_TEST_SCENE(__CLASS__) \
 Scene *scene = Scene::create(); \
@@ -87,7 +89,9 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(AntiAliasing);
 //        CREATE_TEST_SCENE(BlinnPhongLighting);
 //        CREATE_TEST_SCENE(GammaCorrection);
-        CREATE_TEST_SCENE(ShadowMapping);
+//        CREATE_TEST_SCENE(ShadowMapping);
+
+        CREATE_TEST_SCENE(AStar);
 
         return true;
     });

@@ -18,6 +18,7 @@ aux_source_directory(ui OTHER_SRC_FILES)
 aux_source_directory(extrnal OTHER_SRC_FILES)
 aux_source_directory(render OTHER_SRC_FILES)
 aux_source_directory(samples OTHER_SRC_FILES)
+aux_source_directory(samples/alg OTHER_SRC_FILES)
 aux_source_directory(math OTHER_SRC_FILES)
 list(APPEND SOURCE_FILES ${OTHER_SRC_FILES})
 
@@ -28,6 +29,8 @@ include_directories(${PROJECT_SOURCE_DIR}/ui)
 include_directories(${PROJECT_SOURCE_DIR}/extrnal)
 include_directories(${PROJECT_SOURCE_DIR}/render)
 include_directories(${PROJECT_SOURCE_DIR}/math)
+include_directories(${PROJECT_SOURCE_DIR}/samples)
+include_directories(${PROJECT_SOURCE_DIR}/samples/alg)
 
 link_directories(extrnal/glfw/deps)
 link_directories(${PROJECT_SOURCE_DIR}/base)
@@ -35,6 +38,7 @@ link_directories(${PROJECT_SOURCE_DIR}/ui)
 link_directories(${PROJECT_SOURCE_DIR}/extrnal)
 link_directories(${PROJECT_SOURCE_DIR}/render)
 link_directories(${PROJECT_SOURCE_DIR}/samples)
+link_directories(${PROJECT_SOURCE_DIR}/samples/alg)
 link_directories(${PROJECT_SOURCE_DIR}/math)
 
 if (MINGW)
@@ -48,7 +52,7 @@ if (APPLE)
     link_directories(extrnal/zlib/mac)
 endif (APPLE)
 
-add_executable(gl ${SOURCE_FILES} samples/AdvancedGLSL.cpp samples/AdvancedGLSL.h samples/GeometryShader.cpp samples/GeometryShader.h samples/AntiAliasing.cpp samples/AntiAliasing.h samples/BlinnPhongLighting.cpp samples/BlinnPhongLighting.h samples/GammaCorrection.cpp samples/GammaCorrection.h samples/ShadowMapping.cpp samples/ShadowMapping.h)
+add_executable(gl ${SOURCE_FILES})
 
 target_link_libraries(gl glfw3.a assimp.a zlibstatic.a)
 
