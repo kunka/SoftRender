@@ -21,7 +21,6 @@ CustomDraw::CustomDraw() {
 CustomDraw::~CustomDraw() {
 }
 
-
 void CustomDraw::fixedUpdate(float delta) {
     Input *input = Input::getInstance();
     float cameraSpeed = delta * 5;

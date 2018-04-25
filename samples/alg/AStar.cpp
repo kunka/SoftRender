@@ -3,6 +3,7 @@
 //
 
 #include "AStar.h"
+#include "Input.h"
 
 using namespace std;
 TEST_NODE_IMP_BEGIN
@@ -69,8 +70,13 @@ void main()
         }
         else if (visitTimes[index].r == -3)
         {
+            // route history
+            color = vec4(1.0, 1.0, 0, 1.0f);
+        }
+        else if (visitTimes[index].r == -4)
+        {
             // route path
-            color = vec4(1.0, 1.0, 0, 1.0);
+            color = vec4(1.0, 0, 1.0, 1.0);
         }
         else if (visitTimes[index].r > 0)
         {
@@ -197,16 +203,44 @@ void main()
         float dis = manhattanDis(from, to);
         h_score.insert({indexOf(from), dis});
         f_score.insert({indexOf(from), dis});
+        vec2 head = from;
         while (!open_set.empty()) {
             float dis = INT_MAX;
-            vec2 p;
+            vec2 p = head;
+//            for (int i = -1; i <= 1; i++) {
+//                for (int j = -1; j <= 1; j++) {
+//                    if (i == 0 && j == 0) {
+//                        // p;
+//                        continue;
+//                    }
+//                    vec2 y = vec2(head.x + i, head.y + j);
+//                    auto index = indexOf(y);
+//                    if (index < 0 || index >= width * height ||
+//                        close_set.find(index) != close_set.end()) {
+//                        continue;
+//                    }
+//
+//                    if (f_score.find(index) != f_score.end() && f_score.at(index) < dis) {
+//                        dis = f_score.at(index);
+//                        p = y;
+//                    }
+//                }
+//            }
+//
             for (auto iter = f_score.begin(); iter != f_score.end(); iter++) {
+                if (iter->first == indexOf(head) || close_set.find(iter->first) != close_set.end())
+                    continue;
                 if (iter->second < dis) {
                     dis = iter->second;
                     p.y = iter->first / width + 1;
                     p.x = iter->first % width + 1;
                 }
             }
+            head = p;
+            mutex.lock();
+            visitTimes[indexOf(head)] = -3;
+            mutex.unlock();
+
             if (indexOf(p) == indexOf(to)) {
                 reconstruct_path(path, came_from, indexOf(to));
                 break;
@@ -215,15 +249,19 @@ void main()
             close_set.insert(indexOf(p));
             for (int i = -1; i <= 1; i++) {
                 for (int j = -1; j <= 1; j++) {
+                    if (i == 0 && j == 0) {
+                        // p;
+                        continue;
+                    }
                     vec2 y = vec2(p.x + i, p.y + j);
                     auto index = indexOf(y);
                     if (index < 0 || index >= width * height ||
                         close_set.find(index) != close_set.end()) {
                         continue;
                     }
-//                    if (map[index] > 0) {
-//                        continue;
-//                    }
+                    if (map[index] > 0) {
+                        continue;
+                    }
                     mutex.lock();
                     visitTimes[index] += 1;
                     mutex.unlock();
@@ -240,7 +278,7 @@ void main()
                         h_score.insert({index, dis});
                         f_score.insert({index, dis});
                     }
-                    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(slow ? 1000 : 5));
                 }
             }
         }
@@ -251,7 +289,7 @@ void main()
             int y = *iter / width + 1;
             int x = *iter % width + 1;
             log("%d,%d", x, y);
-            visitTimes[*iter] = -3;
+            visitTimes[*iter] = -4;
         }
         // from
         visitTimes[(from.x - 1) + (from.y - 1) * width] = -1;
@@ -308,6 +346,17 @@ void main()
         glBindVertexArray(VAO);
         shader.use();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+
+    void AStar::fixedUpdate(float delta) {
+        Input *input = Input::getInstance();
+        if (input->isKeyPressed(GLFW_KEY_S) == GLFW_PRESS && !slowDownPressed) {
+            slow = !slow;
+            slowDownPressed = true;
+        }
+        if (input->isKeyPressed(GLFW_KEY_S) == GLFW_RELEASE) {
+            slowDownPressed = false;
+        }
     }
 
     AStar::~AStar() {

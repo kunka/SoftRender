@@ -20,6 +20,8 @@ TEST_NODE_BEGIN(AStar)
 
         void drawMap();
 
+        virtual void fixedUpdate(float delta) override;
+
     private:
         void resetVisitTimes();
 
@@ -31,6 +33,9 @@ TEST_NODE_BEGIN(AStar)
         vec2 to;
         std::thread *thread;
         std::mutex mutex;
+
+        bool slow = false;
+        bool slowDownPressed = false;
 
 TEST_NODE_END(AStar)
 
