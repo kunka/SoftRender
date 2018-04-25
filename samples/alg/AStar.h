@@ -6,8 +6,9 @@
 #define GL_ASTAR_H
 
 #include "CustomDraw.h"
-#include<unordered_map>
-#include<unordered_set>
+#include <unordered_map>
+#include <unordered_set>
+#include <thread>
 
 TEST_NODE_BEGIN(AStar)
 
@@ -28,6 +29,9 @@ TEST_NODE_BEGIN(AStar)
 
         vec2 from;
         vec2 to;
+        std::thread *thread;
+        std::mutex mutex;
+
 TEST_NODE_END(AStar)
 
 #endif //GL_ASTAR_H

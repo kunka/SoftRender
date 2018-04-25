@@ -27,10 +27,10 @@ in vec2 pos;
 
 layout (std140) uniform Map
 {
-    vec4 status[1200];
-    vec4 times[1200];
-//    int status[1200];
-//    float times[1200];
+    vec4 map[1200];
+    vec4 visitTimes[1200];
+//    int map[1200];
+//    float visitTimes[1200];
 };
 
 void main()
@@ -52,36 +52,39 @@ void main()
     }
     else
     {
-        if (times[index].r == -1)
+        if (map[index].r == 1)
+        {
+            // block
+            color = vec4(0.5, 0.5, 0.5, 1.0);
+        }
+        else if (visitTimes[index].r == -1)
         {
             // from
             color = vec4(1, 0.5, 0.5, 1.0);
         }
-        else if (times[index].r == -2)
+        else if (visitTimes[index].r == -2)
         {
             // to
-            color = vec4(0.5, 1.0, 0.5, 1.0);
+            color = vec4(0, 1.0, 1.0, 1.0);
         }
-        else if (times[index].r == 1)
+        else if (visitTimes[index].r == -3)
         {
             // route path
-            color = vec4(0.5, 0.5, 0.5, 1.0);
+            color = vec4(1.0, 1.0, 0, 1.0);
         }
-        else if (times[index].r > 0)
+        else if (visitTimes[index].r > 0)
         {
             // route history
-            color = vec4(0, times[index].r, 0, 1.0);
+            color = vec4(0, visitTimes[index].r, 0, 1.0);
         }
-        else if (status[index].r == 0)
+        else if (map[index].r == 0)
         {
             // empty grid
             color = vec4(0.86, 0.86, 0.86, 1.0);
         }
         else
         {
-            color.b = times[index].r;
-            color.g = color.b;
-            color.r = color.b;
+            color = vec4(0, 0, 0, 1.0);
         }
     }
 
@@ -142,13 +145,23 @@ void main()
                 map.push_back(0);
             }
         }
+        // add block
+        for (int i = 18; i < 28; i++) {
+            int j = 5;
+            map[i - 1 + (j - 1) * width] = 1;
+            j = 20;
+            map[i - 1 + (j - 1) * width] = 1;
+        }
+        for (int j = 5; j <= 20; j++) {
+            int i = 28;
+            map[i - 1 + (j - 1) * width] = 1;
+        }
 
-        from = vec2(10, 10);
-        to = vec2(35, 20);
+        from = vec2(8, 10);
+        to = vec2(36, 15);
 
         resetVisitTimes();
-        doAStar();
-        drawMap();
+        thread = new std::thread(&AStar::doAStar, this);
     }
 
     void AStar::resetVisitTimes() {
@@ -158,6 +171,10 @@ void main()
                 visitTimes.push_back(0);
             }
         }
+        // from
+        visitTimes[(from.x - 1) + (from.y - 1) * width] = -1;
+        // to
+        visitTimes[(to.x - 1) + (to.y - 1) * width] = -2;
     }
 
     void AStar::doAStar() {
@@ -168,11 +185,12 @@ void main()
 //        unordered_map<int, int> g_score;
         unordered_map<int, float> h_score;
         unordered_map<int, float> f_score;
-        auto manhattanDis = [](vec2 &from, vec2 &to) -> float {
-            return abs(from.x - to.x) + abs(from.y - to.y);
-        };
         auto indexOf = [&](vec2 &p) -> int {
             return int((p.x - 1) + (p.y - 1) * width);
+        };
+        auto manhattanDis = [&](vec2 &from, vec2 &to) -> float {
+//            return map[indexOf(from)] > 0 ? INT_MAX : (abs(from.x - to.x) + abs(from.y - to.y));
+            return (abs(from.x - to.x) + abs(from.y - to.y));
         };
 
         open_set.emplace(indexOf(from));
@@ -199,13 +217,16 @@ void main()
                 for (int j = -1; j <= 1; j++) {
                     vec2 y = vec2(p.x + i, p.y + j);
                     auto index = indexOf(y);
-                    if (index < 0 || index >= width * height) {
+                    if (index < 0 || index >= width * height ||
+                        close_set.find(index) != close_set.end()) {
                         continue;
                     }
-                    if (close_set.find(index) != close_set.end()) {
-                        continue;
-                    }
+//                    if (map[index] > 0) {
+//                        continue;
+//                    }
+                    mutex.lock();
                     visitTimes[index] += 1;
+                    mutex.unlock();
                     bool isBetter = false;
                     if (open_set.find(index) == open_set.end()) {
                         open_set.insert(index);
@@ -219,21 +240,24 @@ void main()
                         h_score.insert({index, dis});
                         f_score.insert({index, dis});
                     }
+                    std::this_thread::sleep_for(std::chrono::milliseconds(50));
                 }
             }
         }
 
+        mutex.lock();
         // route path
         for (auto iter = path.rbegin() + 1; iter != path.rend() - 1; iter++) {
             int y = *iter / width + 1;
             int x = *iter % width + 1;
             log("%d,%d", x, y);
-            visitTimes[*iter] = 1;
+            visitTimes[*iter] = -3;
         }
         // from
         visitTimes[(from.x - 1) + (from.y - 1) * width] = -1;
         // to
         visitTimes[(to.x - 1) + (to.y - 1) * width] = -2;
+        mutex.unlock();
     }
 
     void AStar::reconstruct_path(std::vector<int> &path, std::unordered_map<int, int> &came_from, int current) {
@@ -245,24 +269,25 @@ void main()
 
     void AStar::drawMap() {
         // std140 require align memory
-        float max = 1.0f;
+        mutex.lock();
+        float max = 10.0f;
         for (auto iter = visitTimes.begin(); iter != visitTimes.end(); iter++) {
             if (*iter > max) {
                 max = *iter;
             }
         }
-        log("max times = %.0f", max);
         std::vector<vec4> map2;
         std::vector<vec4> visitTimes2;
         for (int i = 0; i < width * height; i++) {
             map2.push_back(vec4(map[i], 0, 0, 0));
             // normalize
             if (visitTimes[i] > 0) {
-                visitTimes2.push_back(vec4(visitTimes[i] / max / 2, 0, 0, 0));
+                visitTimes2.push_back(vec4(1.0f - visitTimes[i] / max, 0, 0, 0));
             } else {
                 visitTimes2.push_back(vec4(visitTimes[i], 0, 0, 0));
             }
         }
+        mutex.unlock();
         auto mapSize = 16 * width * height;
         auto visitTimesSize = 16 * width * height;
 
@@ -276,6 +301,8 @@ void main()
     }
 
     void AStar::draw(const mat4 &transform) {
+        drawMap();
+
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(VAO);
@@ -287,6 +314,8 @@ void main()
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &EBO);
+        thread->join();
+        delete thread;
     }
 
 TEST_NODE_IMP_END
