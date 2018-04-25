@@ -8,7 +8,15 @@
 #include "CustomDraw.h"
 #include <unordered_map>
 #include <unordered_set>
+
+#ifdef _WIN32
+
+#include "mingw.thread.h"
+#include "mingw.mutex.h"
+
+#else
 #include <thread>
+#endif
 
 TEST_NODE_BEGIN(AStar)
 
