@@ -2,13 +2,13 @@
 // Created by huangkun on 2018/4/24.
 //
 
-#include "AStar.h"
+#include "PathFinding.h"
 #include "Input.h"
 
 using namespace std;
 TEST_NODE_IMP_BEGIN
 
-    AStar::AStar() {
+    PathFinding::PathFinding() {
         const char *vert = R"(
 #version 330 core
 layout (location = 0) in vec2 a_position;
@@ -151,6 +151,9 @@ void main()
                 map.push_back(0);
             }
         }
+        from = vec2(5, 10);
+        to = vec2(36, 15);
+
         // add block
         for (int i = 18; i < 28; i++) {
             int j = 5;
@@ -163,16 +166,29 @@ void main()
             map[i + j * width] = 1;
         }
 
-        from = vec2(8, 10);
-        to = vec2(36, 15);
+        // gen random block
+//        int blockCount = 100;
+//        unordered_set<int> blocks;
+//        auto indexOf = [&](vec2 &p) -> int {
+//            return int(p.x + p.y * width);
+//        };
+//        while (blocks.size() < 800) {
+//            int x = std::rand() % width;
+//            int y = std::rand() % height;
+//            int index = x + y * width;
+//            if (index != indexOf(from) && index != indexOf(to) && blocks.find(index) == blocks.end()) {
+//                blocks.insert(index);
+//                map[x + y * width] = 1;
+//            }
+//        }
 
         resetVisitTimes();
-//        thread = new std::thread(&AStar::doDJT, this);
-//        thread = new std::thread(&AStar::doBFS, this);
-        thread = new std::thread(&AStar::doAStar, this);
+//        thread = new std::thread(&PathFinding::doDJT, this);
+//        thread = new std::thread(&PathFinding::doBFS, this);
+        thread = new std::thread(&PathFinding::doAStar, this);
     }
 
-    void AStar::resetVisitTimes() {
+    void PathFinding::resetVisitTimes() {
         visitTimes.clear();
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -185,7 +201,7 @@ void main()
         visitTimes[to.x + to.y * width] = -2;
     }
 
-    void AStar::doDJT() {
+    void PathFinding::doDJT() {
         slow = true;
         std::vector<int> path;
         unordered_set<int> open_set;
@@ -321,7 +337,7 @@ void main()
         mutex.unlock();
     }
 
-    void AStar::doBFS() {
+    void PathFinding::doBFS() {
         std::vector<int> path;
         unordered_set<int> open_set;
         unordered_set<int> close_set;
@@ -416,7 +432,7 @@ void main()
         mutex.unlock();
     }
 
-    void AStar::doAStar() {
+    void PathFinding::doAStar() {
         slow = true;
         std::vector<int> path;
         unordered_set<int> open_set;
@@ -553,14 +569,14 @@ void main()
         mutex.unlock();
     }
 
-    void AStar::reconstruct_path(std::vector<int> &path, std::unordered_map<int, int> &came_from, int current) {
+    void PathFinding::reconstruct_path(std::vector<int> &path, std::unordered_map<int, int> &came_from, int current) {
         path.push_back(current);
         if (came_from.find(current) != came_from.end()) {
             reconstruct_path(path, came_from, came_from.at(current));
         }
     }
 
-    void AStar::drawMap() {
+    void PathFinding::drawMap() {
         // std140 require align memory
         mutex.lock();
         float max = 10.0f;
@@ -593,7 +609,7 @@ void main()
         CHECK_GL_ERROR_DEBUG();
     }
 
-    void AStar::draw(const mat4 &transform) {
+    void PathFinding::draw(const mat4 &transform) {
         drawMap();
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -603,7 +619,7 @@ void main()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 
-    void AStar::fixedUpdate(float delta) {
+    void PathFinding::fixedUpdate(float delta) {
         Input *input = Input::getInstance();
         if (input->isKeyPressed(GLFW_KEY_S) == GLFW_PRESS && !slowDownPressed) {
             slow = !slow;
@@ -614,7 +630,7 @@ void main()
         }
     }
 
-    AStar::~AStar() {
+    PathFinding::~PathFinding() {
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &EBO);

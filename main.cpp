@@ -43,7 +43,7 @@
 #include "samples/GammaCorrection.h"
 #include "samples/ShadowMapping.h"
 
-#include "samples/alg/AStar.h"
+#include "alg/PathFinding.h"
 
 
 #define CREATE_TEST_SCENE(__CLASS__) \
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(GammaCorrection);
 //        CREATE_TEST_SCENE(ShadowMapping);
 
-        CREATE_TEST_SCENE(AStar);
+        CREATE_TEST_SCENE(PathFinding);
 
         return true;
     });

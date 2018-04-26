@@ -21,7 +21,7 @@
 
 #endif
 
-TEST_NODE_BEGIN(AStar)
+TEST_NODE_BEGIN(PathFinding)
 
         unsigned int UBO;
         int width;
@@ -51,6 +51,6 @@ TEST_NODE_BEGIN(AStar)
         bool slow = false;
         bool slowDownPressed = false;
 
-TEST_NODE_END(AStar)
+TEST_NODE_END(PathFinding)
 
 #endif //GL_ASTAR_H
