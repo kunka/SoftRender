@@ -7,6 +7,7 @@
 
 #include "CustomDraw.h"
 #include <unordered_map>
+#include <map>
 #include <unordered_set>
 
 #ifdef _WIN32
@@ -15,7 +16,9 @@
 #include "mingw.mutex.h"
 
 #else
+
 #include <thread>
+
 #endif
 
 TEST_NODE_BEGIN(AStar)
@@ -33,6 +36,10 @@ TEST_NODE_BEGIN(AStar)
     private:
         void resetVisitTimes();
 
+        void doDJT();
+
+        void doBFS();
+
         void doAStar();
 
         void reconstruct_path(std::vector<int> &path, std::unordered_map<int, int> &came_from, int current);
@@ -41,7 +48,6 @@ TEST_NODE_BEGIN(AStar)
         vec2 to;
         std::thread *thread;
         std::mutex mutex;
-
         bool slow = false;
         bool slowDownPressed = false;
 

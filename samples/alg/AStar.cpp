@@ -154,19 +154,21 @@ void main()
         // add block
         for (int i = 18; i < 28; i++) {
             int j = 5;
-            map[i - 1 + (j - 1) * width] = 1;
+            map[i + j * width] = 1;
             j = 20;
-            map[i - 1 + (j - 1) * width] = 1;
+            map[i + j * width] = 1;
         }
         for (int j = 5; j <= 20; j++) {
             int i = 28;
-            map[i - 1 + (j - 1) * width] = 1;
+            map[i + j * width] = 1;
         }
 
         from = vec2(8, 10);
         to = vec2(36, 15);
 
         resetVisitTimes();
+//        thread = new std::thread(&AStar::doDJT, this);
+//        thread = new std::thread(&AStar::doBFS, this);
         thread = new std::thread(&AStar::doAStar, this);
     }
 
@@ -178,24 +180,159 @@ void main()
             }
         }
         // from
-        visitTimes[(from.x - 1) + (from.y - 1) * width] = -1;
+        visitTimes[from.x + from.y * width] = -1;
         // to
-        visitTimes[(to.x - 1) + (to.y - 1) * width] = -2;
+        visitTimes[to.x + to.y * width] = -2;
     }
 
-    void AStar::doAStar() {
+    void AStar::doDJT() {
+        slow = true;
+        std::vector<int> path;
+        unordered_set<int> open_set;
+        unordered_set<int> close_set;
+        unordered_map<int, int> came_from;
+        unordered_map<int, int> g_score;
+        unordered_map<int, float> h_score;
+        std::map<int, float> f_score;
+        auto indexOf = [&](vec2 &p) -> int {
+            return int(p.x + p.y * width);
+        };
+        auto manhattanDis = [&](vec2 &from, vec2 &to) -> float {
+//            return (abs(from.x - to.x) + abs(from.y - to.y));
+            auto dp = from - to;
+            return std::sqrt(dp.x * dp.x + dp.y * dp.y);
+        };
+
+        open_set.emplace(indexOf(from));
+        float dis = 0;//manhattanDis(from, to);
+        g_score.insert({indexOf(from), 0});
+        h_score.insert({indexOf(from), dis});
+        f_score.insert({indexOf(from), dis});
+        while (!open_set.empty()) {
+            float dis = INT_MAX;
+            vec2 p;
+            // 找出评估距离最小的节点
+            for (auto iter = f_score.begin(); iter != f_score.end(); iter++) {
+                if (close_set.find(iter->first) != close_set.end())
+                    continue;
+                if (iter->second < dis) {
+                    dis = iter->second;
+                    p.y = iter->first / width;
+                    p.x = iter->first % width;
+                }
+            }
+            mutex.lock();
+            visitTimes[indexOf(p)] = -3;
+            mutex.unlock();
+
+            if (indexOf(p) == indexOf(to)) {
+                reconstruct_path(path, came_from, indexOf(to));
+                break;
+            } else {
+                // visualize the mini path from start pos we choose
+                std::vector<int> tmpPath;
+                reconstruct_path(tmpPath, came_from, indexOf(p));
+                if (tmpPath.size() > 2) {
+                    mutex.lock();
+                    // route path
+                    for (auto iter = tmpPath.rbegin(); iter != tmpPath.rend() - 1; iter++) {
+                        int y = *iter / width;
+                        int x = *iter % width;
+                        visitTimes[*iter] = -4;
+                    }
+                    visitTimes[from.x + from.y * width] = -1;
+                    visitTimes[to.x + to.y * width] = -2;
+                    mutex.unlock();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(slow ? 1000 : 5));
+                    // reset
+                    mutex.lock();
+                    // route path
+                    for (auto iter = tmpPath.rbegin() + 1; iter != tmpPath.rend() - 1; iter++) {
+                        int y = *iter / width;
+                        int x = *iter % width;
+                        visitTimes[*iter] = -3;
+                    }
+                    mutex.unlock();
+                }
+            }
+            open_set.erase(indexOf(p));
+            close_set.insert(indexOf(p));
+            // 遍历相邻节点，8方向
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    if (i == 0 && j == 0) {
+                        // self;
+                        continue;
+                    }
+                    vec2 y = vec2(p.x + i, p.y + j);
+                    if (y.x < 0 || y.x >= width || y.y < 0 || y.y >= height)
+                        // 边界
+                        continue;
+                    auto index = indexOf(y);
+                    if (close_set.find(index) != close_set.end()) {
+                        continue;
+                    }
+                    // block
+                    if (map[index] > 0) {
+                        continue;
+                    }
+                    auto dp = y - p;
+//                    auto g_score_y = g_score.at(indexOf(p)) + std::sqrt(dp.x * dp.x + dp.y * dp.y);
+                    auto g_score_y = g_score.at(indexOf(p)) + manhattanDis(y, p);
+
+                    // visualize visit times
+                    mutex.lock();
+                    visitTimes[index] += 1;
+                    mutex.unlock();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(slow ? 1000 : 5));
+
+                    bool isBetter = false;
+                    if (open_set.find(index) == open_set.end()) {
+                        // 新节点，加入open集
+                        open_set.insert(index);
+                        isBetter = true;
+                    } else if (g_score_y < g_score.at(index)) {
+                        // 旧节点y，离起点距离小于实际距离
+                        isBetter = true;
+                    } else {
+                        isBetter = false;
+                    }
+                    if (isBetter) {
+                        came_from.insert({indexOf(y), indexOf(p)});
+                        float dis = 0;//manhattanDis(y, to);
+                        g_score.insert({index, g_score_y}); // 更新实际距离
+                        h_score.insert({index, dis});
+                        f_score.insert({index, dis + g_score_y});
+                    }
+                }
+            }
+        }
+
+        mutex.lock();
+        // route path
+        for (auto iter = path.rbegin() + 1; iter != path.rend() - 1; iter++) {
+            int y = *iter / width + 1;
+            int x = *iter % width + 1;
+            log("%d,%d", x, y);
+            visitTimes[*iter] = -4;
+        }
+        visitTimes[from.x + from.y * width] = -1;
+        visitTimes[to.x + to.y * width] = -2;
+        mutex.unlock();
+    }
+
+    void AStar::doBFS() {
         std::vector<int> path;
         unordered_set<int> open_set;
         unordered_set<int> close_set;
         unordered_map<int, int> came_from;
 //        unordered_map<int, int> g_score;
         unordered_map<int, float> h_score;
-        unordered_map<int, float> f_score;
+        std::map<int, float> f_score;
         auto indexOf = [&](vec2 &p) -> int {
-            return int((p.x - 1) + (p.y - 1) * width);
+            return int(p.x + p.y * width);
         };
         auto manhattanDis = [&](vec2 &from, vec2 &to) -> float {
-//            return map[indexOf(from)] > 0 ? INT_MAX : (abs(from.x - to.x) + abs(from.y - to.y));
             return (abs(from.x - to.x) + abs(from.y - to.y));
         };
 
@@ -203,42 +340,20 @@ void main()
         float dis = manhattanDis(from, to);
         h_score.insert({indexOf(from), dis});
         f_score.insert({indexOf(from), dis});
-        vec2 head = from;
         while (!open_set.empty()) {
             float dis = INT_MAX;
-            vec2 p = head;
-//            for (int i = -1; i <= 1; i++) {
-//                for (int j = -1; j <= 1; j++) {
-//                    if (i == 0 && j == 0) {
-//                        // p;
-//                        continue;
-//                    }
-//                    vec2 y = vec2(head.x + i, head.y + j);
-//                    auto index = indexOf(y);
-//                    if (index < 0 || index >= width * height ||
-//                        close_set.find(index) != close_set.end()) {
-//                        continue;
-//                    }
-//
-//                    if (f_score.find(index) != f_score.end() && f_score.at(index) < dis) {
-//                        dis = f_score.at(index);
-//                        p = y;
-//                    }
-//                }
-//            }
-//
+            vec2 p;
             for (auto iter = f_score.begin(); iter != f_score.end(); iter++) {
-                if (iter->first == indexOf(head) || close_set.find(iter->first) != close_set.end())
+                if (close_set.find(iter->first) != close_set.end())
                     continue;
                 if (iter->second < dis) {
                     dis = iter->second;
-                    p.y = iter->first / width + 1;
-                    p.x = iter->first % width + 1;
+                    p.y = iter->first / width;
+                    p.x = iter->first % width;
                 }
             }
-            head = p;
             mutex.lock();
-            visitTimes[indexOf(head)] = -3;
+            visitTimes[indexOf(p)] = -3;
             mutex.unlock();
 
             if (indexOf(p) == indexOf(to)) {
@@ -250,15 +365,18 @@ void main()
             for (int i = -1; i <= 1; i++) {
                 for (int j = -1; j <= 1; j++) {
                     if (i == 0 && j == 0) {
-                        // p;
+                        // self;
                         continue;
                     }
                     vec2 y = vec2(p.x + i, p.y + j);
+                    if (y.x < 0 || y.x >= width || y.y < 0 || y.y >= height)
+                        continue;
                     auto index = indexOf(y);
                     if (index < 0 || index >= width * height ||
                         close_set.find(index) != close_set.end()) {
                         continue;
                     }
+                    // block
                     if (map[index] > 0) {
                         continue;
                     }
@@ -286,15 +404,152 @@ void main()
         mutex.lock();
         // route path
         for (auto iter = path.rbegin() + 1; iter != path.rend() - 1; iter++) {
-            int y = *iter / width + 1;
-            int x = *iter % width + 1;
+            int y = *iter / width;
+            int x = *iter % width;
             log("%d,%d", x, y);
             visitTimes[*iter] = -4;
         }
         // from
-        visitTimes[(from.x - 1) + (from.y - 1) * width] = -1;
+        visitTimes[from.x + from.y * width] = -1;
         // to
-        visitTimes[(to.x - 1) + (to.y - 1) * width] = -2;
+        visitTimes[to.x + to.y * width] = -2;
+        mutex.unlock();
+    }
+
+    void AStar::doAStar() {
+        slow = true;
+        std::vector<int> path;
+        unordered_set<int> open_set;
+        unordered_set<int> close_set;
+        unordered_map<int, int> came_from;
+        unordered_map<int, int> g_score;
+        unordered_map<int, float> h_score;
+        std::map<int, float> f_score;
+        auto indexOf = [&](vec2 &p) -> int {
+            return int(p.x + p.y * width);
+        };
+        auto manhattanDis = [&](vec2 &from, vec2 &to) -> float {
+//            return (abs(from.x - to.x) + abs(from.y - to.y));
+            auto dp = from - to;
+            return std::sqrt(dp.x * dp.x + dp.y * dp.y);
+        };
+
+        open_set.emplace(indexOf(from));
+        float dis = manhattanDis(from, to);
+        g_score.insert({indexOf(from), 0});
+        h_score.insert({indexOf(from), dis});
+        f_score.insert({indexOf(from), dis});
+        while (!open_set.empty()) {
+            float dis = INT_MAX;
+            vec2 p;
+            // 找出评估距离最小的节点
+            for (auto iter = f_score.begin(); iter != f_score.end(); iter++) {
+                if (close_set.find(iter->first) != close_set.end())
+                    continue;
+                if (iter->second < dis) {
+                    dis = iter->second;
+                    p.y = iter->first / width;
+                    p.x = iter->first % width;
+                }
+            }
+            mutex.lock();
+            visitTimes[indexOf(p)] = -3;
+            mutex.unlock();
+
+            if (indexOf(p) == indexOf(to)) {
+                reconstruct_path(path, came_from, indexOf(to));
+                break;
+            } else {
+                std::vector<int> tmpPath;
+                reconstruct_path(tmpPath, came_from, indexOf(p));
+                if (tmpPath.size() > 2) {
+                    mutex.lock();
+                    // route path
+                    for (auto iter = tmpPath.rbegin(); iter != tmpPath.rend() - 1; iter++) {
+                        int y = *iter / width;
+                        int x = *iter % width;
+                        visitTimes[*iter] = -4;
+                    }
+                    // from
+                    visitTimes[from.x + from.y * width] = -1;
+                    // to
+                    visitTimes[to.x + to.y * width] = -2;
+                    mutex.unlock();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(slow ? 1000 : 5));
+                    // reset
+                    mutex.lock();
+                    // route path
+                    for (auto iter = tmpPath.rbegin() + 1; iter != tmpPath.rend() - 1; iter++) {
+                        int y = *iter / width;
+                        int x = *iter % width;
+                        visitTimes[*iter] = -3;
+                    }
+                    mutex.unlock();
+                }
+            }
+            open_set.erase(indexOf(p));
+            close_set.insert(indexOf(p));
+            // 遍历相邻节点
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    if (i == 0 && j == 0) {// self;
+                        continue;
+                    }
+                    vec2 y = vec2(p.x + i, p.y + j);
+                    if (y.x < 0 || y.x >= width || y.y < 0 || y.y >= height)
+                        continue;
+                    auto index = indexOf(y);
+                    if (close_set.find(index) != close_set.end()) {
+                        continue;
+                    }
+                    // block
+                    if (map[index] > 0) {
+                        continue;
+                    }
+                    auto dp = y - p;
+//                    auto g_score_y = g_score.at(indexOf(p)) + std::sqrt(dp.x * dp.x + dp.y * dp.y);
+                    auto g_score_y = g_score.at(indexOf(p)) + manhattanDis(y, p);
+
+                    // visualize
+                    mutex.lock();
+                    visitTimes[index] += 1;
+                    mutex.unlock();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(slow ? 1000 : 5));
+
+                    bool isBetter = false;
+                    if (open_set.find(index) == open_set.end()) {
+                        // 新节点，加入open集
+                        open_set.insert(index);
+                        isBetter = true;
+                    } else if (g_score_y < g_score.at(index)) {
+                        // 旧节点y，离起点距离小于实际距离
+                        isBetter = true;
+                    } else {
+                        isBetter = false;
+                    }
+                    if (isBetter) {
+                        came_from.insert({indexOf(y), indexOf(p)});
+                        float dis = manhattanDis(y, to);
+                        g_score.insert({index, g_score_y}); // 更新实际距离
+                        h_score.insert({index, dis});
+                        f_score.insert({index, dis + g_score_y});
+                    }
+                }
+            }
+        }
+
+        mutex.lock();
+        // route path
+        for (auto iter = path.rbegin() + 1; iter != path.rend() - 1; iter++) {
+            int y = *iter / width;
+            int x = *iter % width;
+            log("%d,%d", x, y);
+            visitTimes[*iter] = -4;
+        }
+        // from
+        visitTimes[from.x + from.y * width] = -1;
+        // to
+        visitTimes[to.x + to.y * width] = -2;
         mutex.unlock();
     }
 
