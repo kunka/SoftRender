@@ -5,10 +5,10 @@
 #ifndef GL_GEOMETRYSHADER_H
 #define GL_GEOMETRYSHADER_H
 
+#include "CustomDraw.h"
 
-class GeometryShader {
+TEST_NODE_BEGIN(GeometryShader)
 
-};
-
+TEST_NODE_END(GeometryShader)
 
 #endif //GL_GEOMETRYSHADER_H

@@ -38,6 +38,8 @@
 #include "samples/CubeMaps.h"
 #include "samples/AdvancedData.h"
 #include "samples/AdvancedGLSL.h"
+#include "samples/GeometryShader.h"
+#include "samples/GeometryShader2.h"
 #include "samples/AntiAliasing.h"
 #include "samples/BlinnPhongLighting.h"
 #include "samples/GammaCorrection.h"
@@ -79,19 +81,21 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(MultipleLights);
 //        CREATE_TEST_SCENE(ModelLoad);
 //        CREATE_TEST_SCENE(DepthTest);
-//        CREATE_TEST_SCENE(StencilTest);
+//        CREATE_TEST_SCENE(StzencilTest);
 //        CREATE_TEST_SCENE(Blending);
 //        CREATE_TEST_SCENE(FaceCulling);
 //        CREATE_TEST_SCENE(FrameBuffer);
 //        CREATE_TEST_SCENE(CubeMaps);
 //        CREATE_TEST_SCENE(AdvancedData);
 //        CREATE_TEST_SCENE(AdvancedGLSL);
+//        CREATE_TEST_SCENE(GeometryShader);
+        CREATE_TEST_SCENE(GeometryShader2);
 //        CREATE_TEST_SCENE(AntiAliasing);
 //        CREATE_TEST_SCENE(BlinnPhongLighting);
 //        CREATE_TEST_SCENE(GammaCorrection);
 //        CREATE_TEST_SCENE(ShadowMapping);
 
-        CREATE_TEST_SCENE(PathFinding);
+//        CREATE_TEST_SCENE(PathFinding);
 
         return true;
     });

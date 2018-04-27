@@ -37,9 +37,9 @@ public:
     // constructor reads and builds the shader
     Shader();
 
-    void loadStr(const GLchar *vertexStr, const GLchar *fragmentStr);
+    void loadStr(const GLchar *vertexStr, const GLchar *fragmentStr, const GLchar *geometryStr = NULL);
 
-    void loadFile(const GLchar *vertexPath, const GLchar *fragmentPath);
+    void loadFile(const GLchar *vertexPath, const GLchar *fragmentPath, const GLchar *geometryStr = NULL);
 
     // use/activate the shader
     void use();

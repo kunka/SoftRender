@@ -55,7 +55,7 @@ if (APPLE)
     link_directories(extrnal/zlib/mac)
 endif (APPLE)
 
-add_executable(gl ${SOURCE_FILES})
+add_executable(gl ${SOURCE_FILES} samples/GeometryShader2.cpp samples/GeometryShader2.h)
 
 target_link_libraries(gl glfw3.a assimp.a zlibstatic.a)
 

@@ -265,6 +265,7 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
             lightShader.use();
             model = glm::mat4();
             model = glm::translate(model, lightPos);
+            model = glm::translate(model, vec3(0, 0, -10));
             model = glm::scale(model, glm::vec3(0.2, 0.2f, 0.2f));
             lightShader.setMat4("projection", projection);
             lightShader.setMat4("model", model);
@@ -310,7 +311,7 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
         shader.setMat4("view", view);
         shader.setVec3("viewPos", cameraPos);
         model = glm::mat4();
-        model = glm::translate(model, vec3(0, -10, 0));
+        model = glm::translate(model, vec3(0, -10, -10));
         shader.setMat4("model", model);
         modelObject->draw(shader);
     }
