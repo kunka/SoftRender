@@ -1,13 +1,13 @@
 //
-// Created by huangkun on 2018/4/13.
+// Created by huangkun on 2018/5/2.
 //
 
-#ifndef GL_SHADOWMAPPING_H
-#define GL_SHADOWMAPPING_H
+#ifndef GL_POINTSHADOWS_H
+#define GL_POINTSHADOWS_H
 
 #include "CustomDraw.h"
 
-TEST_NODE_BEGIN(ShadowMapping)
+TEST_NODE_BEGIN(PointShadows)
 
         unsigned int texture2;
         unsigned int planeVAO;
@@ -15,7 +15,6 @@ TEST_NODE_BEGIN(ShadowMapping)
         unsigned int planeEBO;
         unsigned int quadVAO;
         unsigned int quadVBO;
-        unsigned int depthMapFBO;
         Shader depthShader;
         Shader shadowShader;
 
@@ -23,9 +22,11 @@ TEST_NODE_BEGIN(ShadowMapping)
 
         unsigned int renderType;
         vec3 lightPos;
+        unsigned int depthMapFBO[6];
+        mat4 lightViewMatrix[6];
         unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
-TEST_NODE_END(ShadowMapping)
+TEST_NODE_END(PointShadows)
 
 
-#endif //GL_SHADOWMAPPING_H
+#endif //GL_POINTSHADOWS_H

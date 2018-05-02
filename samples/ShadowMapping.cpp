@@ -6,8 +6,6 @@
 
 TEST_NODE_IMP_BEGIN
 
-    unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-
     ShadowMapping::ShadowMapping() {
         const char *vert = R"(
 #version 330 core

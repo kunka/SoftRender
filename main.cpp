@@ -44,6 +44,7 @@
 #include "samples/BlinnPhongLighting.h"
 #include "samples/GammaCorrection.h"
 #include "samples/ShadowMapping.h"
+#include "samples/PointShadows.h"
 
 #include "alg/PathFinding.h"
 
@@ -89,11 +90,12 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(AdvancedData);
 //        CREATE_TEST_SCENE(AdvancedGLSL);
 //        CREATE_TEST_SCENE(GeometryShader);
-        CREATE_TEST_SCENE(GeometryShader2);
+//        CREATE_TEST_SCENE(GeometryShader2);
 //        CREATE_TEST_SCENE(AntiAliasing);
 //        CREATE_TEST_SCENE(BlinnPhongLighting);
 //        CREATE_TEST_SCENE(GammaCorrection);
 //        CREATE_TEST_SCENE(ShadowMapping);
+        CREATE_TEST_SCENE(PointShadows);
 
 //        CREATE_TEST_SCENE(PathFinding);
 
