@@ -52,7 +52,7 @@ void CustomDraw::fixedUpdate(float delta) {
     }
 
     if (input->isKeyPressed(GLFW_KEY_P))
-        log("cameraPos(%.0f,%.0f,%.0f), cameraDir(%.02f,%.02f,%.02f), cameraUp(%.0f,%.0f,%.0f)", cameraPos.x, cameraPos.y,
+        log("cameraPos(%.1f,%.1f,%.1f), cameraDir(%.02f,%.02f,%.02f), cameraUp(%.1f,%.1f,%.1f)", cameraPos.x, cameraPos.y,
             cameraPos.z, cameraDir.x, cameraDir.y, cameraDir.z, cameraUp.x, cameraUp.y, cameraUp.z);
 }
 

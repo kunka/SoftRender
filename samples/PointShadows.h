@@ -15,6 +15,7 @@ TEST_NODE_BEGIN(PointShadows)
         unsigned int planeEBO;
         unsigned int quadVAO;
         unsigned int quadVBO;
+        unsigned int depthMapFBO;
         Shader depthShader;
         Shader shadowShader;
 
@@ -22,8 +23,6 @@ TEST_NODE_BEGIN(PointShadows)
 
         unsigned int renderType;
         vec3 lightPos;
-        unsigned int depthMapFBO[6];
-        mat4 lightViewMatrix[6];
         unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
 TEST_NODE_END(PointShadows)

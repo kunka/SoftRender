@@ -45,6 +45,7 @@
 #include "samples/GammaCorrection.h"
 #include "samples/ShadowMapping.h"
 #include "samples/PointShadows.h"
+#include "samples/NormalMapping.h"
 
 #include "alg/PathFinding.h"
 
@@ -95,7 +96,8 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(BlinnPhongLighting);
 //        CREATE_TEST_SCENE(GammaCorrection);
 //        CREATE_TEST_SCENE(ShadowMapping);
-        CREATE_TEST_SCENE(PointShadows);
+//        CREATE_TEST_SCENE(PointShadows);
+        CREATE_TEST_SCENE(NormalMapping);
 
 //        CREATE_TEST_SCENE(PathFinding);
 

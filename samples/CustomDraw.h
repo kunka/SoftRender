@@ -51,6 +51,7 @@ protected:
     unsigned int VBO;
     unsigned int EBO;
     unsigned int lightVAO;
+    unsigned int lightVBO;
     unsigned int texture;
     mat4 model;
     mat4 view;
