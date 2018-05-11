@@ -48,6 +48,8 @@
 #include "samples/NormalMapping.h"
 
 #include "alg/PathFinding.h"
+#include <alg/FunctionDraw.h>
+#include "alg/Quaternion.h"
 
 
 #define CREATE_TEST_SCENE(__CLASS__) \
@@ -97,9 +99,11 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(GammaCorrection);
 //        CREATE_TEST_SCENE(ShadowMapping);
 //        CREATE_TEST_SCENE(PointShadows);
-        CREATE_TEST_SCENE(NormalMapping);
+//        CREATE_TEST_SCENE(NormalMapping);
 
 //        CREATE_TEST_SCENE(PathFinding);
+//        CREATE_TEST_SCENE(FunctionDraw);
+        CREATE_TEST_SCENE(Quaternion);
 
         return true;
     });

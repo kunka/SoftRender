@@ -41,8 +41,8 @@ void CustomDraw::fixedUpdate(float delta) {
         yaw += deltaP.x * sensitivity;
         pitch += deltaP.y * sensitivity;
 
-        if (pitch > 89.0f) pitch = 45.0f;
-        if (pitch < -89.0f) pitch = -45.0f;
+        if (pitch > 89.0f) pitch = 89.0f;
+        if (pitch < -89.0f) pitch = -89.0f;
 
         glm::vec3 front;
         front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
@@ -52,7 +52,8 @@ void CustomDraw::fixedUpdate(float delta) {
     }
 
     if (input->isKeyPressed(GLFW_KEY_P))
-        log("cameraPos(%.1f,%.1f,%.1f), cameraDir(%.02f,%.02f,%.02f), cameraUp(%.1f,%.1f,%.1f)", cameraPos.x, cameraPos.y,
+        log("cameraPos(%.1f,%.1f,%.1f), cameraDir(%.02f,%.02f,%.02f), cameraUp(%.1f,%.1f,%.1f)", cameraPos.x,
+            cameraPos.y,
             cameraPos.z, cameraDir.x, cameraDir.y, cameraDir.z, cameraUp.x, cameraUp.y, cameraUp.z);
 }
 
