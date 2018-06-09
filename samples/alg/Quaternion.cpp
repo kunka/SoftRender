@@ -193,9 +193,9 @@ void main()
     }
 
 // Rotate Matrix
-// cos(theta) +(1-cos(theta))xx  (1-cos(theta)xy-sin(theta)z  (1-cos(theta)xz+sin(theta)y
-// (1-cos(theta)yx+ sin(theta)z  cos(theta) +(1-cos(theta)yy   (1-cos(theta)yz-sin(theta)x
-// (1-cos(theta)zx-sin(theta)y   (1-cos(theta))zy+sin(theta)x  cos(theta)+(1-cos(theta))zz
+// [ cos(theta)+(1-cos(theta))xx  (1-cos(theta))xy-sin(theta)z  (1-cos(theta))xz+sin(theta)y ]
+// | (1-cos(theta)yx+sin(theta)z  cos(theta) +(1-cos(theta))yy  (1-cos(theta))yz-sin(theta)x |
+// [ (1-cos(theta)zx-sin(theta)y  (1-cos(theta))zy+sin(theta)x  cos(theta)+(1-cos(theta))zz  ]
     void Quaternion::slerpT(vec3 &var, vec3 from, vec3 to, float dur) {
         tickers.push_back([=, &var](float delta) mutable {
             elapsed4 += delta;
