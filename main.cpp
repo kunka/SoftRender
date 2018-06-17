@@ -52,6 +52,10 @@
 #include "alg/Quaternion.h"
 
 
+#include "softrender/Rast2DPoint.h"
+#include "softrender/Rast2DLine.h"
+
+
 #define CREATE_TEST_SCENE(__CLASS__) \
 Scene *scene = Scene::create(); \
 gltest::__CLASS__ *node = new gltest::__CLASS__(); \
@@ -62,7 +66,8 @@ int main(int argc, char **argv) {
     auto app = Application::getInstance();
     app->applicationDidFinishLaunching([&]() {
 #ifdef __APPLE__
-        auto glView = GLView::createWithRect(0, 0, 400, 300);
+//        auto glView = GLView::createWithRect(0, 0, 400, 300);
+        auto glView = GLView::createWithRect(0, 0, 512, 512);
 #else
         auto glView = GLView::createWithRect(0, 0, 600, 450);
 #endif
@@ -103,7 +108,11 @@ int main(int argc, char **argv) {
 
 //        CREATE_TEST_SCENE(PathFinding);
 //        CREATE_TEST_SCENE(FunctionDraw);
-        CREATE_TEST_SCENE(Quaternion);
+//        CREATE_TEST_SCENE(Texture);
+
+
+//        CREATE_TEST_SCENE(Rast2DPoint);
+        CREATE_TEST_SCENE(Rast2DLine);
 
         return true;
     });

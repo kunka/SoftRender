@@ -55,7 +55,7 @@ if (APPLE)
     link_directories(extrnal/zlib/mac)
 endif (APPLE)
 
-add_executable(gl ${SOURCE_FILES} samples/NormalMapping.cpp samples/NormalMapping.h samples/alg/FunctionDraw.cpp samples/alg/FunctionDraw.h samples/alg/Quaternion.cpp samples/alg/Quaternion.h)
+add_executable(gl ${SOURCE_FILES} samples/NormalMapping.cpp samples/NormalMapping.h samples/alg/FunctionDraw.cpp samples/alg/FunctionDraw.h samples/alg/Quaternion.cpp samples/alg/Quaternion.h samples/softrender/SoftRender.cpp samples/softrender/SoftRender.h samples/softrender/Rast2DPoint.cpp samples/softrender/Rast2DPoint.h samples/softrender/Rast2DLine.cpp samples/softrender/Rast2DLine.h)
 
 target_link_libraries(gl glfw3.a assimp.a zlibstatic.a)
 

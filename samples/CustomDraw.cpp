@@ -66,6 +66,11 @@ unsigned int CustomDraw::loadTexture(const std::string &path) {
     int width, height, nrComponents;
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
     if (data) {
+        int i, j;
+        for (i = 0; i < 12; i++) {
+            log("v = %d", (unsigned int) data[i]);
+        }
+
         GLenum format;
         if (nrComponents == 1)
             format = GL_RED;
