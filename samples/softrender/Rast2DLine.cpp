@@ -8,14 +8,7 @@
 TEST_NODE_IMP_BEGIN
 
     Rast2DLine::Rast2DLine() {
-
-    }
-
-    void Rast2DLine::draw(const mat4 &transform) {
-        memset(texData, 0, TEX_WIDTH * TEX_HEIGHT * 4);
-        int i, j;
-
-        std::vector<vec2> lines = {
+        lines = {
                 vec2(TEX_WIDTH / 4, TEX_HEIGHT / 4),
                 vec2(TEX_WIDTH / 4 * 3, TEX_HEIGHT / 4),
                 vec2(TEX_WIDTH / 4 * 3, TEX_HEIGHT / 4),
@@ -39,7 +32,17 @@ TEST_NODE_IMP_BEGIN
                 vec2(TEX_WIDTH / 8, TEX_HEIGHT / 4 * 3),
                 vec2(TEX_WIDTH / 4 * 3 + TEX_WIDTH / 8, TEX_HEIGHT / 4 * 3),
         };
-        for (i = 0; i < lines.size(); i += 2) {
+        // random
+        for (int i = 0; i < 20; i++) {
+            lines.push_back(vec2(TEX_WIDTH * (rand() % 100 / 100.0f), TEX_HEIGHT * (rand() % 100 / 100.0f)));
+            lines.push_back(vec2(TEX_WIDTH * (rand() % 100 / 100.0f), TEX_HEIGHT * (rand() % 100 / 100.0f)));
+        }
+    }
+
+    void Rast2DLine::draw(const mat4 &transform) {
+        memset(texData, 0, TEX_WIDTH * TEX_HEIGHT * 4);
+
+        for (int i = 0; i < lines.size(); i += 2) {
             vec2 p1 = lines[i];
             vec2 p2 = lines[i + 1];
             if (clip_a_line(p1, p2, TEX_WIDTH / 4, TEX_WIDTH / 4 * 3, TEX_HEIGHT / 4, TEX_HEIGHT / 4 * 3)) {
@@ -118,19 +121,25 @@ TEST_NODE_IMP_BEGIN
         int steps;
         if (abs(dy) > abs(dx)) {
             steps = abs((int) dy);
-            stepY = p2.y > p1.y ? 1 : -1;
-            stepX = dx == 0 ? 0 : dy / dx;
+            stepY = dy > 0 ? 1 : -1;
+            stepX = dx > 0 ? fabs(dx / dy) : -fabs(dx / dy);
         } else {
             steps = abs((int) dx);
-            stepX = p2.x > p1.x ? 1 : -1;
-            stepY = dx == 0 ? 0 : dy / dx;
+            stepX = dx > 0 ? 1 : -1;
+            if (dx == 0)
+                stepY = 0;
+            else
+                stepY = dy > 0 ? fabs(dy / dx) : -fabs(dy / dx);
         }
         float x = p1.x, y = p1.y;
-        setPixel(x, y, color);
+        setPixel(x, y, vec3(0, 255, 0));
         for (int k = 1; k <= steps; k++) {
             x += stepX;
             y += stepY;
-            setPixel(x, y, color);
+            if (k == steps) {
+                setPixel(x, y, vec3(0, 0, 255));
+            } else
+                setPixel(x, y, color);
         }
     }
 
