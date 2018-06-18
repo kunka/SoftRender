@@ -12,6 +12,8 @@
 
 TEST_NODE_BEGIN(SoftRender)
 
+        vec3 interp(const vec3 &v1, const vec3 &v2, float t);
+
     protected:
         unsigned int genTexture();
 

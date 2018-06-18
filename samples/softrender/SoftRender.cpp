@@ -119,4 +119,9 @@ void main()
         setPixel(x, y, vec4(color, 255));
     }
 
+    vec3 SoftRender::interp(const vec3 &v1, const vec3 &v2, float t) {
+        return vec3(v1.x + (v2.x - v1.x) * t, v1.y + (v2.y - v1.y) * t, v1.z + (v2.z - v1.z) * t);
+    }
+
+
 TEST_NODE_IMP_END

@@ -113,8 +113,7 @@ TEST_NODE_IMP_BEGIN
         return code;
     }
 
-    void Rast2DLine::dda_line(const vec2 &p1, const vec2 &p2) {
-        vec3 color(255, 0, 0);
+    void Rast2DLine::dda_line(const vec2 &p1, const vec2 &p2, const vec3 &color, const vec3 &color2) {
         float dy = p2.y - p1.y;
         float dx = p2.x - p1.x;
         float stepX, stepY;
@@ -132,12 +131,12 @@ TEST_NODE_IMP_BEGIN
                 stepY = dy > 0 ? fabs(dy / dx) : -fabs(dy / dx);
         }
         float x = p1.x, y = p1.y;
-        setPixel(x, y, vec3(0, 255, 0));
+        setPixel(x, y, color);
         for (int k = 1; k <= steps; k++) {
             x += stepX;
             y += stepY;
             if (k == steps) {
-                setPixel(x, y, vec3(0, 0, 255));
+                setPixel(x, y, interp(color, color2, 1.0f * k / steps));
             } else
                 setPixel(x, y, color);
         }
