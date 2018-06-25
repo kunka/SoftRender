@@ -18,6 +18,8 @@ TEST_NODE_BEGIN2(Rast2DLine, SoftRender)
         int encode(const vec2 &p, int minX, int maxX, int minY, int maxY);
 
         std::vector<vec2> lines;
+        Rect clipRect;
+        bool clipLine = false;
 TEST_NODE_END(Rast2DLine)
 
 #endif //GL_RASTLINE_H

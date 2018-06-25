@@ -37,27 +37,24 @@ TEST_NODE_IMP_BEGIN
             lines.push_back(vec2(TEX_WIDTH * (rand() % 100 / 100.0f), TEX_HEIGHT * (rand() % 100 / 100.0f)));
             lines.push_back(vec2(TEX_WIDTH * (rand() % 100 / 100.0f), TEX_HEIGHT * (rand() % 100 / 100.0f)));
         }
+
+        clipRect.setRect(TEX_WIDTH / 4, TEX_WIDTH / 4, TEX_HEIGHT / 2, TEX_HEIGHT / 2);
     }
 
     void Rast2DLine::draw(const mat4 &transform) {
         memset(texData, 0, TEX_WIDTH * TEX_HEIGHT * 4);
 
+        clipLine = Input::getInstance()->isKeyPressed(GLFW_KEY_C);
         for (int i = 0; i < lines.size(); i += 2) {
             vec2 p1 = lines[i];
             vec2 p2 = lines[i + 1];
-            if (clip_a_line(p1, p2, TEX_WIDTH / 4, TEX_WIDTH / 4 * 3, TEX_HEIGHT / 4, TEX_HEIGHT / 4 * 3)) {
-//            if (clip_a_line(p1, p2, TEX_WIDTH / 3, TEX_WIDTH / 3 * 2, TEX_HEIGHT / 3, TEX_HEIGHT / 3 * 2)) {
-                dda_line(p1, p2);
-            }
+            dda_line(p1, p2, vec3(255, 0, 0), vec3(0, 255, 0));
         }
 
         SoftRender::draw(transform);
     }
 
     bool Rast2DLine::clip_a_line(vec2 &p1, vec2 &p2, int minX, int maxX, int minY, int maxY) {
-        if (!Input::getInstance()->isKeyPressed(GLFW_KEY_C)) {
-            return true;
-        }
         float dy = p2.y - p1.y;
         float dx = p2.x - p1.x;
         float m = dx == 0 ? 0 : dy / dx;
@@ -113,7 +110,14 @@ TEST_NODE_IMP_BEGIN
         return code;
     }
 
-    void Rast2DLine::dda_line(const vec2 &p1, const vec2 &p2, const vec3 &color, const vec3 &color2) {
+    void Rast2DLine::dda_line(const vec2 &pa, const vec2 &pb, const vec3 &color, const vec3 &color2) {
+        vec2 p1 = pa;
+        vec2 p2 = pb;
+
+        if (clipLine &&
+            !clip_a_line(p1, p2, clipRect.getMinX(), clipRect.getMaxX(), clipRect.getMinY(), clipRect.getMaxY())) {
+            return;
+        }
         float dy = p2.y - p1.y;
         float dx = p2.x - p1.x;
         float stepX, stepY;
@@ -136,9 +140,9 @@ TEST_NODE_IMP_BEGIN
             x += stepX;
             y += stepY;
             if (k == steps) {
-                setPixel(x, y, interp(color, color2, 1.0f * k / steps));
+                setPixel(x, y, color2);
             } else
-                setPixel(x, y, color);
+                setPixel(x, y, interp(color, color2, 1.0f * k / steps));
         }
     }
 

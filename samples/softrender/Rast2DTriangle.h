@@ -12,7 +12,8 @@ TEST_NODE_BEGIN2(Rast2DTriangle, Rast2DLine)
 
     protected:
 
-        void fill(const vec2 &p1, const vec2 &p2, const vec2 &p3, const vec3 &color = vec3(255, 0, 0));
+        void fill(const vec2 &p1, const vec2 &p2, const vec2 &p3, const vec3 &color = vec3(255, 0, 0),
+                  const vec3 &color2 = vec3(255, 0, 0), const vec3 &color3 = vec3(255, 0, 0));
 
         std::vector<vec2> triangles;
 TEST_NODE_END(Rast2DTriangle)

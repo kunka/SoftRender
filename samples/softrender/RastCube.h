@@ -8,12 +8,14 @@
 #include "Rast2DTriangle.h"
 #include "Math.h"
 
-TEST_NODE_BEGIN2(Transform2D, Rast2DTriangle)
+TEST_NODE_BEGIN2(RastCube, Rast2DTriangle)
 
     protected:
         std::vector<float> vertices;
 
-TEST_NODE_END(Transform2D)
+        bool cvvCull(vec4 triangle[3]);
+        bool inCvv(const vec4& vector);
+TEST_NODE_END(RastCube)
 
 
 #endif //GL_TRANSFORM2D_H
