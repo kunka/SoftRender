@@ -53,9 +53,10 @@
 
 
 #include "softrender/Rast2DPoint.h"
-//#include "softrender/Rast2DLine.h"
+#include "softrender/Rast2DLine.h"
 #include "softrender/Rast2DTriangle.h"
 #include "softrender/RastCube.h"
+#include "softrender/TextureCube.h"
 
 
 #define CREATE_TEST_SCENE(__CLASS__) \
@@ -116,7 +117,8 @@ int main(int argc, char **argv) {
 //        CREATE_TEST_SCENE(Rast2DPoint);
 //        CREATE_TEST_SCENE(Rast2DLine);
 //        CREATE_TEST_SCENE(Rast2DTriangle);
-        CREATE_TEST_SCENE(RastCube);
+//        CREATE_TEST_SCENE(RastCube);
+        CREATE_TEST_SCENE(TextureCube);
 
         return true;
     });

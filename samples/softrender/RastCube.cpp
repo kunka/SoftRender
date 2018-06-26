@@ -73,17 +73,19 @@ TEST_NODE_IMP_BEGIN
         m.mult(view);
         m.mult(projection);
         vec2 last;
-        for (int i = 0; i < vertices.size(); i += 6 * 3) {
+        int column = 6;
+        for (int i = 0; i < vertices.size(); i += column * 3) {
             vec4 triangle[3];
             vec3 color[3];
             for (int j = 0; j < 3; j++) {
-                vec4 p = vec4(vertices.at(i + j * 6), vertices.at(i + j * 6 + 1), vertices.at(i + j * 6 + 2), 1.0);
+                vec4 p = vec4(vertices.at(i + j * column), vertices.at(i + j * column + 1),
+                              vertices.at(i + j * column + 2), 1.0);
                 // 模型 --> 世界 --> 相机空间 --> 齐次裁剪空间，xyz ~ [-w，w], w = Z(相机空间)
                 Vector v = m.apply(Vector(p.x, p.y, p.z));
                 p = vec4(v.x, v.y, v.z, v.w);
                 triangle[j] = p;
-                color[j] = vec3(vertices.at(i + j * 6 + 3) * 255, vertices.at(i + j * 6 + 4) * 255,
-                                vertices.at(i + j * 6 + 5) * 255);
+                color[j] = vec3(vertices.at(i + j * column + 3) * 255, vertices.at(i + j * column + 4) * 255,
+                                vertices.at(i + j * column + 5) * 255);
             }
             // CVV裁剪
             if (cvvCull(triangle)) {

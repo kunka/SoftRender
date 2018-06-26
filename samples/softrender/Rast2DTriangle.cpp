@@ -91,7 +91,7 @@ TEST_NODE_IMP_BEGIN
             float dx = max.x - min.x;
             vec2 midP;
             midP.y = mid.y;
-            vec3 c = interp(minColor, maxColor, midP.y / dy);
+            vec3 c = interp(minColor, maxColor, (midP.y - min.y) / dy);
             if (dx == 0) {
                 midP.x = max.x;
             } else {
@@ -101,6 +101,7 @@ TEST_NODE_IMP_BEGIN
             fill(mid, midP, min, midColor, c, minColor);
         }
     }
+
 
     Rast2DTriangle::~Rast2DTriangle() {
     }

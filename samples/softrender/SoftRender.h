@@ -28,6 +28,8 @@ TEST_NODE_BEGIN(SoftRender)
 
         vec3 interp(const vec3 &v1, const vec3 &v2, float t);
 
+        vec2 interp(const vec2 &v1, const vec2 &v2, float t);
+
         float interp(float f1, float f2, float t);
 
     protected:
