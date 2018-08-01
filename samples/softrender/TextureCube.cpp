@@ -55,12 +55,21 @@ TEST_NODE_IMP_BEGIN
         };
 
         int nrComponents;
-        textureData = stbi_load("../res/container.jpg", &textureWidth, &textureHeight, &nrComponents, 0);
-        log("%d", nrComponents);
+//        textureData = stbi_load("../res/net.jpg", &textureWidth, &textureHeight, &nrComponents, 0);
+        stbi_set_flip_vertically_on_load(true); // flipY
+        textureData = stbi_load("../res/smile.jpg", &textureWidth, &textureHeight, &nrComponents, 0);
+        log("width=%d,height=%d,channel=%d", textureWidth, textureHeight, nrComponents);
+        depthBuff = new float[textureWidth * textureHeight];
+
+//        clipRect.setRect(TEX_WIDTH / 4, TEX_WIDTH / 4, TEX_HEIGHT / 2, TEX_HEIGHT / 2);
+        clipRect.setRect(0, 0, TEX_WIDTH, TEX_HEIGHT);
+        clipLine = true;
     }
 
     void TextureCube::draw(const mat4 &transform) {
         memset(texData, 0, TEX_WIDTH * TEX_HEIGHT * 4);
+        for (int i = 0; i < textureWidth * textureHeight; i++)
+            depthBuff[i] = INT_MAX;
 
         Matrix model;
         model.rotate(Vector(0, 1, 0), radians(30.0f));
@@ -80,21 +89,35 @@ TEST_NODE_IMP_BEGIN
         int column = 5;
         for (int i = 0; i < vertices.size(); i += column * 3) {
             vec4 triangle[3];
+            vec3 triangleOrigin[3];
             vec2 uv[3];
             for (int j = 0; j < 3; j++) {
                 vec4 p = vec4(vertices.at(i + j * column), vertices.at(i + j * column + 1),
                               vertices.at(i + j * column + 2), 1.0);
                 // 模型 --> 世界 --> 相机空间 --> 齐次裁剪空间，xyz ~ [-w，w], w = Z(相机空间)
                 Vector v = m.apply(Vector(p.x, p.y, p.z));
-                p = vec4(v.x, v.y, v.z, v.w);
-                triangle[j] = p;
+                triangle[j] = vec4(v.x, v.y, v.z, v.w);
                 uv[j] = vec2(vertices.at(i + j * column + 3), vertices.at(i + j * column + 4));
+
+                Vector v0 = model.apply(Vector(p.x, p.y, p.z));
+                triangleOrigin[j] = vec3(v0.x, v0.y, v0.z);
             }
             // CVV裁剪
             if (cvvCull(triangle)) {
                 log("cvv cull");
                 continue;
             }
+            // 背面剔除
+            vec3 cameraP = vec3(cameraPos.x, cameraPos.y, cameraPos.z);
+            vec3 v1 = triangleOrigin[1] - triangleOrigin[0];
+            vec3 v2 = triangleOrigin[2] - triangleOrigin[0];
+            vec3 normal = glm::cross(v1, v2);
+            vec3 v0 = vec3(triangleOrigin[0]) - cameraP;
+            if (glm::dot(v0, normal) >= 0) {
+//                log("backface cull");
+//                continue;
+            }
+
             for (int j = 0; j < 3; j++) {
                 vec4 p = triangle[j];
                 // CVV裁剪
@@ -103,10 +126,10 @@ TEST_NODE_IMP_BEGIN
 //                    continue;
 //                }
                 // （透视除法） --> NDC空间
-                p.x /= p.w;
-                p.y /= p.w;
-                p.z /= p.w;
-                p.w = 1.0;
+                p.x /= p.w; // [-1,1]
+                p.y /= p.w; // [-1,1]
+                p.z /= p.w; // [-1,1]
+//                p.w = 1.0;
                 // NDC空间 --> 窗口坐标（视口变换）
                 p.x = (p.x + 1.0f) / 2.0f * TEX_WIDTH;
                 p.y = (p.y + 1.0f) / 2.0f * TEX_HEIGHT;
@@ -115,7 +138,9 @@ TEST_NODE_IMP_BEGIN
                 // 光照，深度测试
                 triangle[j] = p;
             }
-            fill(vec2(triangle[0]), vec2(triangle[1]), vec2(triangle[2]), uv[0], uv[1], uv[2]);
+            fill(triangle[0], triangle[1], triangle[2], uv[0], uv[1], uv[2]);
+//            fill(triangle[0], triangle[1], triangle[2], uv[0] / triangle[0].w, uv[1] / triangle[1].w,
+//                 uv[2] / triangle[2].w);
         }
         SoftRender::draw(transform);
     }
@@ -135,26 +160,26 @@ TEST_NODE_IMP_BEGIN
     }
 
     struct VertexCoords {
-        vec2 p;
+        vec4 p;
         vec2 uv;
     };
 
-    void TextureCube::fill(const vec2 &p1, const vec2 &p2, const vec2 &p3, const vec2 &uv,
+    void TextureCube::fill(const vec4 &p1, const vec4 &p2, const vec4 &p3, const vec2 &uv,
                            const vec2 &uv2, const vec2 &uv3) {
         std::vector<VertexCoords> ps = {{p1, uv},
                                         {p2, uv2},
                                         {p3, uv3}};
         std::sort(ps.begin(), ps.end(), [](const VertexCoords &a, const VertexCoords &b) { return a.p.y > b.p.y; });
-        vec2 max = ps[0].p;
-        vec2 mid = ps[1].p;
-        vec2 min = ps[2].p;
+        vec4 max = ps[0].p;
+        vec4 mid = ps[1].p;
+        vec4 min = ps[2].p;
         vec2 maxUV = ps[0].uv;
         vec2 midUV = ps[1].uv;
         vec2 minUV = ps[2].uv;
 
         if (mid.y == min.y || max.y == mid.y) {
             int dy = max.y - min.y;
-            vec2 a, b;
+            vec4 a, b;
             a.y = b.y = max.y;
             vec2 uv1, uv2;
             if (max.y == mid.y) {
@@ -180,9 +205,11 @@ TEST_NODE_IMP_BEGIN
         } else {
             float dy = max.y - min.y;
             float dx = max.x - min.x;
-            vec2 midP;
+            float dz = max.z - min.z;
+            vec4 midP;
             midP.y = mid.y;
             vec2 uv = interp(minUV, maxUV, (midP.y - min.y) / dy);
+            midP.z = interp(min.z, max.z, (midP.y - min.y) / dy);
             if (dx == 0) {
                 midP.x = max.x;
             } else {
@@ -193,14 +220,30 @@ TEST_NODE_IMP_BEGIN
         }
     }
 
-    void TextureCube::dda_line(const vec2 &pa, const vec2 &pb, const vec2 &uv, const vec2 &uv2) {
-        vec2 p1 = pa;
-        vec2 p2 = pb;
-
+    void TextureCube::dda_line(const vec4 &pa, const vec4 &pb, const vec2 &uv1, const vec2 &uv2) {
+        vec4 p1 = pa;
+        vec4 p2 = pb;
+        vec2 p11 = pa;
+        vec2 p22 = pb;
         if (clipLine &&
-            !clip_a_line(p1, p2, clipRect.getMinX(), clipRect.getMaxX(), clipRect.getMinY(), clipRect.getMaxY())) {
+            !clip_a_line(p11, p22, clipRect.getMinX(), clipRect.getMaxX(), clipRect.getMinY(), clipRect.getMaxY())) {
             return;
         }
+        p1.x = p11.x;
+        p1.y = p11.y;
+        p2.x = p22.x;
+        p2.y = p22.y;
+        vec2 uv11 = uv1;
+        vec2 uv12 = uv2;
+        if (pb.x != pa.x) {
+            uv11.x = interp(uv1.x, uv2.x, (p11.x - pa.x) / (pb.x - pa.x));
+            uv12.x = interp(uv1.x, uv2.x, (p22.x - pa.x) / (pb.x - pa.x));
+        }
+        if (pb.y != pa.y) {
+            uv11.y = interp(uv1.y, uv2.y, (p11.y - pa.y) / (pb.y - pa.y));
+            uv12.y = interp(uv1.y, uv2.y, (p22.y - pa.y) / (pb.y - pa.y));
+        }
+
         float dy = p2.y - p1.y;
         float dx = p2.x - p1.x;
         float stepX, stepY;
@@ -218,21 +261,40 @@ TEST_NODE_IMP_BEGIN
                 stepY = dy > 0 ? fabs(dy / dx) : -fabs(dy / dx);
         }
         float x = p1.x, y = p1.y;
-        setPixel(x, y, sample(uv.x, uv.y));
+//        setPixel(x, y, 1.0f / p1.z, sample(uv.x, uv.y));
+        setPixel(x, y, p1.z, sample(uv11.x, uv11.y));
         for (int k = 1; k <= steps; k++) {
             x += stepX;
             y += stepY;
-            if (k == steps) {
-                setPixel(x, y, sample(uv2.x, uv2.y));
-            } else {
-                vec2 uv0 = interp(uv, uv2, 1.0f * k / steps);
-                setPixel(x, y, sample(uv0.x, uv0.y));
+            float f = 1.0f * k / steps;
+            float z = interp(p1.z, p2.z, f);
+            vec2 uv0 = interp(uv11, uv12, f);
+//            setPixel(x, y, 1.0f / z, sample(uv0.x, uv0.y));
+            setPixel(x, y, z, sample(uv0.x, uv0.y));
+        }
+    }
+
+    void TextureCube::setPixel(int x, int y, float depth, const vec4 &color) {
+        if (x >= 0 && y >= 0 && x < TEX_WIDTH && y < TEX_HEIGHT) {
+            int index = y * textureWidth + x;
+            if (depth < depthBuff[index]) {
+                depthBuff[index] = depth;
+                texData[y][x][0] = (GLubyte) color.r;
+                texData[y][x][1] = (GLubyte) color.g;
+                texData[y][x][2] = (GLubyte) color.b;
+                texData[y][x][3] = (GLubyte) color.a;
+//            log("%f",depth);
             }
         }
     }
 
+    void TextureCube::setPixel(int x, int y, float depth, const vec3 &color) {
+        setPixel(x, y, depth, vec4(color, 255));
+    }
+
     TextureCube::~TextureCube() {
         stbi_image_free(textureData);
+        delete[] depthBuff;
     }
 
 TEST_NODE_IMP_END

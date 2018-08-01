@@ -99,6 +99,12 @@ Vector Matrix::apply(const Vector &v) {
     return ret;
 }
 
+/*
+ * s 0 0 0
+ * 0 s 0 0
+ * 0 0 s 0
+ * 0 0 0 1
+ */
 void Matrix::scale(float scale) {
     int i, j;
     for (i = 0; i < 4; i++)
@@ -106,6 +112,12 @@ void Matrix::scale(float scale) {
             m[i][j] *= scale;
 }
 
+/*
+ * 1 0 0 x
+ * 0 1 0 y
+ * 0 0 1 z
+ * 0 0 0 1
+ */
 void Matrix::translate(const Vector &offset) {
     setIdentity();
 //    Matrix t;
@@ -118,6 +130,12 @@ void Matrix::translate(const Vector &offset) {
     m[3][2] = offset.z;
 }
 
+/*
+ * cos(theta)+(1-cos(theta))xx  (1-cos(theta))xy-sin(theta)z  (1-cos(theta))xz+sin(theta)y  0
+ * (1-cos(theta)yx+sin(theta)z  cos(theta) +(1-cos(theta))yy  (1-cos(theta))yz-sin(theta)x  0
+ * (1-cos(theta)zx-sin(theta)y  (1-cos(theta))zy+sin(theta)x  cos(theta)+(1-cos(theta))zz   0
+ *            0                              0                               0              1
+*/
 void Matrix::rotate(const Vector &pivot, float theta) {
     float c = cos(theta);
     float s = sin(theta);
@@ -135,9 +153,16 @@ void Matrix::rotate(const Vector &pivot, float theta) {
     m[1][2] = (1 - c) * y * z - s * x;
     m[2][0] = (1 - c) * z * x - s * y;
     m[2][1] = (1 - c) * z * y + s * x;
+
     m[2][2] = c + (1 - c) * z * z;
 }
 
+/*
+ *  u.x  u.y  u.z  -u.dot(eye)
+ *  v.x  v.y  v.z  -v.dot(eye)
+ *  n.x  n.y  n.z  -n.dot(eye)
+ *   0    0    0        1
+ */
 void Matrix::lookAt(const Vector &eye, const Vector &target, const Vector &up) {
     setZero();
     Vector n = target;
@@ -167,6 +192,12 @@ void Matrix::lookAt(const Vector &eye, const Vector &target, const Vector &up) {
     m[3][3] = 1.0f;
 }
 
+/*
+ * 1/(asp * tan(fovy/2))       0            0         0
+ *          0             1/tan(fovy/2)     0         0
+ *          0                  0          n+f/n-f  2nf/n-f
+ *          0                  0            1        0
+ */
 void Matrix::perspective(float fovy, float aspect, float near, float far) {
     setZero();
     float t = 1.0f / tan(fovy / 2);
