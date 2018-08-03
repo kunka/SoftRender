@@ -97,6 +97,15 @@ TEST_NODE_IMP_BEGIN
         }
     }
 
+    /*
+     *        8
+     *     -------
+     *    |       |
+     *  1 |   0   | 2
+     *    |       |
+     *     -------
+     *        4
+     */
     int Rast2DLine::encode(const vec2 &p, int minX, int maxX, int minY, int maxY) {
         int code = 0;
         if (p.x < minX)
@@ -144,6 +153,7 @@ TEST_NODE_IMP_BEGIN
             } else
                 setPixel(x, y, interp(color, color2, 1.0f * k / steps));
         }
+        setPixel(p2.x, p2.y, color2);
     }
 
     Rast2DLine::~Rast2DLine() {

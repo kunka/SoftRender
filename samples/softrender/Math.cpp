@@ -113,6 +113,18 @@ void Matrix::scale(float scale) {
 }
 
 /*
+ * s 0 0 0
+ * 0 s 0 0
+ * 0 0 s 0
+ * 0 0 0 1
+ */
+void Matrix::scale(const Vector& scale) {
+    m[0][0] *= scale.x;
+    m[1][1] *= scale.y;
+    m[2][2] *= scale.z;
+}
+
+/*
  * 1 0 0 x
  * 0 1 0 y
  * 0 0 1 z

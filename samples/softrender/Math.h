@@ -7,11 +7,14 @@
 
 #include "stdio.h"
 
+#define FLT_EQL(f1, f2) (std::abs(f1-f2)<FLT_EPSILON)
+
 class Vector {
 public:
     float x, y, z, w;
 
     Vector();
+
     Vector(float x, float y, float z, float w = 1.0);
 
     float length();
@@ -48,6 +51,8 @@ public:
     Vector apply(const Vector &v);
 
     void scale(float scale);
+
+    void scale(const Vector &scale);
 
     void translate(const Vector &offset);
 

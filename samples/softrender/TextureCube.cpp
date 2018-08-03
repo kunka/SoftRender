@@ -18,12 +18,12 @@ TEST_NODE_IMP_BEGIN
                 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom-left
                 -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
                 // Front face
-                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
-                0.5f, -0.5f, 0.5f, 1.0f, 0.0f, // bottom-right
-                0.5f, 0.5f, 0.5f, 1.0f, 1.0f, // top-right
-                0.5f, 0.5f, 0.5f, 1.0f, 1.0f, // top-right
-                -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, // top-left
-                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
+//                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
+//                0.5f, -0.5f, 0.5f, 1.0f, 0.0f, // bottom-right
+//                0.5f, 0.5f, 0.5f, 1.0f, 1.0f, // top-right
+//                0.5f, 0.5f, 0.5f, 1.0f, 1.0f, // top-right
+//                -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, // top-left
+//                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
                 // Left face
                 -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, // top-right
                 -0.5f, 0.5f, -0.5f, 1.0f, 1.0f, // top-left
@@ -57,7 +57,7 @@ TEST_NODE_IMP_BEGIN
         int nrComponents;
 //        textureData = stbi_load("../res/net.jpg", &textureWidth, &textureHeight, &nrComponents, 0);
         stbi_set_flip_vertically_on_load(true); // flipY
-        textureData = stbi_load("../res/smile.jpg", &textureWidth, &textureHeight, &nrComponents, 0);
+        textureData = stbi_load("../res/net.jpg", &textureWidth, &textureHeight, &nrComponents, 0);
         log("width=%d,height=%d,channel=%d", textureWidth, textureHeight, nrComponents);
         depthBuff = new float[textureWidth * textureHeight];
 
@@ -73,6 +73,7 @@ TEST_NODE_IMP_BEGIN
 
         Matrix model;
         model.rotate(Vector(0, 1, 0), radians(30.0f));
+//        model.scale(Vector(2.0, 1.0, 1.0));
 //        model.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
         Matrix view;
         vec3 target = cameraPos + cameraDir;
@@ -102,7 +103,7 @@ TEST_NODE_IMP_BEGIN
                 Vector v0 = model.apply(Vector(p.x, p.y, p.z));
                 triangleOrigin[j] = vec3(v0.x, v0.y, v0.z);
             }
-            // CVV裁剪
+            // 简单CVV裁剪，三角形3个点均不在cvv立方体内将被裁剪掉
             if (cvvCull(triangle)) {
                 log("cvv cull");
                 continue;
@@ -120,16 +121,12 @@ TEST_NODE_IMP_BEGIN
 
             for (int j = 0; j < 3; j++) {
                 vec4 p = triangle[j];
-                // CVV裁剪
-//                if (cvvCull(triangle)) {
-//                    log("cvv cull");
-//                    continue;
-//                }
                 // （透视除法） --> NDC空间
                 p.x /= p.w; // [-1,1]
                 p.y /= p.w; // [-1,1]
                 p.z /= p.w; // [-1,1]
-//                p.w = 1.0;
+                //p.w 顶点到相机的距离
+                //p.w = 1.0;
                 // NDC空间 --> 窗口坐标（视口变换）
                 p.x = (p.x + 1.0f) / 2.0f * TEX_WIDTH;
                 p.y = (p.y + 1.0f) / 2.0f * TEX_HEIGHT;
@@ -138,9 +135,8 @@ TEST_NODE_IMP_BEGIN
                 // 光照，深度测试
                 triangle[j] = p;
             }
-            fill(triangle[0], triangle[1], triangle[2], uv[0], uv[1], uv[2]);
-//            fill(triangle[0], triangle[1], triangle[2], uv[0] / triangle[0].w, uv[1] / triangle[1].w,
-//                 uv[2] / triangle[2].w);
+            fill(triangle[0], triangle[1], triangle[2], uv[0] / triangle[0].w, uv[1] / triangle[1].w,
+                 uv[2] / triangle[2].w);
         }
         SoftRender::draw(transform);
     }
@@ -155,7 +151,7 @@ TEST_NODE_IMP_BEGIN
         unsigned char *pixel = textureData + (textureHeight * y + x) * 3;
         unsigned int r = (unsigned int) pixel[0];
         unsigned int g = (unsigned int) pixel[1];
-        unsigned int b = pixel[2];
+        unsigned int b = (unsigned int) pixel[2];
         return vec3(r, g, b);
     }
 
@@ -177,6 +173,17 @@ TEST_NODE_IMP_BEGIN
         vec2 midUV = ps[1].uv;
         vec2 minUV = ps[2].uv;
 
+        /*
+         * mid ---- max
+         *     \  /
+         *      \/
+         *      min
+         *
+         *      max
+         *      /\
+         *     /  \
+         * min ---- mid
+         */
         if (mid.y == min.y || max.y == mid.y) {
             int dy = max.y - min.y;
             vec4 a, b;
@@ -190,31 +197,43 @@ TEST_NODE_IMP_BEGIN
             for (int i = 1; i <= dy; i++) {
                 float f = (float) i / dy;
                 if (max.y == mid.y) {
-                    a.x = mid.x + f * (min.x - mid.x);
+                    a.x = interp(mid.x, min.x, f);
+                    a.z = interp(mid.z, min.z, f);
+                    a.w = 1.0f / interp(1.0f / mid.w, 1.0f / min.w, f);
                     uv1 = interp(midUV, minUV, f);
                 } else {
-                    a.x = max.x + f * (mid.x - max.x);
+                    a.x = interp(max.x, mid.x, f);
+                    a.z = interp(max.z, mid.z, f);
+                    a.w = 1.0f / interp(1.0f / max.w, 1.0f / mid.w, f);
                     uv1 = interp(maxUV, midUV, f);
                 }
                 a.y -= 1;
-                b.x = max.x + f * (min.x - max.x);
+                b.x = interp(max.x, min.x, f);
+                b.z = interp(max.z, min.z, f);
+                b.w = 1.0f / interp(1.0f / max.w, 1.0f / min.w, f);
                 uv2 = interp(maxUV, minUV, f);
                 b.y -= 1;
                 dda_line(a, b, uv1, uv2);
             }
         } else {
+            /*
+             *       max
+             *       /|
+             *      / |
+             * mid /  |
+             *     \  |
+             *      \ |
+             *       \|
+             *       min
+             */
             float dy = max.y - min.y;
-            float dx = max.x - min.x;
-            float dz = max.z - min.z;
             vec4 midP;
             midP.y = mid.y;
-            vec2 uv = interp(minUV, maxUV, (midP.y - min.y) / dy);
-            midP.z = interp(min.z, max.z, (midP.y - min.y) / dy);
-            if (dx == 0) {
-                midP.x = max.x;
-            } else {
-                midP.x = max.x + (mid.y - max.y) * dx / dy;
-            }
+            float f = (midP.y - min.y) / dy;
+            midP.w = 1.0f / interp(1.0f / min.w, 1.0f / max.w, f);
+            vec2 uv = interp(minUV, maxUV, f);
+            midP.z = interp(min.z, max.z, f);
+            midP.x = interp(min.x, max.x, f);
             fill(max, mid, midP, maxUV, midUV, uv);
             fill(mid, midP, min, midUV, uv, minUV);
         }
@@ -235,14 +254,19 @@ TEST_NODE_IMP_BEGIN
         p2.y = p22.y;
         vec2 uv11 = uv1;
         vec2 uv12 = uv2;
+        float f1 = 0, f2 = 0;
         if (pb.x != pa.x) {
-            uv11.x = interp(uv1.x, uv2.x, (p11.x - pa.x) / (pb.x - pa.x));
-            uv12.x = interp(uv1.x, uv2.x, (p22.x - pa.x) / (pb.x - pa.x));
+            f1 = (p11.x - pa.x) / (pb.x - pa.x);
+            f2 = (p22.x - pa.x) / (pb.x - pa.x);
         }
         if (pb.y != pa.y) {
-            uv11.y = interp(uv1.y, uv2.y, (p11.y - pa.y) / (pb.y - pa.y));
-            uv12.y = interp(uv1.y, uv2.y, (p22.y - pa.y) / (pb.y - pa.y));
+            f1 = (p11.y - pa.y) / (pb.y - pa.y);
+            f2 = (p22.y - pa.y) / (pb.y - pa.y);
         }
+        p1.w = 1.0f / interp(1.0f / pa.w, 1.0f / pb.w, f1);
+        p2.w = 1.0f / interp(1.0f / pa.w, 1.0f / pb.w, f2);
+        uv11 = interp(uv1, uv2, f1);
+        uv12 = interp(uv1, uv2, f2);
 
         float dy = p2.y - p1.y;
         float dx = p2.x - p1.x;
@@ -261,30 +285,30 @@ TEST_NODE_IMP_BEGIN
                 stepY = dy > 0 ? fabs(dy / dx) : -fabs(dy / dx);
         }
         float x = p1.x, y = p1.y;
-//        setPixel(x, y, 1.0f / p1.z, sample(uv.x, uv.y));
-        setPixel(x, y, p1.z, sample(uv11.x, uv11.y));
+        setPixel(x, y, p1.z, sample(uv11.x * p1.w, uv11.y * p1.w));
         for (int k = 1; k <= steps; k++) {
             x += stepX;
             y += stepY;
             float f = 1.0f * k / steps;
             float z = interp(p1.z, p2.z, f);
+            float w = 1.0f / interp(1.0f / p1.w, 1.0f / p2.w, f);
             vec2 uv0 = interp(uv11, uv12, f);
-//            setPixel(x, y, 1.0f / z, sample(uv0.x, uv0.y));
-            setPixel(x, y, z, sample(uv0.x, uv0.y));
+            setPixel(x, y, z, sample(uv0.x * w, uv0.y * w));
         }
+        setPixel(p2.x, p2.y, p2.z, sample(uv12.x * p2.w, uv12.y * p2.w));
     }
 
     void TextureCube::setPixel(int x, int y, float depth, const vec4 &color) {
         if (x >= 0 && y >= 0 && x < TEX_WIDTH && y < TEX_HEIGHT) {
             int index = y * textureWidth + x;
-            if (depth < depthBuff[index]) {
-                depthBuff[index] = depth;
-                texData[y][x][0] = (GLubyte) color.r;
-                texData[y][x][1] = (GLubyte) color.g;
-                texData[y][x][2] = (GLubyte) color.b;
-                texData[y][x][3] = (GLubyte) color.a;
+//            if (depth < depthBuff[index]) {
+            depthBuff[index] = depth;
+            texData[y][x][0] = (GLubyte) color.r;
+            texData[y][x][1] = (GLubyte) color.g;
+            texData[y][x][2] = (GLubyte) color.b;
+            texData[y][x][3] = (GLubyte) color.a;
 //            log("%f",depth);
-            }
+//            }
         }
     }
 
