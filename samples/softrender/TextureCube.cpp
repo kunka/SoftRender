@@ -4,7 +4,6 @@
 
 #include "TextureCube.h"
 #include "Input.h"
-#include "stb_image.h"
 
 TEST_NODE_IMP_BEGIN
 
@@ -56,7 +55,6 @@ TEST_NODE_IMP_BEGIN
 
         int nrComponents;
 //        textureData = stbi_load("../res/net.jpg", &textureWidth, &textureHeight, &nrComponents, 0);
-        stbi_set_flip_vertically_on_load(true); // flipY
         textureData = stbi_load("../res/net.jpg", &textureWidth, &textureHeight, &nrComponents, 0);
         log("width=%d,height=%d,channel=%d", textureWidth, textureHeight, nrComponents);
         depthBuff = new float[textureWidth * textureHeight];
@@ -72,8 +70,10 @@ TEST_NODE_IMP_BEGIN
             depthBuff[i] = INT_MAX;
 
         Matrix model;
-        model.rotate(Vector(0, 1, 0), radians(30.0f));
         model.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
+        Matrix identity;
+        identity.rotate(Vector(1, 0, 0), radians(-30.0f));
+        model.mult(identity);
         Matrix view;
         vec3 target = cameraPos + cameraDir;
 //        view.lookAt(Vector(0, 0, 4), Vector(0, 0, 0), Vector(0, 1, 0));

@@ -2,12 +2,11 @@
 // Created by Administrator on 2018/4/3 0003.
 //
 
-#include "PointLight.h"
-#include "stb_image.h"
+#include "Spotlight.h"
 
 TEST_NODE_IMP_BEGIN
 
-    PointLight::PointLight() {
+    Spotlight::Spotlight() {
         const char *vert = R"(
 #version 330 core
 layout (location = 0) in vec3 a_position;
@@ -30,17 +29,6 @@ void main()
 }
 )";
 
-        const char *light_frag = R"(
-#version 330 core
-out vec4 FragColor;
-uniform vec3 lightColor;
-
-void main()
-{
-    FragColor = vec4(lightColor, 1.0f);
-}
-)";
-
         const char *frag = R"(
 #version 330 core
 in vec3 Normal;
@@ -59,6 +47,9 @@ in vec2 TexCoords;
 
 struct Light {
 vec3 position;
+vec3 direction;
+float cutOff;
+float outerCutOff;
 
 vec3 ambient;
 vec3 diffuse;
@@ -72,26 +63,45 @@ uniform Light light;
 
 void main()
 {
-    float distance = length(light.position - FragPos);
-    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
-
-    vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
-
-    vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(light.position - FragPos);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
+     // check if lighting is inside the spotlight cone
+    float theta = dot(lightDir, normalize(-light.direction));
 
-    vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+    if(theta > light.outerCutOff)
+    {
+        // soft edges
+        float intensity = 1.0;
+        if(theta < light.cutOff)
+        {
+            float epsilon = light.outerCutOff - light.cutOff ;
+            intensity = clamp((light.outerCutOff - theta) / epsilon, 0.0, 1.0);
+        }
 
-    FragColor = vec4(attenuation*(diffuse + ambient + specular), 1.0);
+        float distance = length(light.position - FragPos);
+        float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
+        vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
+
+        vec3 norm = normalize(Normal);
+        float diff = max(dot(norm, lightDir), 0.0);
+        vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
+
+        vec3 viewDir = normalize(viewPos - FragPos);
+        vec3 reflectDir = reflect(-lightDir, norm);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+        vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+
+        FragColor = vec4(attenuation*(diffuse + specular) * intensity + ambient, 1.0);
+    }
+    else
+    {
+        // use ambient light
+        vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
+        FragColor = vec4(ambient, 1.0);
+    }
 }
 )";
         shader.loadStr(vert, frag);
-        lightShader.loadStr(vert, light_frag);
 
         float vertices[] = {
                 // positions          // normals           // texture coords
@@ -138,12 +148,12 @@ void main()
                 -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
         };
 
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
+
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
         glEnableVertexAttribArray(0);
@@ -154,21 +164,8 @@ void main()
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
-        // light obj
-        glGenVertexArrays(1, &lightVAO);
-        glBindVertexArray(lightVAO);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
-        glEnableVertexAttribArray(0);
-
-        // unbind
-        glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
         // texture
-        stbi_set_flip_vertically_on_load(true); // flipY
+
 
         int width, height, nrChannels;
         unsigned char *data = stbi_load("../res/container2.png", &width, &height, &nrChannels, 0);
@@ -224,41 +221,28 @@ void main()
         shader.setFloat("light.constant", 1.0f);
         shader.setFloat("light.linear", 0.09f);
         shader.setFloat("light.quadratic", 0.032f);
+        shader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+        shader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
 
-        lightShader.use();
-        lightShader.setMat4("projection", projection);
-        lightShader.setVec3("lightColor", vec3(1.0f, 1.0f, 1.0f));
+        // unbind
+        glBindVertexArray(0);
     }
 
-    void PointLight::draw(const mat4 &transform) {
+    void Spotlight::draw(const mat4 &transform) {
         glEnable(GL_DEPTH_TEST);
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glBindVertexArray(VAO);
+
         // use WSAD to control
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
-
-        // light obj
-        vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
-        vec3 lightPos = glm::vec3(0.0f, 0.0f, -2.0f);
-        lightShader.use();
-        model = glm::mat4();
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2, 0.2f, 0.2f));
-        lightShader.setMat4("model", model);
-        lightShader.setMat4("view", view);
-        lightShader.setVec3("lightColor", lightColor);
-
-        glBindVertexArray(lightVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
-
-        glBindVertexArray(VAO);
 
         glm::vec3 cubePositions[] = {
                 glm::vec3(0.0f, 0.0f, 0.0f),
@@ -273,7 +257,8 @@ void main()
                 glm::vec3(-1.3f, 1.0f, -1.5f)
         };
         shader.use();
-        shader.setVec3("light.position", lightPos);
+        shader.setVec3("light.position", cameraPos);
+        shader.setVec3("light.direction", cameraDir);
         shader.setMat4("view", view);
         shader.setVec3("viewPos", cameraPos);
         for (unsigned int i = 0; i < 10; i++) {
@@ -285,12 +270,12 @@ void main()
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
+        glBindVertexArray(0);
         glDisable(GL_DEPTH_TEST);
     }
 
-    PointLight::~PointLight() {
+    Spotlight::~Spotlight() {
         glDeleteVertexArrays(1, &VAO);
-        glDeleteVertexArrays(1, &lightVAO);
         glDeleteBuffers(1, &VBO);
     }
 TEST_NODE_IMP_END

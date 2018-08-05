@@ -3,7 +3,6 @@
 //
 
 #include "Camerz.h"
-#include "stb_image.h"
 #include "Input.h"
 
 TEST_NODE_IMP_BEGIN
@@ -41,7 +40,7 @@ void main()
 )";
         shader.loadStr(vert, frag);
 
-        stbi_set_flip_vertically_on_load(true); // flipY
+
 
         int width, height, nrChannels;
         unsigned char *data = stbi_load("../res/container.jpg", &width, &height, &nrChannels, 0);

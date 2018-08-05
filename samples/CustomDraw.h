@@ -11,6 +11,7 @@
 #include "Shader.h"
 #include "Log.h"
 #include "Director.h"
+#include "stb_image.h"
 
 #define TEST_NODE_BEGIN(__CLASS__) \
 namespace gltest{ \
