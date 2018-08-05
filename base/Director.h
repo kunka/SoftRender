@@ -55,6 +55,7 @@ protected:
     void setNextScene();
 
     Scene *_runningScene;
+    Scene *_toBeReleaseScene;
     Scene *_nextScene;
     std::vector<Scene *> _scenesStack;
     GLView *_glView;

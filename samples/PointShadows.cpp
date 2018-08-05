@@ -373,11 +373,11 @@ void main()
         glm::quat quat = glm::quat_cast(view);
         vec3 angles = eulerAngles(quat);
         pitch = -degrees(angles.x);
-
-        glEnable(GL_DEPTH_TEST);
     }
 
     void PointShadows::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+
         renderType = 3;
 
         switch (renderType) {
@@ -482,6 +482,8 @@ void main()
             default:
                 break;
         }
+
+        glDisable(GL_DEPTH_TEST);
     }
 
     void PointShadows::renderScene(Shader &shader, bool faceCulling) {

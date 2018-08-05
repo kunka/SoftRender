@@ -6,7 +6,14 @@
 #include "Input.h"
 #include "stb_image.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+
+int CustomDraw::currentSceneIndex;
+std::vector<std::pair<std::string, Scene *(*)()>> CustomDraw::testScenes;
+
 CustomDraw::CustomDraw() {
+    stbi_set_flip_vertically_on_load(true); // flipY
+
     cameraPos = vec3(0.0f, 0.0f, 4.0f);
     cameraDir = vec3(0.0f, 0.0f, -1.0f);
     cameraUp = vec3(0.0f, 1.0f, 0.0f);
@@ -55,6 +62,24 @@ void CustomDraw::fixedUpdate(float delta) {
         log("cameraPos(%.1f,%.1f,%.1f), cameraDir(%.02f,%.02f,%.02f), cameraUp(%.1f,%.1f,%.1f)", cameraPos.x,
             cameraPos.y,
             cameraPos.z, cameraDir.x, cameraDir.y, cameraDir.z, cameraUp.x, cameraUp.y, cameraUp.z);
+
+//    if (input->isKeyPressed(GLFW_KEY_LEFT)) {
+//        CustomDraw::currentSceneIndex--;
+//        if (CustomDraw::currentSceneIndex < 0) {
+//            CustomDraw::currentSceneIndex = CustomDraw::testScenes.size() - 1;
+//        }
+//        auto pair = CustomDraw::testScenes[CustomDraw::currentSceneIndex];
+//        Director::getInstance()->replaceScene(pair.second());
+//        log("switch to scene: %s", pair.first.c_str());
+//    } else if (input->isKeyPressed(GLFW_KEY_RIGHT)) {
+//        CustomDraw::currentSceneIndex++;
+//        if (CustomDraw::currentSceneIndex >= CustomDraw::testScenes.size()) {
+//            CustomDraw::currentSceneIndex = 0;
+//        }
+//        auto pair = CustomDraw::testScenes[CustomDraw::currentSceneIndex];
+//        Director::getInstance()->replaceScene(pair.second());
+//        log("switch to scene: %s", pair.first.c_str());
+//    }
 }
 
 // utility function for loading a 2D texture from file
@@ -66,11 +91,6 @@ unsigned int CustomDraw::loadTexture(const std::string &path) {
     int width, height, nrComponents;
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
     if (data) {
-        int i, j;
-        for (i = 0; i < 12; i++) {
-            log("v = %d", (unsigned int) data[i]);
-        }
-
         GLenum format;
         if (nrComponents == 1)
             format = GL_RED;

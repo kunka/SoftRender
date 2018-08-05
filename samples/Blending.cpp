@@ -244,13 +244,13 @@ void main()
         vec3 angles = eulerAngles(quat);
         pitch = -degrees(angles.x);
 
-        glEnable(GL_DEPTH_TEST);
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     void Blending::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -326,6 +326,10 @@ void main()
             shader.setMat4("model", model);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
+
+        // reset
+        glDisable(GL_BLEND);
+        glDisable(GL_DEPTH_TEST);
     }
 
     Blending::~Blending() {
@@ -334,5 +338,6 @@ void main()
         glDeleteVertexArrays(1, &planeVAO);
         glDeleteBuffers(1, &planeVBO);
         glDeleteBuffers(1, &planeEBO);
+
     }
 TEST_NODE_IMP_END

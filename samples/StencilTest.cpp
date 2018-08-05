@@ -157,14 +157,15 @@ void main()
 
         outlineShader.use();
         outlineShader.setMat4("projection", projection);
+    }
 
+    void StencilTest::draw(const mat4 &transform) {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_STENCIL_TEST);
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-    }
 
-    void StencilTest::draw(const mat4 &transform) {
+
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -245,9 +246,8 @@ void main()
         outlineShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        // reset
-        glStencilMask(0xFF);
-        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_STENCIL_TEST);
+        glDisable(GL_DEPTH_TEST);
     }
 
     StencilTest::~StencilTest() {

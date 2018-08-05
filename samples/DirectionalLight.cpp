@@ -216,13 +216,14 @@ void main()
         lightShader.setMat4("projection", projection);
         lightShader.setVec3("lightColor", vec3(1.0f, 1.0f, 1.0f));
 
-        glEnable(GL_DEPTH_TEST);
 
         // unbind
         glBindVertexArray(0);
     }
 
     void DirectionalLight::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -273,6 +274,8 @@ void main()
         }
 
         glBindVertexArray(0);
+
+        glDisable(GL_DEPTH_TEST);
     }
 
     DirectionalLight::~DirectionalLight() {

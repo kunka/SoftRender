@@ -323,11 +323,11 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
         shader.setVec3("dirLight.ambient", vec3(0.05f, 0.05f, 0.05f));
         shader.setVec3("dirLight.diffuse", vec3(0.4f, 0.4f, 0.4f));
         shader.setVec3("dirLight.specular", vec3(0.5f, 0.5f, 0.5f));
-
-        glEnable(GL_DEPTH_TEST);
     }
 
     void MultipleLights::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -422,6 +422,8 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
             shader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        glDisable(GL_DEPTH_TEST);
     }
 
     MultipleLights::~MultipleLights() {

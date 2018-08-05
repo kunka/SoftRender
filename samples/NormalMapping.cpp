@@ -208,11 +208,11 @@ void main()
 
         cameraPos = vec3(-0.9f, 0.2f, 0.8f);
         cameraDir = vec3(0.0f, 0.0f, 0.0f) - cameraPos;
-
-        glEnable(GL_DEPTH_TEST);
     }
 
     void NormalMapping::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -252,6 +252,8 @@ void main()
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         shader.setMat4("model", model);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glDisable(GL_DEPTH_TEST);
     }
 
     NormalMapping::~NormalMapping() {

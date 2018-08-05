@@ -155,10 +155,6 @@ void main()
         shader.setInt("ourTexture2", 1);
         shader.setMat4("projection", projection);
         shader.setMat4("view", view);
-        glEnable(GL_DEPTH_TEST);
-
-        // unbind
-        glBindVertexArray(0);
 
         pitch = 0;
         yaw = -90;
@@ -166,6 +162,8 @@ void main()
 
 
     void Camerz::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -216,6 +214,7 @@ void main()
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glBindVertexArray(0);
+        glDisable(GL_DEPTH_TEST);
     }
 
     Camerz::~Camerz() {

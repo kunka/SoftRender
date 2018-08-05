@@ -74,3 +74,7 @@ int Input::getKey(int keyCode) {
 bool Input::isKeyPressed(int keyCode) {
     return getKey(keyCode) == GLFW_PRESS;
 }
+
+bool Input::isKeyClicked(int keyCode) {
+    return getKey(keyCode) == GLFW_PRESS;
+}

@@ -74,7 +74,6 @@ void main()
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
         shader.setMat4("view", view);
 
-        glEnable(GL_DEPTH_TEST);
 
 //      Textures used for coloring objects like diffuse textures are almost always in sRGB space.
 //      Textures used for retrieving lighting parameters like specular maps and normal maps are almost
@@ -82,6 +81,8 @@ void main()
     }
 
     void GammaCorrection::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -108,6 +109,8 @@ void main()
             shader.setVec4("color", vec4(i / 10.0, i / 10.0, i / 10.0, 1.0));
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
+
+        glDisable(GL_DEPTH_TEST);
     }
 
     GammaCorrection::~GammaCorrection() {

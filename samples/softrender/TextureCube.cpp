@@ -18,12 +18,12 @@ TEST_NODE_IMP_BEGIN
                 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom-left
                 -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
                 // Front face
-//                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
-//                0.5f, -0.5f, 0.5f, 1.0f, 0.0f, // bottom-right
-//                0.5f, 0.5f, 0.5f, 1.0f, 1.0f, // top-right
-//                0.5f, 0.5f, 0.5f, 1.0f, 1.0f, // top-right
-//                -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, // top-left
-//                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
+                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
+                0.5f, -0.5f, 0.5f, 1.0f, 0.0f, // bottom-right
+                0.5f, 0.5f, 0.5f, 1.0f, 1.0f, // top-right
+                0.5f, 0.5f, 0.5f, 1.0f, 1.0f, // top-right
+                -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, // top-left
+                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
                 // Left face
                 -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, // top-right
                 -0.5f, 0.5f, -0.5f, 1.0f, 1.0f, // top-left
@@ -73,8 +73,7 @@ TEST_NODE_IMP_BEGIN
 
         Matrix model;
         model.rotate(Vector(0, 1, 0), radians(30.0f));
-//        model.scale(Vector(2.0, 1.0, 1.0));
-//        model.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
+        model.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
         Matrix view;
         vec3 target = cameraPos + cameraDir;
 //        view.lookAt(Vector(0, 0, 4), Vector(0, 0, 0), Vector(0, 1, 0));
@@ -103,20 +102,23 @@ TEST_NODE_IMP_BEGIN
                 Vector v0 = model.apply(Vector(p.x, p.y, p.z));
                 triangleOrigin[j] = vec3(v0.x, v0.y, v0.z);
             }
-            // 简单CVV裁剪，三角形3个点均不在cvv立方体内将被裁剪掉
+            // 简单CVV裁剪，三角形3个点有一个不在cvv立方体内将被裁剪掉
             if (cvvCull(triangle)) {
-                log("cvv cull");
+//                log("cvv cull");
                 continue;
             }
-            // 背面剔除
-            vec3 cameraP = vec3(cameraPos.x, cameraPos.y, cameraPos.z);
-            vec3 v1 = triangleOrigin[1] - triangleOrigin[0];
-            vec3 v2 = triangleOrigin[2] - triangleOrigin[0];
-            vec3 normal = glm::cross(v1, v2);
-            vec3 v0 = vec3(triangleOrigin[0]) - cameraP;
-            if (glm::dot(v0, normal) >= 0) {
+            bool backfaceCulling = true;
+            if (backfaceCulling) {
+                // 背面剔除
+                vec3 cameraP = vec3(cameraPos.x, cameraPos.y, cameraPos.z);
+                vec3 v1 = triangleOrigin[1] - triangleOrigin[0];
+                vec3 v2 = triangleOrigin[2] - triangleOrigin[0];
+                vec3 normal = glm::cross(v1, v2);
+                vec3 v0 = vec3(triangleOrigin[0]) - cameraP;
+                if (glm::dot(v0, normal) >= 0) {
 //                log("backface cull");
-//                continue;
+                    continue;
+                }
             }
 
             for (int j = 0; j < 3; j++) {
@@ -130,13 +132,12 @@ TEST_NODE_IMP_BEGIN
                 // NDC空间 --> 窗口坐标（视口变换）
                 p.x = (p.x + 1.0f) / 2.0f * TEX_WIDTH;
                 p.y = (p.y + 1.0f) / 2.0f * TEX_HEIGHT;
-                // 背面剔除
-                // 光栅化
-                // 光照，深度测试
                 triangle[j] = p;
             }
+            // 光栅化
             fill(triangle[0], triangle[1], triangle[2], uv[0] / triangle[0].w, uv[1] / triangle[1].w,
                  uv[2] / triangle[2].w);
+            // 光照，深度测试
         }
         SoftRender::draw(transform);
     }
@@ -265,6 +266,8 @@ TEST_NODE_IMP_BEGIN
         }
         p1.w = 1.0f / interp(1.0f / pa.w, 1.0f / pb.w, f1);
         p2.w = 1.0f / interp(1.0f / pa.w, 1.0f / pb.w, f2);
+        p1.z = interp(pa.z, pb.z, f1);
+        p2.z = interp(pa.z, pb.z, f2);
         uv11 = interp(uv1, uv2, f1);
         uv12 = interp(uv1, uv2, f2);
 
@@ -301,14 +304,13 @@ TEST_NODE_IMP_BEGIN
     void TextureCube::setPixel(int x, int y, float depth, const vec4 &color) {
         if (x >= 0 && y >= 0 && x < TEX_WIDTH && y < TEX_HEIGHT) {
             int index = y * textureWidth + x;
-//            if (depth < depthBuff[index]) {
-            depthBuff[index] = depth;
-            texData[y][x][0] = (GLubyte) color.r;
-            texData[y][x][1] = (GLubyte) color.g;
-            texData[y][x][2] = (GLubyte) color.b;
-            texData[y][x][3] = (GLubyte) color.a;
-//            log("%f",depth);
-//            }
+            if (depth < depthBuff[index]) {
+                depthBuff[index] = depth;
+                texData[y][x][0] = (GLubyte) color.r;
+                texData[y][x][1] = (GLubyte) color.g;
+                texData[y][x][2] = (GLubyte) color.b;
+                texData[y][x][3] = (GLubyte) color.a;
+            }
         }
     }
 

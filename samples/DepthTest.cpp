@@ -156,13 +156,14 @@ void main()
         // Depth cal
         // F_depth = (1/z−1/near) / (1/far−1/near)
 
+    }
+
+    void DepthTest::draw(const mat4 &transform) {
         glEnable(GL_DEPTH_TEST);
         // see different kind of depth func
         glDepthFunc(GL_LESS); // default
         // glDepthFunc(GL_ALWAYS);
-    }
 
-    void DepthTest::draw(const mat4 &transform) {
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -202,6 +203,8 @@ void main()
         glBindTexture(GL_TEXTURE_2D, texture2);
         glBindVertexArray(planeVAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glDisable(GL_DEPTH_TEST);
     }
 
     DepthTest::~DepthTest() {

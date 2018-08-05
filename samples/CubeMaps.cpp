@@ -313,10 +313,11 @@ void main()
         skyBoxShader.use();
         skyBoxShader.setInt("skyBox", 0);
         skyBoxShader.setMat4("projection", projection);
-        glEnable(GL_DEPTH_TEST);
     }
 
     void CubeMaps::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -349,6 +350,8 @@ void main()
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glDepthFunc(GL_LESS); // set depth function back to default
+
+        glDisable(GL_DEPTH_TEST);
     }
 
     CubeMaps::~CubeMaps() {

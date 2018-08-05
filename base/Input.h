@@ -25,6 +25,8 @@ public:
 
     bool isKeyPressed(int keyCode);
 
+    bool isKeyClicked(int keyCode);
+
     const glm::vec2 &getMousePos() { return _mousePos; }
 
     const glm::vec2 &getScrollOffset() { return _scrollOffset; }

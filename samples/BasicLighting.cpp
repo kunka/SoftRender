@@ -224,15 +224,11 @@ void main()
         specularShader.setVec3("lightColor", lightColor);
         specularShader.setFloat("ambientStrength", ambientStrength);
         specularShader.setFloat("specularStrength", specularStrength);
-
-
-        glEnable(GL_DEPTH_TEST);
-
-        // unbind
-        glBindVertexArray(0);
     }
 
     void BasicLighting::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -307,6 +303,7 @@ void main()
 
 
         glBindVertexArray(0);
+        glDisable(GL_DEPTH_TEST);
     }
 
     BasicLighting::~BasicLighting() {

@@ -44,8 +44,10 @@ public:
 
     unsigned int loadTexture(const std::string &path);
 
-protected:
+    static int currentSceneIndex;
+    static std::vector<std::pair<std::string, Scene *(*)()>> testScenes;
 
+protected:
     Shader shader;
     unsigned int VAO;
     unsigned int VBO;

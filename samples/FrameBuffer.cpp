@@ -241,6 +241,8 @@ void main()
         glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
         // use the color attachment texture as the texture of the quad plane
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glDisable(GL_DEPTH_TEST);
     }
 
     FrameBuffer::~FrameBuffer() {

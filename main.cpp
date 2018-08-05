@@ -16,6 +16,7 @@
 #include "Director.h"
 #include "Scene.h"
 
+#include "samples/CustomDraw.h"
 #include "samples/Triangle.h"
 #include "samples/Rectangle.h"
 #include "samples/Texture.h"
@@ -51,19 +52,23 @@
 #include <alg/FunctionDraw.h>
 #include "alg/Quaternion.h"
 
-
 #include "softrender/Rast2DPoint.h"
 #include "softrender/Rast2DLine.h"
 #include "softrender/Rast2DTriangle.h"
 #include "softrender/RastCube.h"
 #include "softrender/TextureCube.h"
 
+template<typename T>
+Scene *createScene() {
+    Scene *scene = Scene::create();
+    T *node = new T;
+    scene->addChild(node);
+    return scene;
+}
 
-#define CREATE_TEST_SCENE(__CLASS__) \
-Scene *scene = Scene::create(); \
-gltest::__CLASS__ *node = new gltest::__CLASS__(); \
-scene->addChild(node); \
-Director::getInstance()->runWithScene(scene)
+#define ADD_TEST_SCENE(__CLASS__)\
+CustomDraw::testScenes.push_back(std::make_pair(#__CLASS__, &createScene<gltest::__CLASS__>))
+
 
 int main(int argc, char **argv) {
     auto app = Application::getInstance();
@@ -78,47 +83,58 @@ int main(int argc, char **argv) {
 
         app->setUpdateInterval(1.0f / 60);
 
-//        CREATE_TEST_SCENE(Triangle);
-//        CREATE_TEST_SCENE(Rectangle);
-//        CREATE_TEST_SCENE(Texture);
-//        CREATE_TEST_SCENE(MVP);
-//        CREATE_TEST_SCENE(Cubes);
-//        CREATE_TEST_SCENE(Camerz);
-//        CREATE_TEST_SCENE(BasicLighting);
-//        CREATE_TEST_SCENE(Materials);
-//        CREATE_TEST_SCENE(LightingMaps);
-//        CREATE_TEST_SCENE(DirectionalLight);
-//        CREATE_TEST_SCENE(PointLight);
-//        CREATE_TEST_SCENE(Spotlight);
-//        CREATE_TEST_SCENE(MultipleLights);
-//        CREATE_TEST_SCENE(ModelLoad);
-//        CREATE_TEST_SCENE(DepthTest);
-//        CREATE_TEST_SCENE(StzencilTest);
-//        CREATE_TEST_SCENE(Blending);
-//        CREATE_TEST_SCENE(FaceCulling);
-//        CREATE_TEST_SCENE(FrameBuffer);
-//        CREATE_TEST_SCENE(CubeMaps);
-//        CREATE_TEST_SCENE(AdvancedData);
-//        CREATE_TEST_SCENE(AdvancedGLSL);
-//        CREATE_TEST_SCENE(GeometryShader);
-//        CREATE_TEST_SCENE(GeometryShader2);
-//        CREATE_TEST_SCENE(AntiAliasing);
-//        CREATE_TEST_SCENE(BlinnPhongLighting);
-//        CREATE_TEST_SCENE(GammaCorrection);
-//        CREATE_TEST_SCENE(ShadowMapping);
-//        CREATE_TEST_SCENE(PointShadows);
-//        CREATE_TEST_SCENE(NormalMapping);
 
-//        CREATE_TEST_SCENE(PathFinding);
-//        CREATE_TEST_SCENE(FunctionDraw);
-//        CREATE_TEST_SCENE(Texture);
+        ADD_TEST_SCENE(Triangle);
+        ADD_TEST_SCENE(Rectangle);
+        ADD_TEST_SCENE(Texture);
+        ADD_TEST_SCENE(MVP);
+        ADD_TEST_SCENE(Cubes);
+        ADD_TEST_SCENE(Camerz);
+        ADD_TEST_SCENE(BasicLighting);
+        ADD_TEST_SCENE(Materials);
+        ADD_TEST_SCENE(LightingMaps);
+        ADD_TEST_SCENE(DirectionalLight);
+        ADD_TEST_SCENE(PointLight);
+        ADD_TEST_SCENE(Spotlight);
+        ADD_TEST_SCENE(MultipleLights);
+        ADD_TEST_SCENE(ModelLoad);
+        ADD_TEST_SCENE(DepthTest);
+        ADD_TEST_SCENE(StencilTest);
+        ADD_TEST_SCENE(Blending);
+        ADD_TEST_SCENE(FaceCulling);
+        ADD_TEST_SCENE(FrameBuffer);
+        ADD_TEST_SCENE(CubeMaps);
+        ADD_TEST_SCENE(AdvancedData);
+        ADD_TEST_SCENE(AdvancedGLSL);
+        ADD_TEST_SCENE(GeometryShader);
+        ADD_TEST_SCENE(GeometryShader2);
+        ADD_TEST_SCENE(AntiAliasing);
+        ADD_TEST_SCENE(BlinnPhongLighting);
+        ADD_TEST_SCENE(GammaCorrection);
+        ADD_TEST_SCENE(ShadowMapping);
+        ADD_TEST_SCENE(PointShadows);
+        ADD_TEST_SCENE(NormalMapping);
 
+        ADD_TEST_SCENE(PathFinding);
+        ADD_TEST_SCENE(FunctionDraw);
+        ADD_TEST_SCENE(Texture);
 
-//        CREATE_TEST_SCENE(Rast2DPoint);
-//        CREATE_TEST_SCENE(Rast2DLine);
-//        CREATE_TEST_SCENE(Rast2DTriangle);
-//        CREATE_TEST_SCENE(RastCube);
-        CREATE_TEST_SCENE(TextureCube);
+        ADD_TEST_SCENE(Rast2DPoint);
+        ADD_TEST_SCENE(Rast2DLine);
+        ADD_TEST_SCENE(Rast2DTriangle);
+        ADD_TEST_SCENE(RastCube);
+        ADD_TEST_SCENE(TextureCube);
+
+        auto currentScene = "TextureCube";
+        int index = 0;
+        for (auto pair :  CustomDraw::testScenes) {
+            if (pair.first == currentScene) {
+                CustomDraw::currentSceneIndex = index;
+                Director::getInstance()->runWithScene(pair.second());
+                break;
+            }
+            index++;
+        }
 
         return true;
     });

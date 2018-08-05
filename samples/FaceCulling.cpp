@@ -14,11 +14,11 @@ TEST_NODE_IMP_BEGIN
         glm::quat quat = glm::quat_cast(view);
         vec3 angles = eulerAngles(quat);
         pitch = -degrees(angles.x);
-
-        glEnable(GL_CULL_FACE);
     }
 
     void FaceCulling::draw(const mat4 &transform) {
+        glEnable(GL_CULL_FACE);
+
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -47,6 +47,8 @@ TEST_NODE_IMP_BEGIN
         model = glm::translate(model, glm::vec3(1.0f, 0.0f, 0.0f));
         shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        glDisable(GL_CULL_FACE);
     }
 
 

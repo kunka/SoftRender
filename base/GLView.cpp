@@ -14,6 +14,29 @@
 #include "Director.h"
 #include "Log.h"
 #include "Input.h"
+#include "CustomDraw.h"
+
+void keycallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    if (action == GLFW_PRESS) {
+        if (key == GLFW_KEY_LEFT) {
+            CustomDraw::currentSceneIndex--;
+            if (CustomDraw::currentSceneIndex < 0) {
+                CustomDraw::currentSceneIndex = CustomDraw::testScenes.size() - 1;
+            }
+            auto pair = CustomDraw::testScenes[CustomDraw::currentSceneIndex];
+            Director::getInstance()->replaceScene(pair.second());
+            log("switch to scene: %s", pair.first.c_str());
+        } else if (key == GLFW_KEY_RIGHT) {
+            CustomDraw::currentSceneIndex++;
+            if (CustomDraw::currentSceneIndex >= CustomDraw::testScenes.size()) {
+                CustomDraw::currentSceneIndex = 0;
+            }
+            auto pair = CustomDraw::testScenes[CustomDraw::currentSceneIndex];
+            Director::getInstance()->replaceScene(pair.second());
+            log("switch to scene: %s", pair.first.c_str());
+        }
+    }
+}
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     Input::getInstance()->onScrollCallback(xoffset, yoffset);
@@ -82,6 +105,7 @@ bool GLView::initWithRect(int x, int y, int width, int height) {
     glfwSetScrollCallback(window, scroll_callback);
 
     glfwSetWindowPos(window, x, y);
+    glfwSetKeyCallback(window, keycallback);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetWindowSizeCallback(window, window_size_callback);
     glfwShowWindow(window);

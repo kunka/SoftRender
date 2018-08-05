@@ -238,11 +238,11 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
         glBindVertexArray(0);
 
         modelObject = new Model("../res/nanosuit/nanosuit.obj");
-
-        glEnable(GL_DEPTH_TEST);
     }
 
     void ModelLoad::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -314,6 +314,8 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
         model = glm::translate(model, vec3(0, -10, -10));
         shader.setMat4("model", model);
         modelObject->draw(shader);
+
+        glDisable(GL_DEPTH_TEST);
     }
 
     ModelLoad::~ModelLoad() {

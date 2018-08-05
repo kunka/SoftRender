@@ -133,11 +133,11 @@ void main()
         shader.setVec3("light.diffuse", vec3(1.0f, 1.0f, 1.0f));
         shader.setVec3("light.specular", vec3(0.5f, 0.5f, 0.5f));
         shader.setVec3("light.position", vec3(0, 0, 0));
-
-        glEnable(GL_DEPTH_TEST);
     }
 
     void BlinnPhongLighting::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -156,6 +156,8 @@ void main()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glDisable(GL_DEPTH_TEST);
     }
 
     void BlinnPhongLighting::fixedUpdate(float delta) {

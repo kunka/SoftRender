@@ -49,11 +49,11 @@ void main()
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
         glEnableVertexAttribArray(0);
-
-        glEnable(GL_PROGRAM_POINT_SIZE);
     }
 
     void AdvancedGLSL::draw(const mat4 &transform) {
+        glEnable(GL_PROGRAM_POINT_SIZE);
+
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -81,6 +81,8 @@ void main()
             shader.setMat4("model", model);
             glDrawArrays(GL_POINTS, 0, 1);
         }
+
+        glDisable(GL_PROGRAM_POINT_SIZE);
     }
 
     AdvancedGLSL::~AdvancedGLSL() {

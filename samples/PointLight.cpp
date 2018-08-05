@@ -228,11 +228,11 @@ void main()
         lightShader.use();
         lightShader.setMat4("projection", projection);
         lightShader.setVec3("lightColor", vec3(1.0f, 1.0f, 1.0f));
-
-        glEnable(GL_DEPTH_TEST);
     }
 
     void PointLight::draw(const mat4 &transform) {
+        glEnable(GL_DEPTH_TEST);
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -284,6 +284,8 @@ void main()
             shader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        glDisable(GL_DEPTH_TEST);
     }
 
     PointLight::~PointLight() {

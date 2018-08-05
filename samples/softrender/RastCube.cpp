@@ -94,11 +94,6 @@ TEST_NODE_IMP_BEGIN
             }
             for (int j = 0; j < 3; j++) {
                 vec4 p = triangle[j];
-                // CVV裁剪
-//                if (cvvCull(triangle)) {
-//                    log("cvv cull");
-//                    continue;
-//                }
                 // （透视除法） --> NDC空间
                 p.x /= p.w;
                 p.y /= p.w;
@@ -126,11 +121,12 @@ TEST_NODE_IMP_BEGIN
 
     bool RastCube::cvvCull(vec4 triangle[3]) {
         return !inCvv(triangle[0]) && !inCvv(triangle[1]) && !inCvv(triangle[2]);
+//        return !inCvv(triangle[0]) || !inCvv(triangle[1]) || !inCvv(triangle[2]);
     }
 
     bool RastCube::inCvv(const vec4 &vector) {
         float w = fabs(vector.w);
-        return fabs(vector.x) < w || fabs(vector.y) < w || fabs(vector.z) < w;
+        return w > 0.01 && fabs(vector.x) < w && fabs(vector.y) < w && fabs(vector.z) < w;
     }
 
     RastCube::~RastCube() {

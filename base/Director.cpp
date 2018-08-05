@@ -22,6 +22,7 @@ Director::Director() {
 bool Director::init(void) {
     _runningScene = nullptr;
     _nextScene = nullptr;
+    _toBeReleaseScene = nullptr;
     _scenesStack.reserve(15);
     _render = new(std::nothrow) Render;
     return true;
@@ -61,7 +62,7 @@ void Director::replaceScene(Scene *scene) {
     }
     ssize_t index = _scenesStack.size() - 1;
     auto back = _scenesStack.back();
-    delete back;
+    _toBeReleaseScene = back;
     _scenesStack[index] = scene;
 
     _nextScene = scene;
@@ -75,7 +76,7 @@ void Director::pushScene(Scene *scene) {
 
 void Director::popScene(void) {
     auto back = _scenesStack.back();
-    delete back;
+    _toBeReleaseScene = back;
     _scenesStack.pop_back();
 
     if (_scenesStack.size() == 0) {
@@ -137,6 +138,10 @@ void Director::setNextScene() {
 
 void Director::mainLoop(float delta) {
     // switch scene
+    if (_toBeReleaseScene) {
+        delete _toBeReleaseScene;
+        _toBeReleaseScene = nullptr;
+    }
     if (_nextScene) {
         _runningScene = _nextScene;
         _nextScene = nullptr;
