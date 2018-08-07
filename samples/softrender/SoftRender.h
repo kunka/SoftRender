@@ -35,13 +35,27 @@ TEST_NODE_BEGIN(SoftRender)
     protected:
         unsigned int genTexture();
 
-        void setPixel(int x, int y, const vec3 &color);
+        void setPixel(int x, int y, float depth, const vec4 &color);
 
-        void setPixel(int x, int y, const vec4 &color);
+        void setPixel(int x, int y, float depth, const vec3 &color);
+
+        void setDepthTest(bool depthTest);
+
+        void clearColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a = 255);
+
+        void clearDepth();
+
+        bool cvvCull(vec4 triangle[3]);
+
+        bool inCvv(const vec4 &vector);
 
         unsigned int texture = -1;
 
         GLubyte texData[TEX_WIDTH][TEX_HEIGHT][4];
+        bool depthTest;
+        float *depthBuff;
+        Rect clipRect;
+        bool isClipRect;
 
 TEST_NODE_END(SoftRender)
 

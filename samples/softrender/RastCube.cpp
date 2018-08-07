@@ -119,16 +119,6 @@ TEST_NODE_IMP_BEGIN
         SoftRender::draw(transform);
     }
 
-    bool RastCube::cvvCull(vec4 triangle[3]) {
-        return !inCvv(triangle[0]) && !inCvv(triangle[1]) && !inCvv(triangle[2]);
-//        return !inCvv(triangle[0]) || !inCvv(triangle[1]) || !inCvv(triangle[2]);
-    }
-
-    bool RastCube::inCvv(const vec4 &vector) {
-        float w = fabs(vector.w);
-        return w > 0.01 && fabs(vector.x) < w && fabs(vector.y) < w && fabs(vector.z) < w;
-    }
-
     RastCube::~RastCube() {
     }
 

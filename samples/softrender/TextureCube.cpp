@@ -54,20 +54,14 @@ TEST_NODE_IMP_BEGIN
         };
 
         int nrComponents;
-//        textureData = stbi_load("../res/net.jpg", &textureWidth, &textureHeight, &nrComponents, 0);
         textureData = stbi_load("../res/net.jpg", &textureWidth, &textureHeight, &nrComponents, 0);
         log("width=%d,height=%d,channel=%d", textureWidth, textureHeight, nrComponents);
-        depthBuff = new float[textureWidth * textureHeight];
-
-//        clipRect.setRect(TEX_WIDTH / 4, TEX_WIDTH / 4, TEX_HEIGHT / 2, TEX_HEIGHT / 2);
-        clipRect.setRect(0, 0, TEX_WIDTH, TEX_HEIGHT);
-        clipLine = true;
     }
 
     void TextureCube::draw(const mat4 &transform) {
-        memset(texData, 0, TEX_WIDTH * TEX_HEIGHT * 4);
-        for (int i = 0; i < textureWidth * textureHeight; i++)
-            depthBuff[i] = INT_MAX;
+        setDepthTest(true);
+        clearColor(50, 50, 50, 255);
+        clearDepth();
 
         Matrix model;
         model.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
@@ -140,6 +134,7 @@ TEST_NODE_IMP_BEGIN
             // 光照，深度测试
         }
         SoftRender::draw(transform);
+        setDepthTest(false);
     }
 
     int clamp_(int x, int min, int max) {
@@ -245,7 +240,7 @@ TEST_NODE_IMP_BEGIN
         vec4 p2 = pb;
         vec2 p11 = pa;
         vec2 p22 = pb;
-        if (clipLine &&
+        if (isClipRect &&
             !clip_a_line(p11, p22, clipRect.getMinX(), clipRect.getMaxX(), clipRect.getMinY(), clipRect.getMaxY())) {
             return;
         }
@@ -301,26 +296,8 @@ TEST_NODE_IMP_BEGIN
         setPixel(p2.x, p2.y, p2.z, sample(uv12.x * p2.w, uv12.y * p2.w));
     }
 
-    void TextureCube::setPixel(int x, int y, float depth, const vec4 &color) {
-        if (x >= 0 && y >= 0 && x < TEX_WIDTH && y < TEX_HEIGHT) {
-            int index = y * textureWidth + x;
-            if (depth < depthBuff[index]) {
-                depthBuff[index] = depth;
-                texData[y][x][0] = (GLubyte) color.r;
-                texData[y][x][1] = (GLubyte) color.g;
-                texData[y][x][2] = (GLubyte) color.b;
-                texData[y][x][3] = (GLubyte) color.a;
-            }
-        }
-    }
-
-    void TextureCube::setPixel(int x, int y, float depth, const vec3 &color) {
-        setPixel(x, y, depth, vec4(color, 255));
-    }
-
     TextureCube::~TextureCube() {
         stbi_image_free(textureData);
-        delete[] depthBuff;
     }
 
 TEST_NODE_IMP_END

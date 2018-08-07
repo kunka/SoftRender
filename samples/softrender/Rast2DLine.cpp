@@ -44,7 +44,7 @@ TEST_NODE_IMP_BEGIN
     void Rast2DLine::draw(const mat4 &transform) {
         memset(texData, 0, TEX_WIDTH * TEX_HEIGHT * 4);
 
-        clipLine = Input::getInstance()->isKeyPressed(GLFW_KEY_C);
+        isClipRect = Input::getInstance()->isKeyPressed(GLFW_KEY_C);
         for (int i = 0; i < lines.size(); i += 2) {
             vec2 p1 = lines[i];
             vec2 p2 = lines[i + 1];
@@ -79,32 +79,40 @@ TEST_NODE_IMP_BEGIN
                     p1.x += (maxY - p1.y) / m;
                     p1.y = maxY;
                 }
-
-                if (code2 & 1) {
-                    p2.y += m * (minX - p2.x);
-                    p2.x = minX;
-                } else if (code2 & 2) {
-                    p2.y += m * (maxX - p2.x);
-                    p2.x = maxX;
-                } else if (code2 & 4) {
-                    p2.x += (minY - p2.y) / m;
-                    p2.y = minY;
-                } else if (code2 & 8) {
-                    p2.x += (maxY - p2.y) / m;
-                    p2.y = maxY;
+                code1 = encode(p1, minX, maxX, minY, maxY);
+                if (code1 == 0 and code2 == 0) {
+                    return true;
+                } else if (code1 & code2) {
+                    return false;
+                } else {
+                    if (code2 & 1) {
+                        p2.y += m * (minX - p2.x);
+                        p2.x = minX;
+                    } else if (code2 & 2) {
+                        p2.y += m * (maxX - p2.x);
+                        p2.x = maxX;
+                    } else if (code2 & 4) {
+                        p2.x += (minY - p2.y) / m;
+                        p2.y = minY;
+                    } else if (code2 & 8) {
+                        p2.x += (maxY - p2.y) / m;
+                        p2.y = maxY;
+                    }
                 }
             }
         }
     }
 
     /*
-     *        8
-     *     -------
-     *    |       |
-     *  1 |   0   | 2
-     *    |       |
-     *     -------
-     *        4
+     * Cohen-Sutherland
+     *
+     *  8+1    8     8+2
+     *      -------
+     *     |       |
+     *   1 |   0   |  2
+     *     |       |
+     *      -------
+     *  4+1    4     4+2
      */
     int Rast2DLine::encode(const vec2 &p, int minX, int maxX, int minY, int maxY) {
         int code = 0;
@@ -123,7 +131,7 @@ TEST_NODE_IMP_BEGIN
         vec2 p1 = pa;
         vec2 p2 = pb;
 
-        if (clipLine &&
+        if (isClipRect &&
             !clip_a_line(p1, p2, clipRect.getMinX(), clipRect.getMaxX(), clipRect.getMinY(), clipRect.getMaxY())) {
             return;
         }
@@ -144,16 +152,16 @@ TEST_NODE_IMP_BEGIN
                 stepY = dy > 0 ? fabs(dy / dx) : -fabs(dy / dx);
         }
         float x = p1.x, y = p1.y;
-        setPixel(x, y, color);
+        setPixel(x, y, 0, color);
         for (int k = 1; k <= steps; k++) {
             x += stepX;
             y += stepY;
             if (k == steps) {
-                setPixel(x, y, color2);
+                setPixel(x, y, 0, color2);
             } else
-                setPixel(x, y, interp(color, color2, 1.0f * k / steps));
+                setPixel(x, y, 0, interp(color, color2, 1.0f * k / steps));
         }
-        setPixel(p2.x, p2.y, color2);
+        setPixel(p2.x, p2.y, 0, color2);
     }
 
     Rast2DLine::~Rast2DLine() {

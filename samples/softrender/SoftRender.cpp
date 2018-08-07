@@ -66,6 +66,11 @@ void main()
 
         shader.use();
         shader.setInt("ourTexture", 0);
+
+        clipRect.setRect(0, 0, TEX_WIDTH, TEX_HEIGHT);
+        isClipRect = true;
+        depthBuff = new float[TEX_WIDTH * TEX_HEIGHT];
+        depthTest = false;
     }
 
     void SoftRender::draw(const mat4 &transform) {
@@ -86,6 +91,7 @@ void main()
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &EBO);
+        delete[] depthBuff;
     }
 
     unsigned int SoftRender::genTexture() {
@@ -106,17 +112,21 @@ void main()
         return textureID;
     }
 
-    void SoftRender::setPixel(int x, int y, const vec4 &color) {
+    void SoftRender::setPixel(int x, int y, float depth, const vec4 &color) {
         if (x >= 0 && y >= 0 && x < TEX_WIDTH && y < TEX_HEIGHT) {
-            texData[y][x][0] = (GLubyte) color.r;
-            texData[y][x][1] = (GLubyte) color.g;
-            texData[y][x][2] = (GLubyte) color.b;
-            texData[y][x][3] = (GLubyte) color.a;
+            int index = y * TEX_WIDTH + x;
+            if (!depthTest or depth < depthBuff[index]) {
+                depthBuff[index] = depth;
+                texData[y][x][0] = (GLubyte) color.r;
+                texData[y][x][1] = (GLubyte) color.g;
+                texData[y][x][2] = (GLubyte) color.b;
+                texData[y][x][3] = (GLubyte) color.a;
+            }
         }
     }
 
-    void SoftRender::setPixel(int x, int y, const vec3 &color) {
-        setPixel(x, y, vec4(color, 255));
+    void SoftRender::setPixel(int x, int y, float depth, const vec3 &color) {
+        setPixel(x, y, depth, vec4(color, 255));
     }
 
     float SoftRender::interp(float f1, float f2, float t) {
@@ -129,6 +139,30 @@ void main()
 
     vec3 SoftRender::interp(const vec3 &v1, const vec3 &v2, float t) {
         return vec3(v1.x + (v2.x - v1.x) * t, v1.y + (v2.y - v1.y) * t, v1.z + (v2.z - v1.z) * t);
+    }
+
+    void SoftRender::setDepthTest(bool depthTest) {
+        this->depthTest = depthTest;
+    }
+
+    void SoftRender::clearColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a) {
+        int color = a << 24 | r << 16 | g << 8 | b;
+        memset(texData, color, TEX_WIDTH * TEX_HEIGHT * 4);
+    }
+
+    void SoftRender::clearDepth() {
+        for (int i = 0; i < TEX_WIDTH * TEX_HEIGHT; i++)
+            depthBuff[i] = INT_MAX;
+    }
+
+    bool SoftRender::cvvCull(vec4 triangle[3]) {
+        return !inCvv(triangle[0]) && !inCvv(triangle[1]) && !inCvv(triangle[2]);
+//        return !inCvv(triangle[0]) || !inCvv(triangle[1]) || !inCvv(triangle[2]);
+    }
+
+    bool SoftRender::inCvv(const vec4 &vector) {
+        float w = fabs(vector.w);
+        return w > 0.01 && fabs(vector.x) < w && fabs(vector.y) < w && fabs(vector.z) < w;
     }
 
 TEST_NODE_IMP_END

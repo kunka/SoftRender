@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(RastCube);
         ADD_TEST_SCENE(TextureCube);
 
-        auto currentScene = "TextureCube";
+        auto currentScene = "Rast2DTriangle";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {

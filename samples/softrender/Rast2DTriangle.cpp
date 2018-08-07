@@ -25,8 +25,7 @@ TEST_NODE_IMP_BEGIN
     void Rast2DTriangle::draw(const mat4 &transform) {
         memset(texData, 0, TEX_WIDTH * TEX_HEIGHT * 4);
 
-        clipLine = Input::getInstance()->isKeyPressed(GLFW_KEY_C);
-
+        isClipRect = Input::getInstance()->isKeyPressed(GLFW_KEY_C);
         for (int i = 0; i < triangles.size(); i += 3) {
             vec2 p1 = triangles[i];
             vec2 p2 = triangles[i + 1];
@@ -101,7 +100,6 @@ TEST_NODE_IMP_BEGIN
             fill(mid, midP, min, midColor, c, minColor);
         }
     }
-
 
     Rast2DTriangle::~Rast2DTriangle() {
     }

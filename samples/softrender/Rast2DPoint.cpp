@@ -25,18 +25,10 @@ TEST_NODE_IMP_BEGIN
                                    vec2(TEX_WIDTH / 2, TEX_HEIGHT / 4 * 3),
                                    vec2(TEX_WIDTH / 4 * 3, TEX_HEIGHT / 4 * 3),};
 
-//        for (i = 0; i < TEX_HEIGHT; i++) {
-//            for (j = 0; j < TEX_WIDTH; j++) {
-//                texData[i][j][0] = (GLubyte) 255;
-//                texData[i][j][1] = (GLubyte) 0;
-//                texData[i][j][2] = (GLubyte) 255;
-//                texData[i][j][3] = (GLubyte) 255;
-//            }
-//        }
         vec3 color(255, 0, 0);
         for (i = 0; i < POINTS_NUM; i++) {
             vec2 p = points[i];
-            setPixel(p.x, p.y, color);
+            setPixel(p.x, p.y, 0, color);
         }
 
         SoftRender::draw(transform);

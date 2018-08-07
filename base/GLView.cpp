@@ -21,7 +21,7 @@ void keycallback(GLFWwindow *window, int key, int scancode, int action, int mods
         if (key == GLFW_KEY_LEFT) {
             CustomDraw::currentSceneIndex--;
             if (CustomDraw::currentSceneIndex < 0) {
-                CustomDraw::currentSceneIndex = CustomDraw::testScenes.size() - 1;
+                CustomDraw::currentSceneIndex = (int)CustomDraw::testScenes.size() - 1;
             }
             auto pair = CustomDraw::testScenes[CustomDraw::currentSceneIndex];
             Director::getInstance()->replaceScene(pair.second());
