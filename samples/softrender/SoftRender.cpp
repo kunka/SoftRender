@@ -71,6 +71,8 @@ void main()
         isClipRect = true;
         depthBuff = new float[TEX_WIDTH * TEX_HEIGHT];
         depthTest = false;
+        faceCulling = false;
+        projectMatrix.perspective(radians(60.0f), (float) TEX_WIDTH / TEX_HEIGHT, 0.1, 100.0f);
     }
 
     void SoftRender::draw(const mat4 &transform) {
@@ -129,6 +131,10 @@ void main()
         setPixel(x, y, depth, vec4(color, 255));
     }
 
+    void SoftRender::setPixel(int x, int y, int z, float u, float v) {
+        // override to sample
+    }
+
     float SoftRender::interp(float f1, float f2, float t) {
         return f1 + (f2 - f1) * t;
     }
@@ -145,6 +151,10 @@ void main()
         this->depthTest = depthTest;
     }
 
+    void SoftRender::setFaceCull(bool cull) {
+        this->faceCulling = cull;
+    }
+
     void SoftRender::clearColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a) {
         int color = a << 24 | r << 16 | g << 8 | b;
         memset(texData, color, TEX_WIDTH * TEX_HEIGHT * 4);
@@ -155,14 +165,42 @@ void main()
             depthBuff[i] = INT_MAX;
     }
 
+    bool SoftRender::inCvv(const vec4 &vector) {
+        float w = fabs(vector.w);
+        return w > 0.01 && fabs(vector.x) < w && fabs(vector.y) < w && fabs(vector.z) < w;
+    }
+
     bool SoftRender::cvvCull(vec4 triangle[3]) {
         return !inCvv(triangle[0]) && !inCvv(triangle[1]) && !inCvv(triangle[2]);
 //        return !inCvv(triangle[0]) || !inCvv(triangle[1]) || !inCvv(triangle[2]);
     }
 
-    bool SoftRender::inCvv(const vec4 &vector) {
-        float w = fabs(vector.w);
-        return w > 0.01 && fabs(vector.x) < w && fabs(vector.y) < w && fabs(vector.z) < w;
+    bool SoftRender::faceCull(vec3 triangle[3]) {
+        if (faceCulling) {
+            vec3 cameraP = vec3(cameraPos.x, cameraPos.y, cameraPos.z);
+            vec3 v1 = triangle[1] - triangle[0];
+            vec3 v2 = triangle[2] - triangle[0];
+            vec3 normal = glm::cross(v1, v2);
+            vec3 v0 = vec3(triangle[0]) - cameraP;
+            return glm::dot(v0, normal) >= 0;
+        } else {
+            return false;
+        }
+    }
+
+    bool SoftRender::pointToScreen(vec4 triangle[3]) {
+        for (int j = 0; j < 3; j++) {
+            vec4 &p = triangle[j];
+            // （透视除法） --> NDC空间
+            p.x /= p.w; // [-1,1]
+            p.y /= p.w; // [-1,1]
+            p.z /= p.w; // [-1,1]
+            //p.w 顶点到相机的距离
+            //p.w = 1.0;
+            // NDC空间 --> 窗口坐标（视口变换）
+            p.x = (p.x + 1.0f) / 2.0f * TEX_WIDTH;
+            p.y = (p.y + 1.0f) / 2.0f * TEX_HEIGHT;
+        }
     }
 
 TEST_NODE_IMP_END

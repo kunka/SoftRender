@@ -2,9 +2,13 @@
 // Created by huangkun on 2018/6/17.
 //
 
-#include "Math.h"
+#include "MathUtil.h"
 #include <math.h>
 #include <string.h>
+
+int MathUtil::clamp(int x, int min, int max) {
+    return (x < min) ? min : ((x > max) ? max : x);
+}
 
 Vector::Vector() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
 
@@ -118,7 +122,7 @@ void Matrix::scale(float scale) {
  * 0 0 s 0
  * 0 0 0 1
  */
-void Matrix::scale(const Vector& scale) {
+void Matrix::scale(const Vector &scale) {
     m[0][0] *= scale.x;
     m[1][1] *= scale.y;
     m[2][2] *= scale.z;

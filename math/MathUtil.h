@@ -2,12 +2,17 @@
 // Created by huangkun on 2018/6/17.
 //
 
-#ifndef GL_MATH_H
-#define GL_MATH_H
+#ifndef GL_MATHUTIL_H
+#define GL_MATHUTIL_H
 
 #include "stdio.h"
 
 #define FLT_EQL(f1, f2) (std::abs(f1-f2)<FLT_EPSILON)
+
+class MathUtil {
+public:
+    static int clamp(int x, int min, int max);
+};
 
 class Vector {
 public:
@@ -63,4 +68,4 @@ public:
     void perspective(float fovy, float aspect, float near, float far);
 };
 
-#endif //GL_MATH_H
+#endif //GL_MATHUTIL_H

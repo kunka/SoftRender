@@ -6,7 +6,6 @@
 #define GL_TRANSFORM2D_H
 
 #include "Rast2DTriangle.h"
-#include "Math.h"
 
 TEST_NODE_BEGIN2(RastCube, Rast2DTriangle)
 
