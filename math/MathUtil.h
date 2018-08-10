@@ -6,6 +6,7 @@
 #define GL_MATHUTIL_H
 
 #include "stdio.h"
+#include <glm/glm.hpp>
 
 #define FLT_EQL(f1, f2) (std::abs(f1-f2)<FLT_EPSILON)
 
@@ -35,6 +36,12 @@ public:
     Vector interp(const Vector &v1, const Vector &v2, float t);
 
     void normalize();
+
+    glm::vec2 vec2();
+
+    glm::vec3 vec3();
+
+    glm::vec4 vec4();
 };
 
 class Matrix {

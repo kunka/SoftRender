@@ -59,7 +59,7 @@ TEST_NODE_IMP_BEGIN
         clearColor(0, 0, 0, 0);
 
         Matrix model;
-        model.rotate(Vector(0, 1, 0), radians(30.0f));
+        model.rotate(Vector(0, 1, 0), radians(10.0f));
 //        model.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
         vec3 target = cameraPos + cameraDir;
         viewMatrix.lookAt(Vector(cameraPos.x, cameraPos.y, cameraPos.z), Vector(target.x, target.y, target.z),

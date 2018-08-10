@@ -15,6 +15,18 @@ Vector::Vector() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
 Vector::Vector(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {
 }
 
+glm::vec2 Vector::vec2() {
+    return glm::vec2(x, y);
+}
+
+glm::vec3 Vector::vec3() {
+    return glm::vec3(x, y, z);
+}
+
+glm::vec4 Vector::vec4() {
+    return glm::vec4(x, y, z, w);
+}
+
 float Vector::length() {
     return sqrt(x * x + y * y + z * z);
 }

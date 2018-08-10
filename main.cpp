@@ -57,6 +57,7 @@
 #include "softrender/Rast2DTriangle.h"
 #include "softrender/RastCube.h"
 #include "softrender/TextureCube.h"
+#include "softrender/Lighting.h"
 
 template<typename T>
 Scene *createScene() {
@@ -124,8 +125,9 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(Rast2DTriangle);
         ADD_TEST_SCENE(RastCube);
         ADD_TEST_SCENE(TextureCube);
+        ADD_TEST_SCENE(Lighting);
 
-        auto currentScene = "TextureCube";
+        auto currentScene = "Lighting";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {

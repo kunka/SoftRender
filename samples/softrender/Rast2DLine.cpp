@@ -37,11 +37,10 @@ TEST_NODE_IMP_BEGIN
             lines.push_back(vec2(TEX_WIDTH * (rand() % 100 / 100.0f), TEX_HEIGHT * (rand() % 100 / 100.0f)));
             lines.push_back(vec2(TEX_WIDTH * (rand() % 100 / 100.0f), TEX_HEIGHT * (rand() % 100 / 100.0f)));
         }
-
-        clipRect.setRect(TEX_WIDTH / 4, TEX_WIDTH / 4, TEX_HEIGHT / 2, TEX_HEIGHT / 2);
     }
 
     void Rast2DLine::draw(const mat4 &transform) {
+        clipRect.setRect(TEX_WIDTH / 4, TEX_WIDTH / 4, TEX_HEIGHT / 2, TEX_HEIGHT / 2);
         memset(texData, 0, TEX_WIDTH * TEX_HEIGHT * 4);
 
         isClipRect = Input::getInstance()->isKeyPressed(GLFW_KEY_C);

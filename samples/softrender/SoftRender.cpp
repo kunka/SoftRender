@@ -147,6 +147,11 @@ void main()
         return vec3(v1.x + (v2.x - v1.x) * t, v1.y + (v2.y - v1.y) * t, v1.z + (v2.z - v1.z) * t);
     }
 
+    vec4 SoftRender::interp(const vec4 &v1, const vec4 &v2, float t) {
+        return vec4(v1.x + (v2.x - v1.x) * t, v1.y + (v2.y - v1.y) * t, v1.z + (v2.z - v1.z) * t,
+                    v1.w + (v2.w - v1.w) * t);
+    }
+
     void SoftRender::setDepthTest(bool depthTest) {
         this->depthTest = depthTest;
     }
@@ -177,18 +182,26 @@ void main()
 
     bool SoftRender::faceCull(vec3 triangle[3]) {
         if (faceCulling) {
-            vec3 cameraP = vec3(cameraPos.x, cameraPos.y, cameraPos.z);
             vec3 v1 = triangle[1] - triangle[0];
             vec3 v2 = triangle[2] - triangle[0];
             vec3 normal = glm::cross(v1, v2);
-            vec3 v0 = vec3(triangle[0]) - cameraP;
+            vec3 v0 = vec3(triangle[0]) - cameraPos;
             return glm::dot(v0, normal) >= 0;
         } else {
             return false;
         }
     }
 
-    bool SoftRender::pointToScreen(vec4 triangle[3]) {
+    bool SoftRender::faceCull(const vec3 &triangle1, const vec3 &normal) {
+        if (faceCulling) {
+            vec3 v0 = vec3(triangle1) - cameraPos;
+            return glm::dot(v0, normal) >= 0;
+        } else {
+            return false;
+        }
+    }
+
+    void SoftRender::pointToScreen(vec4 triangle[3]) {
         for (int j = 0; j < 3; j++) {
             vec4 &p = triangle[j];
             // （透视除法） --> NDC空间
@@ -197,6 +210,7 @@ void main()
             p.z /= p.w; // [-1,1]
             //p.w 顶点到相机的距离
             //p.w = 1.0;
+            p.w = 1.0f / p.w;
             // NDC空间 --> 窗口坐标（视口变换）
             p.x = (p.x + 1.0f) / 2.0f * TEX_WIDTH;
             p.y = (p.y + 1.0f) / 2.0f * TEX_HEIGHT;

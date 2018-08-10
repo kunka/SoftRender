@@ -31,9 +31,12 @@
 struct VertexCoords {
     vec4 p;
     vec2 uv;
+    std::vector<vec4> varying;
 };
 
 TEST_NODE_BEGIN(SoftRender)
+
+        vec4 interp(const vec4 &v1, const vec4 &v2, float t);
 
         vec3 interp(const vec3 &v1, const vec3 &v2, float t);
 
@@ -62,7 +65,9 @@ TEST_NODE_BEGIN(SoftRender)
 
         bool faceCull(vec3 triangle[3]);
 
-        bool pointToScreen(vec4 triangle[3]);
+        bool faceCull(const vec3 &triangle1, const vec3 &normal);
+
+        void pointToScreen(vec4 triangle[3]);
 
         bool inCvv(const vec4 &vector);
 
