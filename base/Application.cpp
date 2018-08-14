@@ -40,6 +40,8 @@ int Application::run() {
     auto director = Director::getInstance();
     auto glView = director->getGLView();
 
+    int count = 0;
+    long start = nowInMS();
     while (glView && !glView->windowShouldClose()) {
         last = nowInMS();
         if (now == 0) {
@@ -53,6 +55,13 @@ int Application::run() {
         now = nowInMS();
         if (now - last < _interval) {
             usleep(static_cast<useconds_t>((_interval - now + last) * 1000));
+        }
+        count++;
+        if (count >= 10) {
+            now = nowInMS();
+            log("FPS = %.1f", 1000.0f / ((now - start) / count));
+            count = 0;
+            start = now;
         }
     }
 

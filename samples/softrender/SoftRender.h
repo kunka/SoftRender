@@ -9,8 +9,8 @@
 #include "MathUtil.h"
 #include "Texture2D.h"
 
-#define TEX_WIDTH   512
-#define TEX_HEIGHT  512
+#define TEX_WIDTH   1024
+#define TEX_HEIGHT  1024
 
 /*
  * -------[顶点处理]--------
@@ -36,13 +36,29 @@ struct VertexCoords {
 
 TEST_NODE_BEGIN(SoftRender)
 
-        vec4 interp(const vec4 &v1, const vec4 &v2, float t);
+        inline float interp(float f1, float f2, float t) {
+            return f1 + (f2 - f1) * t;
+        }
 
-        vec3 interp(const vec3 &v1, const vec3 &v2, float t);
+        inline vec2 interp(const vec2 &v1, const vec2 &v2, float t) {
+            return vec2(v1.x + (v2.x - v1.x) * t, v1.y + (v2.y - v1.y) * t);
+        }
 
-        vec2 interp(const vec2 &v1, const vec2 &v2, float t);
+        inline vec3 interp(const vec3 &v1, const vec3 &v2, float t) {
+            return vec3(v1.x + (v2.x - v1.x) * t, v1.y + (v2.y - v1.y) * t, v1.z + (v2.z - v1.z) * t);
+        }
 
-        float interp(float f1, float f2, float t);
+        inline vec4 interp(const vec4 &v1, const vec4 &v2, float t) {
+            return vec4(v1.x + (v2.x - v1.x) * t, v1.y + (v2.y - v1.y) * t, v1.z + (v2.z - v1.z) * t,
+                        v1.w + (v2.w - v1.w) * t);
+        }
+
+        template<typename T>
+        inline void swap(T &v1, T &v2) {
+            T tmp = v1;
+            v1 = v2;
+            v2 = tmp;
+        }
 
     protected:
         unsigned int genTexture();
@@ -52,6 +68,8 @@ TEST_NODE_BEGIN(SoftRender)
         void setPixel(int x, int y, float depth, const vec4 &color);
 
         void setPixel(int x, int y, float depth, const vec3 &color);
+
+        void drawPoint(const vec3 &worldPos, const vec3 &color);
 
         void setDepthTest(bool depthTest);
 
@@ -67,7 +85,7 @@ TEST_NODE_BEGIN(SoftRender)
 
         bool faceCull(const vec3 &triangle1, const vec3 &normal);
 
-        void pointToScreen(vec4 triangle[3]);
+        void pointToScreen(vec4 *triangle, int num = 3);
 
         bool inCvv(const vec4 &vector);
 
@@ -79,6 +97,7 @@ TEST_NODE_BEGIN(SoftRender)
         float *depthBuff;
         Rect clipRect;
         bool isClipRect;
+        Matrix modelMatrix;
         Matrix viewMatrix;
         Matrix projectMatrix;
 

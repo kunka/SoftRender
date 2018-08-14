@@ -38,7 +38,6 @@ TEST_NODE_IMP_BEGIN
                 dda_line(p2, p3, vec3(0, 255, 0), vec3(0, 0, 255));
             }
         }
-
         SoftRender::draw(transform);
     }
 

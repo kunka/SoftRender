@@ -62,33 +62,32 @@ TEST_NODE_IMP_BEGIN
         clearColor(50, 50, 50, 255);
         clearDepth();
 
-        Matrix model;
-        model.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
-        Matrix identity;
-        identity.rotate(Vector(1, 0, 0), radians(-30.0f));
-        model.mult(identity);
+        modelMatrix.setIdentity();
+        modelMatrix.translate(Vector(0.5, -0.5, 0));
+        modelMatrix.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
+        modelMatrix.rotate(Vector(1, 0, 0), radians(30.0f));
+        modelMatrix.scale(Vector(1.5f, 2, 0.5));
         vec3 target = cameraPos + cameraDir;
-        viewMatrix.lookAt(Vector(cameraPos.x, cameraPos.y, cameraPos.z), Vector(target.x, target.y, target.z),
-                          Vector(cameraUp.x, cameraUp.y, cameraUp.z));
-        Matrix m = model;
+        viewMatrix = Matrix::lookAt(Vector(cameraPos.x, cameraPos.y, cameraPos.z), Vector(target.x, target.y, target.z),
+                                    Vector(cameraUp.x, cameraUp.y, cameraUp.z));
+        Matrix m = modelMatrix;
         m.mult(viewMatrix);
         m.mult(projectMatrix);
-        vec2 last;
         int column = 5;
+        vec4 triangle[3];
+        vec3 triangleWorld[3];
+        vec2 uv[3];
         for (int i = 0; i < vertices.size(); i += column * 3) {
-            vec4 triangle[3];
-            vec3 triangleWorld[3];
-            vec2 uv[3];
             for (int j = 0; j < 3; j++) {
                 int row = i + j * column;
                 vec4 p = vec4(vertices.at(row), vertices.at(row + 1),
                               vertices.at(row + 2), 1.0);
                 // 模型 --> 世界 --> 相机空间 --> 齐次裁剪空间，xyz ~ [-w，w], w = Z(相机空间)
-                Vector v = m.apply(Vector(p.x, p.y, p.z));
+                Vector v = m.applyPoint(Vector(p.x, p.y, p.z));
                 triangle[j] = vec4(v.x, v.y, v.z, v.w);
                 uv[j] = vec2(vertices.at(row + 3), vertices.at(row + 4));
 
-                Vector v0 = model.apply(Vector(p.x, p.y, p.z));
+                Vector v0 = modelMatrix.applyPoint(Vector(p.x, p.y, p.z));
                 triangleWorld[j] = vec3(v0.x, v0.y, v0.z);
             }
             if (cvvCull(triangle)) {
@@ -270,6 +269,7 @@ TEST_NODE_IMP_BEGIN
             varying2[m] = interp(varyingA[m], varyingB[m], f2);
         }
 
+        // DDA
         float dy = p2.y - p1.y;
         float dx = p2.x - p1.x;
         float stepX, stepY;
@@ -302,6 +302,51 @@ TEST_NODE_IMP_BEGIN
             setPixel(x, y, z, uv0.x / w, uv0.y / w, interpVarying, uniforms);
         }
         setPixel(p2.x, p2.y, p2.z, uv12.x / p2.w, uv12.y / p2.w, varying2, uniforms);
+
+        // Bresenham
+//        float x0 = p1.x, x1 = p2.x, y0 = p1.y, y1 = p2.y;
+//        bool flip = abs(y1 - y0) > abs(x1 - x0);
+//        if (flip) {
+//            swap(x0, y0);
+//            swap(x1, y1);
+//        }
+//        if (x0 > x1) {
+//            swap(x0, x1);
+//            swap(y0, y1);
+//        }
+//        int dx = x1 - x0;
+//        int dy = abs(y1 - y0);
+//        int error = dx / 2;
+//        int ystep = y0 < y1 ? 1 : -1;
+//        int y = y0;
+//        for (int x = x0; x <= x1; x++) {
+//            if (flip) {
+//                float f = dx == 0 ? (y - y0) / (float) dy : (x - x0) / (float) dx;
+//                float z = interp(p1.z, p2.z, f);
+//                float w = interp(p1.w, p2.w, f);
+//                vec2 uv0 = interp(uv11, uv12, f);
+//                std::vector<vec4> interpVarying;
+//                for (int m = 0; m < varyingA.size(); m++) {
+//                    interpVarying.push_back(interp(varying1[m], varying2[m], f));
+//                }
+//                setPixel(y, x, p1.z, uv11.x / p1.w, uv11.y / p1.w, varying1, uniforms);
+//            } else {
+//                float f = dx == 0 ? (y - y0) / (float) dy : (x - x0) / (float) dx;
+//                float z = interp(p1.z, p2.z, f);
+//                float w = interp(p1.w, p2.w, f);
+//                vec2 uv0 = interp(uv11, uv12, f);
+//                std::vector<vec4> interpVarying;
+//                for (int m = 0; m < varyingA.size(); m++) {
+//                    interpVarying.push_back(interp(varying1[m], varying2[m], f));
+//                }
+//                setPixel(x, y, p1.z, uv11.x / p1.w, uv11.y / p1.w, varying1, uniforms);
+//            }
+//            error = error - dy;
+//            if (error < 0) {
+//                y += ystep;
+//                error += dx;
+//            }
+//        }
     }
 
     void TextureCube::setPixel(int x, int y, int z, float u, float v, const std::vector<vec4> &varying,

@@ -12,7 +12,7 @@
 
 class MathUtil {
 public:
-    static int clamp(int x, int min, int max);
+    static float clamp(float x, float min, float max);
 };
 
 class Vector {
@@ -33,8 +33,6 @@ public:
 
     Vector cross(const Vector &other);
 
-    Vector interp(const Vector &v1, const Vector &v2, float t);
-
     void normalize();
 
     glm::vec2 vec2();
@@ -46,6 +44,13 @@ public:
 
 class Matrix {
 public:
+    /*
+     * OPENGL右手坐标系，左乘矩阵，右乘列向量，列主序存储
+     * | 00 10 20 30 |
+     * | 01 11 21 31 |
+     * | 02 12 22 32 |
+     * | 03 13 23 33 |
+     */
     float m[4][4];
 
     Matrix();
@@ -60,7 +65,9 @@ public:
 
     void mult(const Matrix &other);
 
-    Vector apply(const Vector &v);
+    Vector applyVector(const Vector &v);
+
+    Vector applyPoint(const Vector &v);
 
     void scale(float scale);
 
@@ -70,9 +77,9 @@ public:
 
     void rotate(const Vector &pivot, float theta);
 
-    void lookAt(const Vector &eye, const Vector &target, const Vector &up);
+    static Matrix lookAt(const Vector &eye, const Vector &target, const Vector &up);
 
-    void perspective(float fovy, float aspect, float near, float far);
+    static Matrix perspective(float fovy, float aspect, float near, float far);
 };
 
 #endif //GL_MATHUTIL_H

@@ -3,6 +3,7 @@
 //
 
 #include "Lighting.h"
+#include "Input.h"
 
 TEST_NODE_IMP_BEGIN
 
@@ -54,27 +55,32 @@ TEST_NODE_IMP_BEGIN
         };
         texture2D.load("../res/container.jpg");
 
-        cameraPos = vec3(0.0f, 0.0f, 3.0f);
-        view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
+//        cameraPos = vec3(0.0f, 0.0f, 3.0f);
+//        view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
+
+        lightPos = vec3(0.0, 1.0, 0.0);
+        lightColor = vec3(1.0, 1.0, 1.0);
     }
 
+    // pitch and yaw
     void Lighting::draw(const mat4 &transform) {
         setDepthTest(true);
         setFaceCull(true);
         clearColor(50, 50, 50, 255);
         clearDepth();
 
-        Matrix model;
-        model.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
-        Matrix identity;
-        identity.rotate(Vector(1, 0, 0), radians(-20.0f));
-        model.mult(identity);
+        modelMatrix.setIdentity();
+        modelMatrix.translate(Vector(-0.5f, -1.0f, 0.0f));
+//        modelMatrix.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
+        modelMatrix.rotate(Vector(1, 1, 0), radians(45.0f));
         vec3 target = cameraPos + cameraDir;
-        viewMatrix.lookAt(Vector(cameraPos.x, cameraPos.y, cameraPos.z), Vector(target.x, target.y, target.z),
-                          Vector(cameraUp.x, cameraUp.y, cameraUp.z));
-        Matrix m = model;
+        viewMatrix = Matrix::lookAt(Vector(cameraPos.x, cameraPos.y, cameraPos.z),
+                                    Vector(target.x, target.y, target.z),
+                                    Vector(cameraUp.x, cameraUp.y, cameraUp.z));
+        Matrix m = modelMatrix;
         m.mult(viewMatrix);
         m.mult(projectMatrix);
+
         vec2 last;
         int column = 8;
         for (int i = 0; i < vertices.size(); i += column * 3) {
@@ -87,13 +93,15 @@ TEST_NODE_IMP_BEGIN
                 vec4 p = vec4(vertices.at(row), vertices.at(row + 1),
                               vertices.at(row + 2), 1.0);
                 // 模型 --> 世界 --> 相机空间 --> 齐次裁剪空间，xyz ~ [-w，w], w = Z(相机空间)
-                Vector v = m.apply(Vector(p.x, p.y, p.z));
+                Vector v = m.applyPoint(Vector(p.x, p.y, p.z));
+
                 triangle[j] = vec4(v.x, v.y, v.z, v.w);
                 normals[j] = Vector(vertices.at(row + 3), vertices.at(row + 4), vertices.at(row + 5));
                 uv[j] = vec2(vertices.at(row + 6), vertices.at(row + 7));
 
-                Vector v0 = model.apply(Vector(p.x, p.y, p.z));
+                Vector v0 = modelMatrix.applyPoint(Vector(p.x, p.y, p.z));
                 triangleWorld[j] = vec3(v0.x, v0.y, v0.z);
+//                triangleWorld[j] = model * p;
             }
             if (cvvCull(triangle)) {
                 // 简单CVV裁剪，三角形3个点有一个不在cvv立方体内将被裁剪掉
@@ -111,10 +119,18 @@ TEST_NODE_IMP_BEGIN
 
             // 光栅化
 //            log("%f,%f,%f", triangleWorld[0].x, triangleWorld[0].y, triangleWorld[0].z);
+//            mat4 matrix = mat4(modelMatrix.m[0][0], modelMatrix.m[1][0], modelMatrix.m[2][0], modelMatrix.m[3][0],
+//                               modelMatrix.m[0][1], modelMatrix.m[1][1], modelMatrix.m[2][1], modelMatrix.m[3][1],
+//                               modelMatrix.m[0][2], modelMatrix.m[1][2], modelMatrix.m[2][2], modelMatrix.m[3][2],
+//                               modelMatrix.m[0][3], modelMatrix.m[1][3], modelMatrix.m[2][3], modelMatrix.m[3][3]);
+//            matrix = glm::transpose(glm::inverse(matrix));
             vec3 norms[] = {
-                    model.apply(normals[0]).vec3(),
-                    model.apply(normals[1]).vec3(),
-                    model.apply(normals[2]).vec3(),
+//                    matrix * vec4(normals[0].x, normals[0].y, normals[0].z, 0),
+//                    matrix * vec4(normals[1].x, normals[1].y, normals[1].z, 0),
+//                    matrix * vec4(normals[2].x, normals[2].y, normals[2].z, 0),
+                    modelMatrix.applyVector(normals[0]).vec3(),
+                    modelMatrix.applyVector(normals[1]).vec3(),
+                    modelMatrix.applyVector(normals[2]).vec3(),
             };
             std::vector<VertexCoords> verts = {
                     {triangle[0], uv[0] * triangle[0].w, {vec4(triangleWorld[0], 0), vec4(norms[0], 0)}},
@@ -122,6 +138,9 @@ TEST_NODE_IMP_BEGIN
                     {triangle[2], uv[2] * triangle[2].w, {vec4(triangleWorld[2], 0), vec4(norms[2], 0)}}};
             fill(verts);
         }
+        // draw light
+        drawPoint(lightPos, vec4(lightColor.x * 255, lightColor.y * 255, lightColor.z * 255, 255));
+
         SoftRender::draw(transform);
         setDepthTest(false);
         setFaceCull(false);
@@ -131,16 +150,13 @@ TEST_NODE_IMP_BEGIN
                             const std::vector<vec4> &uniforms) {
         const vec4 &textureColor = texture2D.sample(u, v);
 
-
-        vec3 lightPos = vec3(0, 1.5, 1.5);
-        vec3 lightColor = vec3(1.0, 1.0, 1.0);
         vec3 fragPos = varying[0];
         vec3 normal = glm::normalize(varying[1]);
         vec3 lightDir = glm::normalize(lightPos - fragPos);
         float diff = std::max(glm::dot(normal, lightDir), 0.0f);
 
         // ambient
-        vec3 ambient = lightColor * vec3(0.05f, 0.05f, 0.05f);
+        vec3 ambient = lightColor * vec3(0.2f, 0.2f, 0.2f);
         // diffuse
         vec3 diffuse = lightColor * diff;
         // specular
@@ -153,10 +169,10 @@ TEST_NODE_IMP_BEGIN
         vec3 halfwayDir = glm::normalize(lightDir + viewDir);
         float spec = pow(std::max(glm::dot(normal, halfwayDir), 0.0f), 16.0f);
 
-        vec3 specularColor = vec3(0.5, 0.5, 0.5);
+        vec3 specularColor = lightColor * vec3(0.5f, 0.5f, 0.5f);
         vec3 specular = specularColor * spec;
 
-        vec4 color = vec4(vec3(textureColor) * (diffuse + ambient + specular), 255);
+        vec4 color = vec4(vec3(textureColor) * (ambient + diffuse) + specular, 255);
         SoftRender::setPixel(x, y, z, color);
     }
 

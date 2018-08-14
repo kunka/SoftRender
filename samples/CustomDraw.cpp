@@ -35,9 +35,9 @@ void CustomDraw::fixedUpdate(float delta) {
     if (input->isKeyPressed(GLFW_KEY_S))
         cameraPos -= cameraSpeed * cameraDir;
     if (input->isKeyPressed(GLFW_KEY_A))
-        cameraPos += glm::normalize(glm::cross(cameraDir, cameraUp)) * cameraSpeed;
-    if (input->isKeyPressed(GLFW_KEY_D))
         cameraPos -= glm::normalize(glm::cross(cameraDir, cameraUp)) * cameraSpeed;
+    if (input->isKeyPressed(GLFW_KEY_D))
+        cameraPos += glm::normalize(glm::cross(cameraDir, cameraUp)) * cameraSpeed;
 
     // pitch and yaw
     vec2 deltaP = input->getMousePosDelta();

@@ -30,6 +30,8 @@ TEST_NODE_IMP_BEGIN
             vec2 p = points[i];
             setPixel(p.x, p.y, 0, color);
         }
+        setPixel(TEX_WIDTH / 4 * 3, TEX_HEIGHT / 4 * 3, 0, vec3(0, 255, 0));
+        setPixel(TEX_WIDTH / 4 * 3, TEX_HEIGHT / 4, 0, vec3(0, 0, 255));
 
         SoftRender::draw(transform);
     }

@@ -34,7 +34,7 @@ void main()
 )";
         shader.loadStr(vert, frag);
 
-        float ratio = 512.0f / 512.0f;
+        float ratio = (float) TEX_WIDTH / TEX_HEIGHT;
         float vertices[] = {
                 // postions       // texture coords
                 ratio, ratio, 0.0f, 1.0f, 1.0f, // top right
@@ -72,7 +72,7 @@ void main()
         depthBuff = new float[TEX_WIDTH * TEX_HEIGHT];
         depthTest = false;
         faceCulling = false;
-        projectMatrix.perspective(radians(60.0f), (float) TEX_WIDTH / TEX_HEIGHT, 0.1, 100.0f);
+        projectMatrix = Matrix::perspective(radians(60.0f), (float) TEX_WIDTH / TEX_HEIGHT, 0.1, 100.0f);
     }
 
     void SoftRender::draw(const mat4 &transform) {
@@ -135,23 +135,6 @@ void main()
         // override to sample
     }
 
-    float SoftRender::interp(float f1, float f2, float t) {
-        return f1 + (f2 - f1) * t;
-    }
-
-    vec2 SoftRender::interp(const vec2 &v1, const vec2 &v2, float t) {
-        return vec2(v1.x + (v2.x - v1.x) * t, v1.y + (v2.y - v1.y) * t);
-    }
-
-    vec3 SoftRender::interp(const vec3 &v1, const vec3 &v2, float t) {
-        return vec3(v1.x + (v2.x - v1.x) * t, v1.y + (v2.y - v1.y) * t, v1.z + (v2.z - v1.z) * t);
-    }
-
-    vec4 SoftRender::interp(const vec4 &v1, const vec4 &v2, float t) {
-        return vec4(v1.x + (v2.x - v1.x) * t, v1.y + (v2.y - v1.y) * t, v1.z + (v2.z - v1.z) * t,
-                    v1.w + (v2.w - v1.w) * t);
-    }
-
     void SoftRender::setDepthTest(bool depthTest) {
         this->depthTest = depthTest;
     }
@@ -201,8 +184,8 @@ void main()
         }
     }
 
-    void SoftRender::pointToScreen(vec4 triangle[3]) {
-        for (int j = 0; j < 3; j++) {
+    void SoftRender::pointToScreen(vec4 *triangle, int num) {
+        for (int j = 0; j < num; j++) {
             vec4 &p = triangle[j];
             // （透视除法） --> NDC空间
             p.x /= p.w; // [-1,1]
@@ -215,6 +198,22 @@ void main()
             p.x = (p.x + 1.0f) / 2.0f * TEX_WIDTH;
             p.y = (p.y + 1.0f) / 2.0f * TEX_HEIGHT;
         }
+    }
+
+    void SoftRender::drawPoint(const vec3 &worldPos, const vec3 &color) {
+        // draw light
+        Matrix m;
+        m.translate(Vector(worldPos.x, worldPos.y, worldPos.z));
+        m.mult(viewMatrix);
+        m.mult(projectMatrix);
+        Vector v = m.applyPoint(Vector(0, 0, 0));
+        vec4 point = vec4(v.x, v.y, v.z, v.w);
+        pointToScreen(&point, 1);
+        SoftRender::setPixel(point.x - 1, point.y, 0, color);
+        SoftRender::setPixel(point.x + 1, point.y, 0, color);
+        SoftRender::setPixel(point.x, point.y, 0, color);
+        SoftRender::setPixel(point.x, point.y - 1, 0, color);
+        SoftRender::setPixel(point.x, point.y + 1, 0, color);
     }
 
 TEST_NODE_IMP_END
