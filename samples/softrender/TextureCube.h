@@ -16,7 +16,7 @@ TEST_NODE_BEGIN2(TextureCube, RastCube)
 
         void dda_line(const VertexCoords &vert1, const VertexCoords &vert2, const std::vector<vec4> &uniforms = {});
 
-        virtual void setPixel(int x, int y, int z, float u, float v, const std::vector<vec4> &varying,
+        virtual void setPixel(int x, int y, int z, float u, float v, vec3 varying[],
                               const std::vector<vec4> &uniforms = {});
 
         Texture2D texture2D;

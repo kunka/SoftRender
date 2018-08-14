@@ -28,11 +28,33 @@
  * TODO:混合
  */
 
+#define MAX_VARYING_COUNT 5
+
 struct VertexCoords {
     vec4 p;
     vec2 uv;
-    std::vector<vec4> varying;
+    vec3 varying[MAX_VARYING_COUNT];
+    int varyingCount;
+
+    inline void interp(vec3 ret[], vec3 v1[], vec3 v2[], float t) const {
+        for (int i = 0; i < varyingCount; i++) {
+            ret[i].x = v1[i].x + (v2[i].x - v1[i].x) * t;
+            ret[i].y = v1[i].y + (v2[i].y - v1[i].y) * t;
+            ret[i].z = v1[i].z + (v2[i].z - v1[i].z) * t;
+        }
+    }
 };
+
+static VertexCoords createVertexCoords(const vec4 &p, const vec2 &uv, const vec3 varying[], int varyingCount) {
+    VertexCoords v;
+    v.p = p;
+    v.uv = uv;
+    if (varyingCount > 0) {
+        memcpy(v.varying, varying, sizeof(varying[0]) * varyingCount);
+    }
+    v.varyingCount = varyingCount;
+    return v;
+}
 
 TEST_NODE_BEGIN(SoftRender)
 

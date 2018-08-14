@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(Lighting);
         ADD_TEST_SCENE(LightingMap);
 
-        auto currentScene = "LightingMap";
+        auto currentScene = "Lighting";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {

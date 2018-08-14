@@ -125,9 +125,10 @@ TEST_NODE_IMP_BEGIN
         const auto &maxUV = verts[0].uv;
         const auto &midUV = verts[1].uv;
         const auto &minUV = verts[2].uv;
-        const auto &maxVarying = verts[0].varying;
-        const auto &midVarying = verts[1].varying;
-        const auto &minVarying = verts[2].varying;
+        vec3 *maxVarying = verts[0].varying;
+        vec3 *midVarying = verts[1].varying;
+        vec3 *minVarying = verts[2].varying;
+        int varyingCount = verts[0].varyingCount;
 
         /*
          * mid ---- max
@@ -147,31 +148,36 @@ TEST_NODE_IMP_BEGIN
             vec2 uv1, uv2;
             if (max.y == mid.y) {
 //                dda_line(mid, max, midUV, maxUV);
-                dda_line({mid, midUV, midVarying}, {max, maxUV, maxVarying}, uniforms);
+                dda_line(createVertexCoords(mid, midUV, midVarying, varyingCount),
+                         createVertexCoords(max, maxUV, maxVarying, varyingCount), uniforms);
             } else {
 //                dda_line(min, mid, minUV, midUV);
-                dda_line({min, minUV, minVarying}, {mid, midUV, midVarying}, uniforms);
+                dda_line(createVertexCoords(min, minUV, minVarying, varyingCount),
+                         createVertexCoords(mid, midUV, midVarying, varyingCount), uniforms);
             }
+            vec3 varyingA[varyingCount];
+            vec3 varyingB[varyingCount];
+//            VertexCoords v1,v2;
             for (int i = 1; i <= dy; i++) {
                 float f = (float) i / dy;
-                std::vector<vec4> varyingA;
-                std::vector<vec4> varyingB;
                 if (max.y == mid.y) {
                     a.x = interp(mid.x, min.x, f);
                     a.z = interp(mid.z, min.z, f);
                     a.w = interp(mid.w, min.w, f);
                     uv1 = interp(midUV, minUV, f);
-                    for (int m = 0; m < maxVarying.size(); m++) {
-                        varyingA.push_back(interp(midVarying[m], minVarying[m], f));
-                    }
+                    verts[0].interp(varyingA, midVarying, minVarying, f);
+//                    for (int m = 0; m < varyingCount; m++) {
+//                        v1[m].in = interp(midVarying[m], minVarying[m], f));
+//                    }
                 } else {
                     a.x = interp(max.x, mid.x, f);
                     a.z = interp(max.z, mid.z, f);
                     a.w = interp(max.w, mid.w, f);
                     uv1 = interp(maxUV, midUV, f);
-                    for (int m = 0; m < maxVarying.size(); m++) {
-                        varyingA.push_back(interp(maxVarying[m], midVarying[m], f));
-                    }
+                    verts[0].interp(varyingA, maxVarying, midVarying, f);
+//                    for (int m = 0; m < varyingCount; m++) {
+//                        varyingA.push_back(interp(maxVarying[m], midVarying[m], f));
+//                    }
                 }
                 a.y -= 1;
                 b.x = interp(max.x, min.x, f);
@@ -179,11 +185,13 @@ TEST_NODE_IMP_BEGIN
                 b.w = interp(max.w, min.w, f);
                 uv2 = interp(maxUV, minUV, f);
                 b.y -= 1;
-                for (int m = 0; m < maxVarying.size(); m++) {
-                    varyingB.push_back(interp(maxVarying[m], minVarying[m], f));
-                }
+//                for (int m = 0; m < maxVarying.size(); m++) {
+//                    varyingB.push_back(interp(maxVarying[m], minVarying[m], f));
+//                }
+                verts[0].interp(varyingB, maxVarying, minVarying, f);
 
-                dda_line({a, uv1, varyingA}, {b, uv2, varyingB}, uniforms);
+                dda_line(createVertexCoords(a, uv1, varyingA, varyingCount),
+                         createVertexCoords(b, uv2, varyingB, varyingCount), uniforms);
             }
         } else {
             /*
@@ -205,19 +213,21 @@ TEST_NODE_IMP_BEGIN
             midP.x = interp(min.x, max.x, f);
             vec2 uv = interp(minUV, maxUV, f);
 
-            std::vector<vec4> interpVarying;
-            for (int m = 0; m < maxVarying.size(); m++) {
-                interpVarying.push_back(interp(minVarying[m], maxVarying[m], f));
-            }
+            vec3 interpVarying[varyingCount];
+//            std::vector<vec4> interpVarying;
+//            for (int m = 0; m < maxVarying.size(); m++) {
+//                interpVarying.push_back(interp(minVarying[m], maxVarying[m], f));
+//            }
+            verts[0].interp(interpVarying, minVarying, maxVarying, f);
             std::vector<VertexCoords> verts1 = {
-                    {max,  maxUV, maxVarying},
-                    {mid,  midUV, midVarying},
-                    {midP, uv,    interpVarying}};
+                    createVertexCoords(max, maxUV, maxVarying, varyingCount),
+                    createVertexCoords(mid, midUV, midVarying, varyingCount),
+                    createVertexCoords(midP, uv, interpVarying, varyingCount)};
             fill(verts1, uniforms);
             std::vector<VertexCoords> verts2 = {
-                    {mid,  midUV, midVarying},
-                    {midP, uv,    interpVarying},
-                    {min,  minUV, minVarying}};
+                    createVertexCoords(mid, midUV, midVarying, varyingCount),
+                    createVertexCoords(midP, uv, interpVarying, varyingCount),
+                    createVertexCoords(min, minUV, minVarying, varyingCount)};
             fill(verts2, uniforms);
         }
     }
@@ -228,14 +238,15 @@ TEST_NODE_IMP_BEGIN
         const vec4 &pb = vert2.p;
         const vec2 &uv1 = vert1.uv;
         const vec2 &uv2 = vert2.uv;
-        const auto &varyingA = vert1.varying;
-        const auto &varyingB = vert2.varying;
+        vec3 *varyingA = (vec3 *) vert1.varying;
+        vec3 *varyingB = (vec3 *) vert2.varying;
+        int varyingCount = vert1.varyingCount;
         vec4 p1 = pa;
         vec4 p2 = pb;
         vec2 p11 = pa;
         vec2 p22 = pb;
-        auto varying1 = varyingA;
-        auto varying2 = varyingB;
+//        auto varying1 = varyingA;
+//        auto varying2 = varyingB;
         if (isClipRect &&
             !clip_a_line(p11, p22, clipRect.getMinX(), clipRect.getMaxX(), clipRect.getMinY(),
                          clipRect.getMaxY())) {
@@ -262,12 +273,16 @@ TEST_NODE_IMP_BEGIN
         p2.z = interp(pa.z, pb.z, f2);
         uv11 = interp(uv1, uv2, f1);
         uv12 = interp(uv1, uv2, f2);
-        for (int m = 0; m < varyingA.size(); m++) {
-            varying1[m] = interp(varyingA[m], varyingB[m], f1);
-        }
-        for (int m = 0; m < varyingA.size(); m++) {
-            varying2[m] = interp(varyingA[m], varyingB[m], f2);
-        }
+//        for (int m = 0; m < varyingA.size(); m++) {
+//            varying1[m] = interp(varyingA[m], varyingB[m], f1);
+//        }
+//        for (int m = 0; m < varyingA.size(); m++) {
+//            varying2[m] = interp(varyingA[m], varyingB[m], f2);
+//        }
+        vec3 varying1[varyingCount];
+        vert1.interp(varying1, varyingA, varyingB, f1);
+        vec3 varying2[varyingCount];
+        vert1.interp(varying2, varyingA, varyingB, f2);
 
         // DDA
         float dy = p2.y - p1.y;
@@ -288,6 +303,7 @@ TEST_NODE_IMP_BEGIN
         }
         float x = p1.x, y = p1.y;
         setPixel(x, y, p1.z, uv11.x / p1.w, uv11.y / p1.w, varying1, uniforms);
+        vec3 interpVarying[varyingCount];
         for (int k = 1; k <= steps; k++) {
             x += stepX;
             y += stepY;
@@ -295,10 +311,11 @@ TEST_NODE_IMP_BEGIN
             float z = interp(p1.z, p2.z, f);
             float w = interp(p1.w, p2.w, f);
             vec2 uv0 = interp(uv11, uv12, f);
-            std::vector<vec4> interpVarying;
-            for (int m = 0; m < varyingA.size(); m++) {
-                interpVarying.push_back(interp(varying1[m], varying2[m], f));
-            }
+//            std::vector<vec4> interpVarying;
+//            for (int m = 0; m < varyingA.size(); m++) {
+//                interpVarying.push_back(interp(varying1[m], varying2[m], f));
+//            }
+            vert1.interp(interpVarying, varying1, varying2, f);
             setPixel(x, y, z, uv0.x / w, uv0.y / w, interpVarying, uniforms);
         }
         setPixel(p2.x, p2.y, p2.z, uv12.x / p2.w, uv12.y / p2.w, varying2, uniforms);
@@ -349,7 +366,7 @@ TEST_NODE_IMP_BEGIN
 //        }
     }
 
-    void TextureCube::setPixel(int x, int y, int z, float u, float v, const std::vector<vec4> &varying,
+    void TextureCube::setPixel(int x, int y, int z, float u, float v, vec3 varying[],
                                const std::vector<vec4> &uniforms) {
         const vec4 &color = texture2D.sample(u, v);
         SoftRender::setPixel(x, y, z, color);
