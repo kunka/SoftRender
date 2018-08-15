@@ -20,6 +20,12 @@ TEST_NODE_BEGIN2(TextureCube, RastCube)
         virtual void setPixel(int x, int y, int z, float u, float v, vec3 varying[],
                               const std::vector<vec3> &uniforms = {});
 
+        void bindTextures(const std::vector<Texture2D *> &textures);
+
+        void bindTexture(const Texture2D *texture);
+
+        void drawMesh(const Mesh &mesh, const Matrix &mvp);
+
         Texture2D texture2D;
 TEST_NODE_END(TextureCube)
 

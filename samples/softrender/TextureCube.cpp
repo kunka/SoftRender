@@ -377,4 +377,74 @@ TEST_NODE_IMP_BEGIN
     TextureCube::~TextureCube() {
     }
 
+    void TextureCube::drawMesh(const Mesh &mesh, const Matrix &mvp) {
+        const auto &vertices = mesh._vertices;
+        const auto &indices = mesh._indices;
+        bindTextures(mesh._texture2Ds);
+        bool useIndices = indices.size() > 0;
+
+        int num = useIndices ? indices.size() / 3 : vertices.size() / 3;
+        vec4 triangle[3];
+        vec3 triangleWorld[3];
+        vec3 normals[3];
+        vec2 uv[3];
+        for (int i = 0; i < num; i++) {
+            for (int j = 0; j < 3; j++) {
+                const Vertex &vertex = useIndices ? vertices[indices[i * 3 + j]] : vertices[i * 3 + j];
+                vec3 p = vertex.position;
+                Vector v = mvp.applyPoint(p);
+                triangle[j] = v.vec4();
+                normals[j] = vertex.normal;
+                uv[j] = vertex.texCoords;
+
+                Vector v0 = modelMatrix.applyPoint(p);
+                triangleWorld[j] = v0.vec3();
+            }
+            if (cvvCull(triangle)) {
+                // 简单CVV裁剪，三角形3个点有一个不在cvv立方体内将被裁剪掉
+                // log("cvv cull");
+                continue;
+            }
+
+            if (faceCull(triangleWorld)) {
+                // 背面剔除
+                //  log("backface cull");
+                continue;
+            }
+            // 转换为屏幕坐标
+            pointToScreen(triangle);
+
+            // 光栅化
+            vec3 v1[] = {};
+            vec3 v2[] = {};
+            vec3 v3[] = {};
+            std::vector<VertexCoords> verts = {
+                    createVertexCoords(triangle[0], uv[0] * triangle[0].w, v1, 0),
+                    createVertexCoords(triangle[1], uv[1] * triangle[1].w, v2, 0),
+                    createVertexCoords(triangle[2], uv[2] * triangle[2].w, v3, 0),
+            };
+            fill(verts);
+        }
+    }
+
+    void TextureCube::bindTextures(const std::vector<Texture2D *> &textures) {
+        unsigned int diffuseNr = 1;
+        unsigned int specularNr = 1;
+        unsigned int defaultNr = 0;
+        for (unsigned int i = 0; i < textures.size(); i++) {
+            std::stringstream ss;
+            std::string name = textures[i]->type;
+            if (name == "texture_diffuse")
+                ss << name << diffuseNr++; // transfer unsigned int to stream
+            else if (name == "texture_specular")
+                ss << name << specularNr++; // transfer unsigned int to stream
+            else
+                ss << "texture" << defaultNr++;
+            auto it = _bindTextures.find(ss.str());
+            if (it != _bindTextures.end())
+                it->second = textures[i];
+            else
+                _bindTextures.insert(std::make_pair(ss.str(), textures[i]));
+        }
+    }
 TEST_NODE_IMP_END

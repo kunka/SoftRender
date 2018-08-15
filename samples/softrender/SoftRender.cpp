@@ -160,12 +160,12 @@ void main()
 
     void SoftRender::clearDepth() {
         for (int i = 0; i < TEX_WIDTH * TEX_HEIGHT; i++)
-            depthBuff[i] = INT_MAX;
+            depthBuff[i] = 1.0f;
     }
 
     bool SoftRender::inCvv(const vec4 &vector) {
         float w = fabs(vector.w);
-        return w > 0.01 && fabs(vector.x) < w && fabs(vector.y) < w && fabs(vector.z) < w;
+        return w > 0.1 && fabs(vector.x) < w && fabs(vector.y) < w && fabs(vector.z) < w;
     }
 
     bool SoftRender::cvvCull(vec4 triangle[3]) {
@@ -201,8 +201,8 @@ void main()
             p.x /= p.w; // [-1,1]
             p.y /= p.w; // [-1,1]
             p.z /= p.w; // [-1,1]
+            p.z = (p.z + 1.0f) / 2; // [0,1]
             //p.w 顶点到相机的距离
-            //p.w = 1.0;
             p.w = 1.0f / p.w;
             // NDC空间 --> 窗口坐标（视口变换）
             p.x = (p.x + 1.0f) / 2.0f * TEX_WIDTH;
@@ -225,5 +225,6 @@ void main()
         SoftRender::setPixel(point.x, point.y - 1, 0, color);
         SoftRender::setPixel(point.x, point.y + 1, 0, color);
     }
+
 
 TEST_NODE_IMP_END

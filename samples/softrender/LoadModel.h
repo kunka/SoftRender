@@ -11,10 +11,6 @@
 TEST_NODE_BEGIN2(LoadModel, TextureCube)
 
     protected:
-        void bindTextures(const std::vector<Texture2D *> &textures);
-
-        void drawMesh(const Mesh &mesh, const Matrix &mvp);
-
         virtual void setPixel(int x, int y, int z, float u, float v, vec3 varying[],
                               const std::vector<vec3> &uniforms = {}) override;
 

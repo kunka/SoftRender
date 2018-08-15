@@ -58,7 +58,7 @@ if (APPLE)
     link_directories(external/zlib/mac)
 endif (APPLE)
 
-add_executable(gl ${SOURCE_FILES} samples/softrender/LoadModel.cpp samples/softrender/LoadModel.h)
+add_executable(gl ${SOURCE_FILES} samples/softrender/LoadModel.cpp samples/softrender/LoadModel.h samples/softrender/VisualizeDepth.cpp samples/softrender/VisualizeDepth.h samples/softrender/Blend.cpp samples/softrender/Blend.h)
 
 target_link_libraries(gl glfw3.a assimp.a zlibstatic.a)
 

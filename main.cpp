@@ -60,6 +60,8 @@
 #include "softrender/Lighting.h"
 #include "softrender/LightingMap.h"
 #include "softrender/LoadModel.h"
+#include "softrender/VisualizeDepth.h"
+#include "softrender/Blend.h"
 
 template<typename T>
 Scene *createScene() {
@@ -122,6 +124,7 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(FunctionDraw);
         ADD_TEST_SCENE(Texture);
 
+        // soft render
         ADD_TEST_SCENE(Rast2DPoint);
         ADD_TEST_SCENE(Rast2DLine);
         ADD_TEST_SCENE(Rast2DTriangle);
@@ -130,8 +133,10 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(Lighting);
         ADD_TEST_SCENE(LightingMap);
         ADD_TEST_SCENE(LoadModel);
+        ADD_TEST_SCENE(VisualizeDepth);
+        ADD_TEST_SCENE(Blend);
 
-        auto currentScene = "LoadModel";
+        auto currentScene = "VisualizeDepth";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {

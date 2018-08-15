@@ -15,10 +15,12 @@
 
 /*
  * -------[顶点处理]--------
- * 顶点坐标变换，M(模型空间) --> W（世界坐标） --> V（相机空间） --> P（投影坐标）
- * cvv裁剪
- * 背面剔除(CCW三角面剔除 or 计算三角面法线与视线夹角剔除)
- * 屏幕坐标映射（透视除法 --> NDC坐标 --> 屏幕坐标）
+ * 顶点坐标变换，O(模型空间) --> M（世界坐标） --> V（相机空间） --> P（投影坐标）
+ *剔除
+    - Depth Test: Occluded surfaces: hidden surface removal (visibility)
+    - Backface Cull: Back faces: back face culling (CCW三角面剔除 or 计算三角面法线与视线夹角剔除)
+    - CVV Cull: Faces outside view volume: viewing frustrum culling
+ * 屏幕坐标映射（ViewPort变换，透视除法 --> NDC坐标 --> 屏幕坐标）
  *
  * -------[光栅化]--------
  * 投影2D三角形数据设置，扫面线填充
@@ -30,7 +32,6 @@
  */
 
 #define MAX_VARYING_COUNT 5
-#define MAX_BIND_TEXTURES 10
 
 struct VertexCoords {
     vec4 p;
@@ -85,6 +86,7 @@ TEST_NODE_BEGIN(SoftRender)
         }
 
     protected:
+
         unsigned int genTexture();
 
         virtual void setPixel(int x, int y, int z, float u, float v);

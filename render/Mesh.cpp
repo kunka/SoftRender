@@ -20,6 +20,15 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> 
     _texture2Ds = textures;
 }
 
+Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices) {
+    _vertices = vertices;
+    _indices = indices;
+}
+
+Mesh::Mesh(const std::vector<Vertex> &vertices) {
+    _vertices = vertices;
+}
+
 void Mesh::setupMesh() {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
