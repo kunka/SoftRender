@@ -18,7 +18,7 @@ TEST_NODE_IMP_BEGIN
     }
 
     void LightingMap::setPixel(int x, int y, int z, float u, float v, vec3 varying[],
-                               const std::vector<vec4> &uniforms) {
+                               const std::vector<vec3> &uniforms) {
         const vec4 &textureColor = diffuseTexture.sample(u, v);
 
         vec3 fragPos = varying[0];

@@ -8,6 +8,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "Shader.h"
+#include "Texture2D.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -26,15 +27,21 @@ public:
     Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices,
          const std::vector<Texture> &textures);
 
-    void draw(Shader& shader);
+    Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices,
+         const std::vector<Texture2D *> &textures);
 
-private:
+    ~Mesh();
+
+    void draw(Shader &shader);
+
+public:
     void setupMesh();
 
     unsigned int VAO, VBO, EBO;
     std::vector<Vertex> _vertices;
     std::vector<unsigned int> _indices;
     std::vector<Texture> _textures;
+    std::vector<Texture2D *> _texture2Ds;
 };
 
 

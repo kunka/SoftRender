@@ -22,6 +22,8 @@ public:
 
     void load(const std::string &path, int desiredChannels = 0);
 
+    std::string getPath() { return path; }
+
     int getWidth() { return width; }
 
     int getHeight() { return height; }
@@ -36,6 +38,8 @@ public:
 //
     void setFilter(TextureFilter filter);
 
+    std::string type;
+
 private:
     glm::vec4 _sample(int x, int y);
 
@@ -44,6 +48,7 @@ private:
     int width;
     int height;
     TextureFilter filter;
+    std::string path;
     std::unordered_map<int, unsigned char *> mipmaps;
 };
 

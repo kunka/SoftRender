@@ -8,9 +8,10 @@
 #include "CustomDraw.h"
 #include "MathUtil.h"
 #include "Texture2D.h"
+#include <unordered_map>
 
-#define TEX_WIDTH   1024
-#define TEX_HEIGHT  1024
+#define TEX_WIDTH   768
+#define TEX_HEIGHT  768
 
 /*
  * -------[顶点处理]--------
@@ -29,6 +30,7 @@
  */
 
 #define MAX_VARYING_COUNT 5
+#define MAX_BIND_TEXTURES 10
 
 struct VertexCoords {
     vec4 p;
@@ -107,6 +109,8 @@ TEST_NODE_BEGIN(SoftRender)
 
         bool faceCull(const vec3 &triangle1, const vec3 &normal);
 
+        bool depthTest(int x, int y, float depth);
+
         void pointToScreen(vec4 *triangle, int num = 3);
 
         bool inCvv(const vec4 &vector);
@@ -114,7 +118,7 @@ TEST_NODE_BEGIN(SoftRender)
         unsigned int texture = -1;
 
         GLubyte texData[TEX_WIDTH][TEX_HEIGHT][4];
-        bool depthTest;
+        bool _depthTest;
         bool faceCulling;
         float *depthBuff;
         Rect clipRect;
@@ -122,6 +126,7 @@ TEST_NODE_BEGIN(SoftRender)
         Matrix modelMatrix;
         Matrix viewMatrix;
         Matrix projectMatrix;
+        std::unordered_map<std::string, Texture2D *> _bindTextures;
 
 TEST_NODE_END(SoftRender)
 

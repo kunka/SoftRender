@@ -11,7 +11,7 @@ TEST_NODE_BEGIN2(LightingMap, Lighting)
 
     protected:
         virtual void setPixel(int x, int y, int z, float u, float v, vec3 varying[],
-                              const std::vector<vec4> &uniforms = {}) override;
+                              const std::vector<vec3> &uniforms = {}) override;
 
         Texture2D diffuseTexture;
         Texture2D specularTexture;

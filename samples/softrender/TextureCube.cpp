@@ -116,7 +116,7 @@ TEST_NODE_IMP_BEGIN
         setFaceCull(false);
     }
 
-    void TextureCube::fill(std::vector<VertexCoords> &verts, const std::vector<vec4> &uniforms) {
+    void TextureCube::fill(std::vector<VertexCoords> &verts, const std::vector<vec3> &uniforms) {
         std::sort(verts.begin(), verts.end(),
                   [](const VertexCoords &a, const VertexCoords &b) { return a.p.y > b.p.y; });
         const auto &max = verts[0].p;
@@ -233,13 +233,15 @@ TEST_NODE_IMP_BEGIN
     }
 
     void TextureCube::dda_line(const VertexCoords &vert1, const VertexCoords &vert2,
-                               const std::vector<vec4> &uniforms) {
+                               const std::vector<vec3> &uniforms) {
         const vec4 &pa = vert1.p;
         const vec4 &pb = vert2.p;
         const vec2 &uv1 = vert1.uv;
         const vec2 &uv2 = vert2.uv;
-        vec3 *varyingA = (vec3 *) vert1.varying;
-        vec3 *varyingB = (vec3 *) vert2.varying;
+        vec3 *varyingA = (vec3 *)
+                vert1.varying;
+        vec3 *varyingB = (vec3 *)
+                vert2.varying;
         int varyingCount = vert1.varyingCount;
         vec4 p1 = pa;
         vec4 p2 = pb;
@@ -367,7 +369,7 @@ TEST_NODE_IMP_BEGIN
     }
 
     void TextureCube::setPixel(int x, int y, int z, float u, float v, vec3 varying[],
-                               const std::vector<vec4> &uniforms) {
+                               const std::vector<vec3> &uniforms) {
         const vec4 &color = texture2D.sample(u, v);
         SoftRender::setPixel(x, y, z, color);
     }

@@ -23,6 +23,10 @@ public:
 
     Vector(float x, float y, float z, float w = 1.0);
 
+    Vector(const glm::vec3 &v);
+
+    Vector(const glm::vec4 &v);
+
     float length();
 
     void add(const Vector &other);
@@ -65,9 +69,9 @@ public:
 
     void mult(const Matrix &other);
 
-    Vector applyVector(const Vector &v);
+    Vector applyVector(const Vector &v) const;
 
-    Vector applyPoint(const Vector &v);
+    Vector applyPoint(const Vector &v) const;
 
     void scale(float scale);
 

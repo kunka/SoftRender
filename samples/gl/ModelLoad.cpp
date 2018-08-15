@@ -102,7 +102,7 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir);
 
 void main()
 {
-//    FragColor = texture(texture_diffuse1, TexCoords);
+//    FragColor = vec4(vec3(texture(texture_diffuse1, TexCoords)), 1.0);
 
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
@@ -237,7 +237,8 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
 
         glBindVertexArray(0);
 
-        modelObject = new Model("../res/nanosuit/nanosuit.obj");
+        modelObject = new Model();
+        modelObject->load("../res/nanosuit/nanosuit.obj");
     }
 
     void ModelLoad::draw(const mat4 &transform) {
@@ -294,7 +295,7 @@ vec3 calcSpotLight(SpotLight light, vec3 norm, vec3 FragPos, vec3 viewDir)
             name = formatString("pointLights[%d].quadratic", i);
             shader.setFloat(name, 0.032f);
         }
-        shader.setVec3("spotLights[0].ambient", vec3(0.0f, 0.0f, 0.0f));
+        shader.setVec3("spotLights[0].ambient", vec3(0.5f, 0.5f, 0.5f));
         shader.setVec3("spotLights[0].diffuse", vec3(1.0f, 1.0f, 1.0f)); // darken the light a bit to fit the scene
         shader.setVec3("spotLights[0].specular", vec3(1.0f, 1.0f, 1.0f));
         shader.setFloat("spotLights[0].constant", 1.0f);

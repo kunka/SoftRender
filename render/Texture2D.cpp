@@ -19,6 +19,7 @@ void Texture2D::setFilter(TextureFilter filter) {
 
 void Texture2D::load(const std::string &path, int desiredChannels) {
     data = stbi_load(path.c_str(), &width, &height, &channels, desiredChannels);
+    this->path = path;
 }
 
 glm::vec4 Texture2D::_sample(int x, int y) {
@@ -43,6 +44,9 @@ glm::vec4 Texture2D::_sample(int x, int y) {
 }
 
 glm::vec4 Texture2D::sample(float u, float v) {
+    // clamp to 0~1
+    u = u - floor(u);
+    v = v - floor(v);
     if (this->filter == TF_NEAREST) {
         return _sample(width * u, height * v);
     } else if (this->filter == TF_LINEAR) {
@@ -65,5 +69,7 @@ glm::vec4 Texture2D::sample(float u, float v) {
 }
 
 Texture2D::~Texture2D() {
-    stbi_image_free(data);
+    if (data != nullptr) {
+        stbi_image_free(data);
+    }
 }

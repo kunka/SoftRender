@@ -15,6 +15,12 @@ Vector::Vector() : x(0.0f), y(0.0f), z(0.0f), w(1.0f) {}
 Vector::Vector(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {
 }
 
+Vector::Vector(const glm::vec3 &v) : x(v.x), y(v.y), z(v.z) {
+}
+
+Vector::Vector(const glm::vec4 &v) : x(v.x), y(v.y), z(v.z), w(v.w) {
+}
+
 glm::vec2 Vector::vec2() {
     return glm::vec2(x, y);
 }
@@ -121,14 +127,14 @@ void Matrix::mult(const Matrix &other) {
  *  | 00 10 20 30 |   | x |
  *  | 01 11 21 31 |   | y |
  *  | 02 12 22 32 | * | z |
- *  | 03 13 23 33 |   | w |
+ *  | 03 13 23 33 |   | 1 |
  */
-Vector Matrix::applyPoint(const Vector &v) {
+Vector Matrix::applyPoint(const Vector &v) const {
     Vector ret;
-    ret.x = v.x * m[0][0] + v.y * m[1][0] + v.z * m[2][0] + v.w * m[3][0];
-    ret.y = v.x * m[0][1] + v.y * m[1][1] + v.z * m[2][1] + v.w * m[3][1];
-    ret.z = v.x * m[0][2] + v.y * m[1][2] + v.z * m[2][2] + v.w * m[3][2];
-    ret.w = v.x * m[0][3] + v.y * m[1][3] + v.z * m[2][3] + v.w * m[3][3];
+    ret.x = v.x * m[0][0] + v.y * m[1][0] + v.z * m[2][0] + m[3][0];
+    ret.y = v.x * m[0][1] + v.y * m[1][1] + v.z * m[2][1] + m[3][1];
+    ret.z = v.x * m[0][2] + v.y * m[1][2] + v.z * m[2][2] + m[3][2];
+    ret.w = v.x * m[0][3] + v.y * m[1][3] + v.z * m[2][3] + m[3][3];
     return ret;
 }
 
@@ -138,7 +144,7 @@ Vector Matrix::applyPoint(const Vector &v) {
  *  | 02 12 22 32 | * | z |
  *  | 03 13 23 33 |   | 0 |
  */
-Vector Matrix::applyVector(const Vector &v) {
+Vector Matrix::applyVector(const Vector &v) const {
     Vector ret;
     ret.x = v.x * m[0][0] + v.y * m[1][0] + v.z * m[2][0];
     ret.y = v.x * m[0][1] + v.y * m[1][1] + v.z * m[2][1];

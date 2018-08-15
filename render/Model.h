@@ -20,27 +20,36 @@ unsigned int TextureFromFile(const char *path, const std::string &directory, boo
 class Model {
 
 public:
-    Model(const std::string &path) {
-        loadModel(path);
-    }
+    Model();
+
+    ~Model();
+
+    void load(const std::string &path);
 
     void draw(Shader &shader);
 
-private:
+    std::vector<Mesh *> &getMeshes() { return _meshes; }
 
-    void loadModel(const std::string &path);
+    void setCustomLoad(bool customLoad) { _customLoad = customLoad; }
+
+private:
 
     void processNode(aiNode *node, const aiScene *scene);
 
-    Mesh processMesh(aiMesh *mesh, const aiScene *scene);
+    Mesh *processMesh(aiMesh *mesh, const aiScene *scene);
 
     std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type,
                                               const std::string &typeName);
 
-    std::vector<Mesh> _meshes;
+    std::vector<Texture2D *> loadMaterialTexture2Ds(aiMaterial *mat, aiTextureType type,
+                                                    const std::string &typeName);
+
+    std::vector<Mesh *> _meshes;
     std::string _directory;
+    bool _customLoad;// for soft render
 
     std::unordered_map<std::string, Texture> _texturesLoaded;
+    std::unordered_map<std::string, Texture2D *> _texture2DsLoaded;
 };
 
 #endif //GL_MODEL_H

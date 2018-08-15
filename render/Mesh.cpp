@@ -11,8 +11,13 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> 
     _vertices = vertices;
     _indices = indices;
     _textures = textures;
+}
 
-    setupMesh();
+Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices,
+           const std::vector<Texture2D *> &textures) {
+    _vertices = vertices;
+    _indices = indices;
+    _texture2Ds = textures;
 }
 
 void Mesh::setupMesh() {
@@ -65,3 +70,7 @@ void Mesh::draw(Shader &shader) {
     glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
+
+Mesh::~Mesh() {
+}
+

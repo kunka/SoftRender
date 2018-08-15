@@ -59,6 +59,7 @@
 #include "softrender/TextureCube.h"
 #include "softrender/Lighting.h"
 #include "softrender/LightingMap.h"
+#include "softrender/LoadModel.h"
 
 template<typename T>
 Scene *createScene() {
@@ -128,8 +129,9 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(TextureCube);
         ADD_TEST_SCENE(Lighting);
         ADD_TEST_SCENE(LightingMap);
+        ADD_TEST_SCENE(LoadModel);
 
-        auto currentScene = "Lighting";
+        auto currentScene = "LoadModel";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {

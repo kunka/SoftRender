@@ -70,7 +70,7 @@ void main()
         clipRect.setRect(0, 0, TEX_WIDTH, TEX_HEIGHT);
         isClipRect = true;
         depthBuff = new float[TEX_WIDTH * TEX_HEIGHT];
-        depthTest = false;
+        _depthTest = false;
         faceCulling = false;
         projectMatrix = Matrix::perspective(radians(60.0f), (float) TEX_WIDTH / TEX_HEIGHT, 0.1, 100.0f);
     }
@@ -114,10 +114,20 @@ void main()
         return textureID;
     }
 
+    bool SoftRender::depthTest(int x, int y, float depth) {
+        if (x >= 0 && y >= 0 && x < TEX_WIDTH && y < TEX_HEIGHT) {
+            int index = y * TEX_WIDTH + x;
+            if (!_depthTest or depth < depthBuff[index]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void SoftRender::setPixel(int x, int y, float depth, const vec4 &color) {
         if (x >= 0 && y >= 0 && x < TEX_WIDTH && y < TEX_HEIGHT) {
             int index = y * TEX_WIDTH + x;
-            if (!depthTest or depth < depthBuff[index]) {
+            if (!_depthTest or depth < depthBuff[index]) {
                 depthBuff[index] = depth;
                 texData[y][x][0] = (GLubyte) color.r;
                 texData[y][x][1] = (GLubyte) color.g;
@@ -136,7 +146,7 @@ void main()
     }
 
     void SoftRender::setDepthTest(bool depthTest) {
-        this->depthTest = depthTest;
+        this->_depthTest = depthTest;
     }
 
     void SoftRender::setFaceCull(bool cull) {

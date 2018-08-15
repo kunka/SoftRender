@@ -74,9 +74,7 @@ TEST_NODE_IMP_BEGIN
 //        modelMatrix.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
         modelMatrix.rotate(Vector(1, 1, 0), radians(45.0f));
         vec3 target = cameraPos + cameraDir;
-        viewMatrix = Matrix::lookAt(Vector(cameraPos.x, cameraPos.y, cameraPos.z),
-                                    Vector(target.x, target.y, target.z),
-                                    Vector(cameraUp.x, cameraUp.y, cameraUp.z));
+        viewMatrix = Matrix::lookAt(Vector(cameraPos), Vector(target), Vector(cameraUp));
         Matrix m = modelMatrix;
         m.mult(viewMatrix);
         m.mult(projectMatrix);
@@ -90,17 +88,16 @@ TEST_NODE_IMP_BEGIN
         for (int i = 0; i < vertices.size(); i += column * 3) {
             for (int j = 0; j < 3; j++) {
                 int row = i + j * column;
-                vec4 p = vec4(vertices.at(row), vertices.at(row + 1),
-                              vertices.at(row + 2), 1.0);
+                vec3 p = vec3(vertices.at(row), vertices.at(row + 1), vertices.at(row + 2));
                 // 模型 --> 世界 --> 相机空间 --> 齐次裁剪空间，xyz ~ [-w，w], w = Z(相机空间)
-                Vector v = m.applyPoint(Vector(p.x, p.y, p.z));
+                Vector v = m.applyPoint(p);
 
-                triangle[j] = vec4(v.x, v.y, v.z, v.w);
+                triangle[j] = v.vec4();
                 normals[j] = Vector(vertices.at(row + 3), vertices.at(row + 4), vertices.at(row + 5));
                 uv[j] = vec2(vertices.at(row + 6), vertices.at(row + 7));
 
-                Vector v0 = modelMatrix.applyPoint(Vector(p.x, p.y, p.z));
-                triangleWorld[j] = vec3(v0.x, v0.y, v0.z);
+                Vector v0 = modelMatrix.applyPoint(p);
+                triangleWorld[j] = v0.vec3();
 //                triangleWorld[j] = model * p;
             }
             if (cvvCull(triangle)) {
@@ -152,34 +149,34 @@ TEST_NODE_IMP_BEGIN
     }
 
     void Lighting::setPixel(int x, int y, int z, float u, float v, vec3 varying[],
-                            const std::vector<vec4> &uniforms) {
+                            const std::vector<vec3> &uniforms) {
         const vec4 &textureColor = texture2D.sample(u, v);
-        SoftRender::setPixel(x, y, z, textureColor);
+//        SoftRender::setPixel(x, y, z, textureColor);
 
-//        vec3 fragPos = varying[0];
-//        vec3 normal = glm::normalize(varying[1]);
-//        vec3 lightDir = glm::normalize(lightPos - fragPos);
-//        float diff = std::max(glm::dot(normal, lightDir), 0.0f);
-//
-//        // ambient
-//        vec3 ambient = lightColor * vec3(0.2f, 0.2f, 0.2f);
-//        // diffuse
-//        vec3 diffuse = lightColor * diff;
-//        // specular
-//        vec3 viewDir = glm::normalize(cameraPos - fragPos);
-//
-//        // Phong
-////        vec3 reflectDir = glm::reflect(-lightDir, normal);
-////        float spec = pow(std::max(glm::dot(viewDir, reflectDir), 0.0f), 32.0f);
-//        // BlinnPhong
-//        vec3 halfwayDir = glm::normalize(lightDir + viewDir);
-//        float spec = pow(std::max(glm::dot(normal, halfwayDir), 0.0f), 16.0f);
-//
-//        vec3 specularColor = lightColor * vec3(0.5f, 0.5f, 0.5f);
-//        vec3 specular = specularColor * spec;
-//
-//        vec4 color = vec4(vec3(textureColor) * (ambient + diffuse) + specular, 255);
-//        SoftRender::setPixel(x, y, z, color);
+        vec3 fragPos = varying[0];
+        vec3 normal = glm::normalize(varying[1]);
+        vec3 lightDir = glm::normalize(lightPos - fragPos);
+        float diff = std::max(glm::dot(normal, lightDir), 0.0f);
+
+        // ambient
+        vec3 ambient = lightColor * vec3(0.2f, 0.2f, 0.2f);
+        // diffuse
+        vec3 diffuse = lightColor * diff;
+        // specular
+        vec3 viewDir = glm::normalize(cameraPos - fragPos);
+
+        // Phong
+//        vec3 reflectDir = glm::reflect(-lightDir, normal);
+//        float spec = pow(std::max(glm::dot(viewDir, reflectDir), 0.0f), 32.0f);
+        // BlinnPhong
+        vec3 halfwayDir = glm::normalize(lightDir + viewDir);
+        float spec = pow(std::max(glm::dot(normal, halfwayDir), 0.0f), 16.0f);
+
+        vec3 specularColor = lightColor * vec3(0.5f, 0.5f, 0.5f);
+        vec3 specular = specularColor * spec;
+
+        vec4 color = vec4(vec3(textureColor) * (ambient + diffuse) + specular, 255);
+        SoftRender::setPixel(x, y, z, color);
     }
 
     Lighting::~Lighting() {

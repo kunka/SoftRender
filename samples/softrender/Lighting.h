@@ -12,7 +12,7 @@ TEST_NODE_BEGIN2(Lighting, TextureCube)
     protected:
 
         virtual void setPixel(int x, int y, int z, float u, float v, vec3 varying[],
-                              const std::vector<vec4> &uniforms = {}) override;
+                              const std::vector<vec3> &uniforms = {}) override;
 
         vec3 lightPos;
         vec3 lightColor;
