@@ -17,7 +17,7 @@ TEST_NODE_IMP_BEGIN
         Lighting::draw(transform);
     }
 
-    void LightingMap::setPixel(int x, int y, int z, float u, float v, vec3 varying[],
+    void LightingMap::setPixel(int x, int y, float z, float u, float v, vec3 varying[],
                                const std::vector<vec3> &uniforms) {
         const vec4 &textureColor = diffuseTexture.sample(u, v);
 

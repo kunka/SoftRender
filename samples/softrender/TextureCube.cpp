@@ -51,6 +51,9 @@ TEST_NODE_IMP_BEGIN
                 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, // bottom-right
                 -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
                 -0.5f, 0.5f, 0.5f, 0.0f, 0.0f  // bottom-left
+//                -4 / 1.732, 0, 2, 0, 0,
+//                4 / 1.732, 0, 2, 1, 0,
+//                0, 10, 2, 0.5, 1,
         };
 
         texture2D.load("../res/net.jpg");
@@ -70,6 +73,7 @@ TEST_NODE_IMP_BEGIN
         vec3 target = cameraPos + cameraDir;
         viewMatrix = Matrix::lookAt(Vector(cameraPos.x, cameraPos.y, cameraPos.z), Vector(target.x, target.y, target.z),
                                     Vector(cameraUp.x, cameraUp.y, cameraUp.z));
+        projectMatrix = Matrix::perspective(radians(60.0f), (float) TEX_WIDTH / TEX_HEIGHT, 0.1, 100.0f);
         Matrix m = modelMatrix;
         m.mult(viewMatrix);
         m.mult(projectMatrix);
@@ -91,7 +95,6 @@ TEST_NODE_IMP_BEGIN
                 triangleWorld[j] = vec3(v0.x, v0.y, v0.z);
             }
             if (cvvCull(triangle)) {
-                // 简单CVV裁剪，三角形3个点有一个不在cvv立方体内将被裁剪掉
                 // log("cvv cull");
                 continue;
             }
@@ -245,13 +248,9 @@ TEST_NODE_IMP_BEGIN
         int varyingCount = vert1.varyingCount;
         vec4 p1 = pa;
         vec4 p2 = pb;
-        vec2 p11 = pa;
-        vec2 p22 = pb;
-//        auto varying1 = varyingA;
-//        auto varying2 = varyingB;
-        if (isClipRect &&
-            !clip_a_line(p11, p22, clipRect.getMinX(), clipRect.getMaxX(), clipRect.getMinY(),
-                         clipRect.getMaxY())) {
+        vec4 p11 = pa;
+        vec4 p22 = pb;
+        if (clip_3D_line(p11, p22)) {
             return;
         }
         p1.x = p11.x;
@@ -368,7 +367,7 @@ TEST_NODE_IMP_BEGIN
 //        }
     }
 
-    void TextureCube::setPixel(int x, int y, int z, float u, float v, vec3 varying[],
+    void TextureCube::setPixel(int x, int y, float z, float u, float v, vec3 varying[],
                                const std::vector<vec3> &uniforms) {
         const vec4 &color = texture2D.sample(u, v);
         SoftRender::setPixel(x, y, z, color);

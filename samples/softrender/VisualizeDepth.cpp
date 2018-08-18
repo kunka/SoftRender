@@ -57,13 +57,13 @@ TEST_NODE_IMP_BEGIN
             pointToScreen(triangle);
 
             // 光栅化
-            vec3 v1[] = {triangle[0]};
-            vec3 v2[] = {triangle[1]};
-            vec3 v3[] = {triangle[2]};
+            vec3 v1[] = {};
+            vec3 v2[] = {};
+            vec3 v3[] = {};
             std::vector<VertexCoords> verts = {
-                    createVertexCoords(triangle[0], uv[0] * triangle[0].w, v1, 1),
-                    createVertexCoords(triangle[1], uv[1] * triangle[1].w, v2, 1),
-                    createVertexCoords(triangle[2], uv[2] * triangle[2].w, v3, 1)
+                    createVertexCoords(triangle[0], uv[0] * triangle[0].w, v1, 0),
+                    createVertexCoords(triangle[1], uv[1] * triangle[1].w, v2, 0),
+                    createVertexCoords(triangle[2], uv[2] * triangle[2].w, v3, 0)
             };
             fill(verts);
         }
@@ -79,10 +79,9 @@ TEST_NODE_IMP_BEGIN
         return (2.0f * near * far) / (far + near - z * (far - near));
     }
 
-    void VisualizeDepth::setPixel(int x, int y, int z, float u, float v, vec3 varying[],
+    void VisualizeDepth::setPixel(int x, int y, float z, float u, float v, vec3 varying[],
                                   const std::vector<vec3> &uniforms) {
-        vec3 fragPos = varying[0];
-        float depth = LinearizeDepth(fragPos.z) / 5.0f;
+        float depth = LinearizeDepth(z) / 5.0f;
         vec4 color = vec4(depth, depth, depth, 1.0) * 255.0f;
         SoftRender::setPixel(x, y, z, color);
     }

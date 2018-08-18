@@ -141,7 +141,7 @@ void main()
         setPixel(x, y, depth, vec4(color, 255));
     }
 
-    void SoftRender::setPixel(int x, int y, int z, float u, float v) {
+    void SoftRender::setPixel(int x, int y, float z, float u, float v) {
         // override to sample
     }
 
@@ -163,14 +163,133 @@ void main()
             depthBuff[i] = 1.0f;
     }
 
-    bool SoftRender::inCvv(const vec4 &vector) {
-        float w = fabs(vector.w);
-        return w > 0.1 && fabs(vector.x) < w && fabs(vector.y) < w && fabs(vector.z) < w;
+    // 简单裁剪，完全不可见三角形
+    bool SoftRender::cvvCull(vec4 triangle[3]) {
+        int code1 = encode(triangle[0]);
+        int code2 = encode(triangle[1]);
+        int code3 = encode(triangle[2]);
+        if (code1 == 0 && code2 == 0 && code3 == 0) {
+            return false;
+        } else if (code1 & code2 & code3) {
+            return true;
+        }
+
+        return false;
     }
 
-    bool SoftRender::cvvCull(vec4 triangle[3]) {
-        return !inCvv(triangle[0]) && !inCvv(triangle[1]) && !inCvv(triangle[2]);
-//        return !inCvv(triangle[0]) || !inCvv(triangle[1]) || !inCvv(triangle[2]);
+/*
+ *  000000
+ *
+ *       3   6
+ *       |  /
+ *       | /
+ *       |/
+ *  2----/----- 1
+ *      /|
+ *     / |
+ *    5  4
+ */
+    int SoftRender::encode(const vec4 &p) {
+        int code = 0;
+        if (p.x > p.w)
+            code |= 1;
+        else if (p.x < -p.w)
+            code |= 2;
+        if (p.y > p.w)
+            code |= 4;
+        else if (p.y < -p.w)
+            code |= 8;
+        if (p.z > p.w)
+            code |= 16;
+        else if (p.z < -p.w)
+            code |= 32;
+        return code;
+    }
+
+    int SoftRender::encodeScreen(const vec4 &p) {
+        int code = 0;
+        if (p.x > TEX_WIDTH)
+            code |= 1;
+        else if (p.x < 0)
+            code |= 2;
+        if (p.y > TEX_HEIGHT)
+            code |= 4;
+        else if (p.y < 0)
+            code |= 8;
+        if (p.z > 1.0)
+            code |= 16;
+        else if (p.z < -1.0)
+            code |= 32;
+        return code;
+    }
+
+    bool SoftRender::clip_3D_line(vec4 &p1, vec4 &p2) {
+        float dy = p2.y - p1.y;
+        float dx = p2.x - p1.x;
+        float dz = p2.z - p1.z;
+        float m = dx == 0 ? 0 : dy / dx;
+        float my = dz == 0 ? 0 : dy / dz;
+        float mx = dz == 0 ? 0 : dx / dz;
+        while (true) {
+            int code1 = encodeScreen(p1);
+            int code2 = encodeScreen(p2);
+            if (code1 == 0 && code2 == 0) {
+                return false;
+            } else if (code1 & code2) {
+                return true;
+            } else {
+                if (code1 & 1) {
+                    p1.y += m * (TEX_WIDTH - p1.x);
+                    p1.x = TEX_WIDTH;
+                } else if (code1 & 2) {
+                    p1.y += m * (0 - p1.x);
+                    p1.x = 0;
+                } else if (code1 & 4) {
+                    p1.x += (TEX_HEIGHT - p1.y) / m;
+                    p1.y = TEX_HEIGHT;
+                } else if (code1 & 8) {
+                    p1.x += (0 - p1.y) / m;
+                    p1.y = 0;
+                } else if (code1 & 16) {
+                    p1.x += mx * (1 - p1.z);
+                    p1.y += my * (1 - p1.z);
+                    p1.z = 1;
+                } else if (code1 & 32) {
+                    p1.x += mx * (0 - p1.z);
+                    p1.y += my * (0 - p1.z);
+                    p1.z = 0;
+                }
+
+                code1 = encodeScreen(p1);
+                if (code1 == 0 and code2 == 0) {
+                    return false;
+                } else if (code1 & code2) {
+                    return true;
+                } else {
+                    if (code2 & 1) {
+                        p2.y += m * (TEX_WIDTH - p2.x);
+                        p2.x = TEX_WIDTH;
+                    } else if (code2 & 2) {
+                        p2.y += m * (0 - p2.x);
+                        p2.x = 0;
+                    } else if (code2 & 4) {
+                        p2.x += (TEX_HEIGHT - p2.y) / m;
+                        p2.y = TEX_HEIGHT;
+                    } else if (code2 & 8) {
+                        p2.x += (0 - p2.y) / m;
+                        p2.y = 0;
+                    } else if (code2 & 16) {
+                        p2.x += mx * (1 - p2.z);
+                        p2.y += my * (1 - p2.z);
+                        p2.z = 1;
+                    } else if (code2 & 32) {
+                        p2.x += mx * (0 - p2.z);
+                        p2.y += my * (0 - p2.z);
+                        p2.z = 0;
+                    }
+                }
+            }
+        }
     }
 
     bool SoftRender::faceCull(vec3 triangle[3]) {
@@ -198,6 +317,9 @@ void main()
         for (int j = 0; j < num; j++) {
             vec4 &p = triangle[j];
             // （透视除法） --> NDC空间
+            if (fabs(p.w) < 0.01) {
+                p.w = p.w > 0 ? 0.01 : -0.01;
+            }
             p.x /= p.w; // [-1,1]
             p.y /= p.w; // [-1,1]
             p.z /= p.w; // [-1,1]

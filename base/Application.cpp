@@ -57,7 +57,7 @@ int Application::run() {
             usleep(static_cast<useconds_t>((_interval - now + last) * 1000));
         }
         count++;
-        if (count >= 10) {
+        if (count >= 15) {
             now = nowInMS();
             log("FPS = %.1f", 1000.0f / ((now - start) / count));
             count = 0;

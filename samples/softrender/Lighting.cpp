@@ -148,7 +148,7 @@ TEST_NODE_IMP_BEGIN
         setFaceCull(false);
     }
 
-    void Lighting::setPixel(int x, int y, int z, float u, float v, vec3 varying[],
+    void Lighting::setPixel(int x, int y, float z, float u, float v, vec3 varying[],
                             const std::vector<vec3> &uniforms) {
         const vec4 &textureColor = texture2D.sample(u, v);
 //        SoftRender::setPixel(x, y, z, textureColor);

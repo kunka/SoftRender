@@ -28,12 +28,14 @@ CustomDraw::~CustomDraw() {
 
 void CustomDraw::fixedUpdate(float delta) {
     Input *input = Input::getInstance();
-    float cameraSpeed = delta * 5;
+    float cameraSpeed = delta;// * 5;
     // move
-    if (input->isKeyPressed(GLFW_KEY_W))
+    if (input->isKeyPressed(GLFW_KEY_W)) {
         cameraPos += cameraSpeed * cameraDir;
-    if (input->isKeyPressed(GLFW_KEY_S))
+    }
+    if (input->isKeyPressed(GLFW_KEY_S)) {
         cameraPos -= cameraSpeed * cameraDir;
+    }
     if (input->isKeyPressed(GLFW_KEY_A))
         cameraPos -= glm::normalize(glm::cross(cameraDir, cameraUp)) * cameraSpeed;
     if (input->isKeyPressed(GLFW_KEY_D))

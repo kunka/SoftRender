@@ -39,7 +39,7 @@ TEST_NODE_IMP_BEGIN
         setFaceCull(false);
     }
 
-    void LoadModel::setPixel(int x, int y, int z, float u, float v, vec3 varying[],
+    void LoadModel::setPixel(int x, int y, float z, float u, float v, vec3 varying[],
                              const std::vector<vec3> &uniforms) {
         Texture2D *diffuse = _bindTextures["texture_diffuse1"];
         if (diffuse) {

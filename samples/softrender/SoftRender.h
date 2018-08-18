@@ -23,12 +23,19 @@
  * 屏幕坐标映射（ViewPort变换，透视除法 --> NDC坐标 --> 屏幕坐标）
  *
  * -------[光栅化]--------
- * 投影2D三角形数据设置，扫面线填充
- * 像素着色（颜色插值 or 纹理UV插值）
+ * 三角形顶点插值，UV插值，自定义插值（顶点法向量插值等）
+ * 扫面线填充2D三角形，2D/3D直线裁剪
+ * 像素着色（颜色插值 or 纹理UV插值，纹理包裹/滤波/Mipmaps）
  * TODO:Alpha测试
  * 深度测试
  * TODO:模版测试
  * TODO:混合
+ *
+ * -------[其他]--------
+ * Phong光照，ambient/diffuse/specular，材质/光照贴图
+ * 模型加载，Model，Mesh
+ * 深度测试，深度可视化
+ * Blend
  */
 
 #define MAX_VARYING_COUNT 5
@@ -89,7 +96,7 @@ TEST_NODE_BEGIN(SoftRender)
 
         unsigned int genTexture();
 
-        virtual void setPixel(int x, int y, int z, float u, float v);
+        virtual void setPixel(int x, int y, float z, float u, float v);
 
         void setPixel(int x, int y, float depth, const vec4 &color);
 
@@ -115,7 +122,11 @@ TEST_NODE_BEGIN(SoftRender)
 
         void pointToScreen(vec4 *triangle, int num = 3);
 
-        bool inCvv(const vec4 &vector);
+        int encode(const vec4 &p);
+
+        int encodeScreen(const vec4 &p);
+
+        bool clip_3D_line(vec4 &p1, vec4 &p2);
 
         unsigned int texture = -1;
 

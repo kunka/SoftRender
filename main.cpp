@@ -134,9 +134,10 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(LightingMap);
         ADD_TEST_SCENE(LoadModel);
         ADD_TEST_SCENE(VisualizeDepth);
+        ADD_TEST_SCENE(Blending);
         ADD_TEST_SCENE(Blend);
 
-        auto currentScene = "VisualizeDepth";
+        auto currentScene = "Blend";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {
