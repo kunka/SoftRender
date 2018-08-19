@@ -11,7 +11,6 @@ std::vector<std::pair<std::string, Scene *(*)()>> CustomDraw::testScenes;
 
 CustomDraw::CustomDraw() {
     stbi_set_flip_vertically_on_load(true); // flipY
-
     cameraPos = vec3(0.0f, 0.0f, 4.0f);
     cameraDir = vec3(0.0f, 0.0f, -1.0f);
     cameraUp = vec3(0.0f, 1.0f, 0.0f);
@@ -23,12 +22,16 @@ CustomDraw::CustomDraw() {
     projection = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
 }
 
+bool CustomDraw::init() {
+    return true;
+}
+
 CustomDraw::~CustomDraw() {
 }
 
 void CustomDraw::fixedUpdate(float delta) {
     Input *input = Input::getInstance();
-    float cameraSpeed = delta;// * 5;
+    float cameraSpeed = delta * 5;
     // move
     if (input->isKeyPressed(GLFW_KEY_W)) {
         cameraPos += cameraSpeed * cameraDir;
@@ -84,7 +87,7 @@ void CustomDraw::fixedUpdate(float delta) {
 
 // utility function for loading a 2D texture from file
 // ---------------------------------------------------
-unsigned int CustomDraw::loadTexture(const std::string &path) {
+unsigned int CustomDraw::loadTexture(const std::string &path, bool mipmap) {
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
@@ -101,12 +104,17 @@ unsigned int CustomDraw::loadTexture(const std::string &path) {
 
         glBindTexture(GL_TEXTURE_2D, textureID);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
+        if (mipmap) {
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
         // for this tutorial: use GL_CLAMP_TO_EDGE to prevent semi-transparent borders. Due to interpolation it takes texels from next repeat
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        if (mipmap) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        }
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         stbi_image_free(data);

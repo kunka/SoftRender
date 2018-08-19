@@ -29,7 +29,6 @@ public: \
     ~__CLASS__(); \
     virtual void draw(const mat4 &transform) override;
 
-
 #define TEST_NODE_END(__CLASS__) };};
 
 #define TEST_NODE_IMP_BEGIN namespace gltest{
@@ -43,12 +42,14 @@ public:
 
     virtual void fixedUpdate(float delta) override;
 
-    unsigned int loadTexture(const std::string &path);
+    unsigned int loadTexture(const std::string &path, bool mipmap = true);
 
     static int currentSceneIndex;
     static std::vector<std::pair<std::string, Scene *(*)()>> testScenes;
 
+    virtual bool init() override;
 protected:
+
     Shader shader;
     unsigned int VAO;
     unsigned int VBO;

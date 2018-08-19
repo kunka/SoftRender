@@ -9,8 +9,8 @@ TEST_NODE_IMP_BEGIN
     LightingMap::LightingMap() {
         diffuseTexture.load("../res/container2.png");
         specularTexture.load("../res/container2_specular.png");
-        diffuseTexture.setFilter(TF_LINEAR);
-        specularTexture.setFilter(TF_LINEAR);
+        diffuseTexture.setMagFilter(GL_LINEAR);
+        specularTexture.setMagFilter(GL_LINEAR);
     }
 
     void LightingMap::draw(const mat4 &transform) {

@@ -43,7 +43,6 @@ TEST_NODE_IMP_BEGIN
                 triangleWorld[j] = vec3(v0.x, v0.y, v0.z);
             }
             if (cvvCull(triangle)) {
-                // 简单CVV裁剪，三角形3个点有一个不在cvv立方体内将被裁剪掉
                 // log("cvv cull");
                 continue;
             }

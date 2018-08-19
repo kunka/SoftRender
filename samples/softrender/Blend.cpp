@@ -3,12 +3,18 @@
 //
 
 #include "Blend.h"
+#include <map>
 
 TEST_NODE_IMP_BEGIN
 
     Blend::Blend() {
+    }
+
+    bool Blend::init() {
+        SoftRender::init();
         texture2DBox.load("../res/container.jpg");
         texture2DPlane.load("../res/metal.png");
+        texture2DWindow.load("../res/blending_transparent_window.png");
 
         vertices = {
                 // postions        // texture coords
@@ -73,12 +79,15 @@ TEST_NODE_IMP_BEGIN
 
         cameraPos = vec3(0.0f, 1.5f, 3.0f);
         cameraDir = vec3(0.0f, 0.0f, 0.0f) - cameraPos;
+        return true;
     }
 
     void Blend::draw(const mat4 &transform) {
         setDepthTest(true);
         clearColor(50, 50, 50, 255);
         clearDepth();
+        setBlendEnabled(true);
+        setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         setFaceCull(false);
         // draw plane
@@ -113,8 +122,36 @@ TEST_NODE_IMP_BEGIN
         for (unsigned int i = 0; i < boxMeshes.size(); i++)
             drawMesh(*boxMeshes[i], m);
 
+        // draw windows
+        std::vector<glm::vec3> vegetation;
+        vegetation.push_back(glm::vec3(-1.5f, 0.5f, -0.48f));
+        vegetation.push_back(glm::vec3(1.5f, 0.5f, 0.51f));
+        vegetation.push_back(glm::vec3(0.0f, 0.5f, 0.7f));
+        vegetation.push_back(glm::vec3(-0.3f, 0.5f, -2.3f));
+        vegetation.push_back(glm::vec3(0.5f, 0.5f, -0.6f));
+
+//        1. Draw all opaque objects first.
+//        2. Sort all the transparent objects.
+//        3. Draw all the transparent objects in sorted order.
+        bindTextures({&texture2DWindow});
+        std::map<float, glm::vec3> sorted;
+        for (unsigned int i = 0; i < vegetation.size(); i++) {
+            float distance = glm::distance(cameraPos, vegetation.at(i));
+            sorted[distance] = vegetation[i];
+        }
+        for (std::map<float, glm::vec3>::reverse_iterator it = sorted.rbegin(); it != sorted.
+                rend(); ++it) {
+            modelMatrix.setIdentity();
+            modelMatrix.translate(it->second);
+            m = modelMatrix;
+            m.mult(viewMatrix);
+            m.mult(projectMatrix);
+            for (unsigned int i = 0; i < planeMeshes.size(); i++)
+                drawMesh(*planeMeshes[i], m);
+        }
 
         SoftRender::draw(transform);
+        setBlendEnabled(false);
         setDepthTest(false);
         setFaceCull(false);
     }

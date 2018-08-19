@@ -24,7 +24,7 @@ TEST_NODE_BEGIN2(TextureCube, RastCube)
 
         void bindTexture(const Texture2D *texture);
 
-        void drawMesh(const Mesh &mesh, const Matrix &mvp);
+        void drawMesh(const Mesh &mesh, const Matrix &mvp, int varyingCount = 0);
 
         Texture2D texture2D;
 TEST_NODE_END(TextureCube)

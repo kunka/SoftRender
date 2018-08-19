@@ -60,18 +60,20 @@ void main()
 {
     vec3 color = texture(material.diffuse, fs_in.TexCoords).rgb;
     vec3 ambient = light.ambient * color;
-
-    vec3 norm = normalize(fs_in.Normal);
-    vec3 lightDir = normalize(light.position - fs_in.FragPos);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff * color;
-
-    vec3 viewDir = normalize(viewPos - fs_in.FragPos);
-    vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(norm, halfwayDir), 0.0), 16.0);
-    vec3 specular = light.specular * spec;
-
-    FragColor = vec4(diffuse + ambient + specular, 1.0);
+    FragColor = vec4( color, 1.0);
+//
+//    vec3 norm = normalize(fs_in.Normal);
+//    vec3 lightDir = normalize(light.position - fs_in.FragPos);
+//    float diff = max(dot(norm, lightDir), 0.0);
+//    vec3 diffuse = light.diffuse * diff * color;
+//
+//    vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+//    vec3 halfwayDir = normalize(lightDir + viewDir);
+//    float spec = pow(max(dot(norm, halfwayDir), 0.0), 16.0);
+//    vec3 specular = light.specular * spec;
+//
+////    FragColor = vec4(diffuse + ambient + specular, 1.0);
+//    FragColor = vec4( specular, 1.0);
 }
 )";
 
@@ -310,7 +312,7 @@ void main()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+        float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
         // attach depth texture as FBO's depth buffer
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -318,7 +320,6 @@ void main()
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 
         // visual depth quad
         float quadVertices[] = {
@@ -344,9 +345,11 @@ void main()
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
+        glBindVertexArray(0);
+
         // Images
         texture = loadTexture("../res/container.jpg");
-        texture2 = loadTexture("../res/wood.png");
+        texture2 = loadTexture("../res/net.jpg");
 
         lightPos = vec3(-2, 4, -3);
         shader.use();
@@ -378,7 +381,7 @@ void main()
     void ShadowMapping::draw(const mat4 &transform) {
         glEnable(GL_DEPTH_TEST);
 
-        renderType = 3;
+        renderType = 0;
 
         switch (renderType) {
             case 0 : {
@@ -395,7 +398,8 @@ void main()
             case 1: {
                 // visual depth 1
                 // light matrix
-                glClear(GL_DEPTH_BUFFER_BIT);
+                glClearColor(0, 0, 0, 0.0f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 auto &size = Director::getInstance()->getWinSize();
 //                mat4 pj = glm::perspective(glm::radians(60.0f), size.width / size.height, 0.1f, 100.0f);
                 mat4 pj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
@@ -408,6 +412,7 @@ void main()
                 break;
             }
             case 2: {
+                glClearColor(0, 0, 0, 0.0f);
                 // visual depth by depth map
                 // render to depth map
                 auto &size = Director::getInstance()->getFrameBufferSize();
@@ -492,24 +497,24 @@ void main()
             glCullFace(GL_FRONT); // fix peter panning
         }
 
-        glBindVertexArray(VAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(-1.0f, 2.0f, -1.0f));
-        shader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(1.0f, 0.5f, -1.0f));
-        model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        shader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(-2.0f, 0.5f, 0.0f));
-        shader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+//        glBindVertexArray(VAO);
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, texture);
+//        model = glm::mat4();
+//        model = glm::translate(model, glm::vec3(-1.0f, 2.0f, -1.0f));
+//        shader.setMat4("model", model);
+//        glDrawArrays(GL_TRIANGLES, 0, 36);
+//
+//        model = glm::mat4();
+//        model = glm::translate(model, glm::vec3(1.0f, 0.5f, -1.0f));
+//        model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+//        shader.setMat4("model", model);
+//        glDrawArrays(GL_TRIANGLES, 0, 36);
+//
+//        model = glm::mat4();
+//        model = glm::translate(model, glm::vec3(-2.0f, 0.5f, 0.0f));
+//        shader.setMat4("model", model);
+//        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         if (faceCulling) {
             glDisable(GL_CULL_FACE);

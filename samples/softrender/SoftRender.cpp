@@ -7,6 +7,11 @@
 TEST_NODE_IMP_BEGIN
 
     SoftRender::SoftRender() {
+        TEX_WIDTH = 512;
+        TEX_HEIGHT = 512;
+    }
+
+    bool SoftRender::init() {
         const char *vert = R"(
 #version 330 core
 layout (location = 0) in vec3 a_position;
@@ -33,6 +38,7 @@ void main()
 }
 )";
         shader.loadStr(vert, frag);
+        texData = new GLubyte[TEX_WIDTH * TEX_HEIGHT * 4];
 
         float ratio = (float) TEX_WIDTH / TEX_HEIGHT;
         float vertices[] = {
@@ -69,10 +75,12 @@ void main()
 
         clipRect.setRect(0, 0, TEX_WIDTH, TEX_HEIGHT);
         isClipRect = true;
-        depthBuff = new float[TEX_WIDTH * TEX_HEIGHT];
+        depthBuff = new float[MAX_TEX_SIZE * MAX_TEX_SIZE];
         _depthTest = false;
         faceCulling = false;
+        _blend = false;
         projectMatrix = Matrix::perspective(radians(60.0f), (float) TEX_WIDTH / TEX_HEIGHT, 0.1, 100.0f);
+        return true;
     }
 
     void SoftRender::draw(const mat4 &transform) {
@@ -94,6 +102,9 @@ void main()
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &EBO);
         delete[] depthBuff;
+        if (texData) {
+            delete[] texData;
+        }
     }
 
     unsigned int SoftRender::genTexture() {
@@ -128,11 +139,46 @@ void main()
         if (x >= 0 && y >= 0 && x < TEX_WIDTH && y < TEX_HEIGHT) {
             int index = y * TEX_WIDTH + x;
             if (!_depthTest or depth < depthBuff[index]) {
+                float r, g, b, a;
                 depthBuff[index] = depth;
-                texData[y][x][0] = (GLubyte) color.r;
-                texData[y][x][1] = (GLubyte) color.g;
-                texData[y][x][2] = (GLubyte) color.b;
-                texData[y][x][3] = (GLubyte) color.a;
+                if (_blend) {
+                    // C_result =C_source∗F_source+C_destination∗F_destination
+                    float F_source = 1;
+                    float F_destination = 0;
+                    if (_blendFuncSrc == GL_SRC_ALPHA) {
+                        F_source = color.a / 255.0f;
+                    }
+                    if (_blendFuncDst == GL_ONE_MINUS_SRC_ALPHA) {
+                        F_destination = 1.0f - color.a / 255.0f;
+                    }
+//                    r = F_source * color.r + F_destination * (float) texData[y][x][0];
+//                    g = F_source * color.g + F_destination * (float) texData[y][x][1];
+//                    b = F_source * color.b + F_destination * (float) texData[y][x][2];
+//                    a = F_source * color.a + F_destination * (float) texData[y][x][3];
+                    r = F_source * color.r + F_destination * (float) texData[4 * (y * TEX_WIDTH + x)];
+                    g = F_source * color.g + F_destination * (float) texData[4 * (y * TEX_WIDTH + x) + 1];
+                    b = F_source * color.b + F_destination * (float) texData[4 * (y * TEX_WIDTH + x) + 2];
+                    a = F_source * color.a + F_destination * (float) texData[4 * (y * TEX_WIDTH + x) + 3];
+                } else {
+                    r = color.r;
+                    g = color.g;
+                    b = color.b;
+                    a = color.a;
+                }
+                // overflow
+                r = r > 255 ? 255 : r;
+                g = g > 255 ? 255 : g;
+                b = b > 255 ? 255 : b;
+                a = a > 255 ? 255 : a;
+//                texData[y][x][0] = (GLubyte) r;
+//                texData[y][x][1] = (GLubyte) g;
+//                texData[y][x][2] = (GLubyte) b;
+//                texData[y][x][3] = (GLubyte) a;
+                texData[4 * (y * TEX_WIDTH + x)] = (GLubyte) r;
+                texData[4 * (y * TEX_WIDTH + x) + 1] = (GLubyte) g;
+                texData[4 * (y * TEX_WIDTH + x) + 2] = (GLubyte) b;
+                texData[4 * (y * TEX_WIDTH + x) + 3] = (GLubyte) a;
+
             }
         }
     }
@@ -154,8 +200,17 @@ void main()
     }
 
     void SoftRender::clearColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a) {
-        int color = a << 24 | r << 16 | g << 8 | b;
-        memset(texData, color, TEX_WIDTH * TEX_HEIGHT * 4);
+        for (int x = 0; x < TEX_WIDTH; x++)
+            for (int y = 0; y < TEX_HEIGHT; y++) {
+//                texData[y][x][0] = (GLubyte) r;
+//                texData[y][x][1] = (GLubyte) g;
+//                texData[y][x][2] = (GLubyte) b;
+//                texData[y][x][3] = (GLubyte) a;
+                texData[4 * (y * TEX_WIDTH + x)] = (GLubyte) r;
+                texData[4 * (y * TEX_WIDTH + x) + 1] = (GLubyte) g;
+                texData[4 * (y * TEX_WIDTH + x) + 2] = (GLubyte) b;
+                texData[4 * (y * TEX_WIDTH + x) + 3] = (GLubyte) a;
+            }
     }
 
     void SoftRender::clearDepth() {

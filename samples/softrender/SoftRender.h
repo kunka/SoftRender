@@ -10,9 +10,6 @@
 #include "Texture2D.h"
 #include <unordered_map>
 
-#define TEX_WIDTH   768
-#define TEX_HEIGHT  768
-
 /*
  * -------[顶点处理]--------
  * 顶点坐标变换，O(模型空间) --> M（世界坐标） --> V（相机空间） --> P（投影坐标）
@@ -39,6 +36,7 @@
  */
 
 #define MAX_VARYING_COUNT 5
+#define MAX_TEX_SIZE 1024
 
 struct VertexCoords {
     vec4 p;
@@ -92,6 +90,8 @@ TEST_NODE_BEGIN(SoftRender)
             v2 = tmp;
         }
 
+        virtual bool init() override;
+
     protected:
 
         unsigned int genTexture();
@@ -128,11 +128,24 @@ TEST_NODE_BEGIN(SoftRender)
 
         bool clip_3D_line(vec4 &p1, vec4 &p2);
 
+        void setBlendEnabled(bool blend) { _blend = blend; }
+
+        void setBlendFunc(int src, int dst) {
+            _blendFuncSrc = src;
+            _blendFuncDst = dst;
+        }
+
+        int TEX_WIDTH;
+        int TEX_HEIGHT;
+
         unsigned int texture = -1;
 
-        GLubyte texData[TEX_WIDTH][TEX_HEIGHT][4];
+        GLubyte *texData;
         bool _depthTest;
         bool faceCulling;
+        bool _blend;
+        int _blendFuncSrc;
+        int _blendFuncDst;
         float *depthBuff;
         Rect clipRect;
         bool isClipRect;

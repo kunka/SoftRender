@@ -1,31 +1,36 @@
 //
-// Created by huangkun on 2018/8/15.
+// Created by huangkun on 2018/8/18.
 //
 
-#ifndef GL_BLEND_H
-#define GL_BLEND_H
+#ifndef GL_SHADOWMAP_H
+#define GL_SHADOWMAP_H
+
 
 #include "TextureCube.h"
 
-TEST_NODE_BEGIN2(Blend, TextureCube)
-
-    public:
-        virtual bool init() override;
+TEST_NODE_BEGIN2(ShadowMap, TextureCube)
 
     protected:
 
         virtual void setPixel(int x, int y, float z, float u, float v, vec3 varying[],
                               const std::vector<vec3> &uniforms = {}) override;
 
+        void renderScene(int type, bool faceCulling = false);
+
         std::vector<float> verticesPlane;
+        std::vector<float> verticesQuad;
         std::vector<unsigned int> indicesPlane;
 
         Texture2D texture2DBox;
         Texture2D texture2DPlane;
-        Texture2D texture2DWindow;
 
         std::vector<Mesh *> planeMeshes;
         std::vector<Mesh *> boxMeshes;
-TEST_NODE_END(Blend)
+        std::vector<Mesh *> quadMeshes;
 
-#endif //GL_BLEND_H
+        vec3 lightPos;
+        float *depthFBO;
+        int renderType;
+
+TEST_NODE_END(ShadowMap)
+#endif //GL_SHADOWMAP_H

@@ -66,7 +66,7 @@ TEST_NODE_IMP_BEGIN
     void Lighting::draw(const mat4 &transform) {
         setDepthTest(true);
         setFaceCull(true);
-        clearColor(50, 50, 50, 255);
+        clearColor(25, 25, 25, 255);
         clearDepth();
 
         modelMatrix.setIdentity();
@@ -101,7 +101,6 @@ TEST_NODE_IMP_BEGIN
 //                triangleWorld[j] = model * p;
             }
             if (cvvCull(triangle)) {
-                // 简单CVV裁剪，三角形3个点有一个不在cvv立方体内将被裁剪掉
                 // log("cvv cull");
                 continue;
             }
@@ -173,6 +172,7 @@ TEST_NODE_IMP_BEGIN
         float spec = pow(std::max(glm::dot(normal, halfwayDir), 0.0f), 16.0f);
 
         vec3 specularColor = lightColor * vec3(0.5f, 0.5f, 0.5f);
+        spec *= 255.0f;
         vec3 specular = specularColor * spec;
 
         vec4 color = vec4(vec3(textureColor) * (ambient + diffuse) + specular, 255);

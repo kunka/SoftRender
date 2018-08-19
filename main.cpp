@@ -20,6 +20,8 @@
 #include "gl/Triangle.h"
 #include "gl/Rectangle.h"
 #include "gl/Texture.h"
+#include "gl/TextureFiltering.h"
+#include "gl/Mipmaps.h"
 #include "gl/MVP.h"
 #include "gl/Cubes.h"
 #include "gl/Camerz.h"
@@ -57,16 +59,19 @@
 #include "softrender/Rast2DTriangle.h"
 #include "softrender/RastCube.h"
 #include "softrender/TextureCube.h"
+#include "softrender/Textures.h"
 #include "softrender/Lighting.h"
 #include "softrender/LightingMap.h"
 #include "softrender/LoadModel.h"
 #include "softrender/VisualizeDepth.h"
 #include "softrender/Blend.h"
+#include "softrender/ShadowMap.h"
 
 template<typename T>
 Scene *createScene() {
     Scene *scene = Scene::create();
     T *node = new T;
+    node->init();
     scene->addChild(node);
     return scene;
 }
@@ -92,6 +97,8 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(Triangle);
         ADD_TEST_SCENE(Rectangle);
         ADD_TEST_SCENE(Texture);
+        ADD_TEST_SCENE(TextureFiltering);
+        ADD_TEST_SCENE(Mipmaps);
         ADD_TEST_SCENE(MVP);
         ADD_TEST_SCENE(Cubes);
         ADD_TEST_SCENE(Camerz);
@@ -130,14 +137,22 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(Rast2DTriangle);
         ADD_TEST_SCENE(RastCube);
         ADD_TEST_SCENE(TextureCube);
+        ADD_TEST_SCENE(BasicLighting);// opengl
         ADD_TEST_SCENE(Lighting);
+        ADD_TEST_SCENE(LightingMaps);// opengl
         ADD_TEST_SCENE(LightingMap);
+        ADD_TEST_SCENE(ModelLoad); // opengl
         ADD_TEST_SCENE(LoadModel);
+        ADD_TEST_SCENE(DepthTest); // opengl
         ADD_TEST_SCENE(VisualizeDepth);
-        ADD_TEST_SCENE(Blending);
+        ADD_TEST_SCENE(Blending); // opengl
         ADD_TEST_SCENE(Blend);
+        ADD_TEST_SCENE(ShadowMapping);// opengl
+        ADD_TEST_SCENE(ShadowMap);
+        ADD_TEST_SCENE(Texture);// opengl
+        ADD_TEST_SCENE(Textures);
 
-        auto currentScene = "Blend";
+        auto currentScene = "Textures";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {

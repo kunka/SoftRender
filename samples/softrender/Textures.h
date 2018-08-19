@@ -1,13 +1,13 @@
 //
-// Created by huangkun on 2018/8/15.
+// Created by huangkun on 2018/8/19.
 //
 
-#ifndef GL_BLEND_H
-#define GL_BLEND_H
+#ifndef GL_TEXTURES_H
+#define GL_TEXTURES_H
 
 #include "TextureCube.h"
 
-TEST_NODE_BEGIN2(Blend, TextureCube)
+TEST_NODE_BEGIN2(Textures, TextureCube)
 
     public:
         virtual bool init() override;
@@ -19,13 +19,8 @@ TEST_NODE_BEGIN2(Blend, TextureCube)
 
         std::vector<float> verticesPlane;
         std::vector<unsigned int> indicesPlane;
-
-        Texture2D texture2DBox;
-        Texture2D texture2DPlane;
-        Texture2D texture2DWindow;
-
         std::vector<Mesh *> planeMeshes;
-        std::vector<Mesh *> boxMeshes;
-TEST_NODE_END(Blend)
 
-#endif //GL_BLEND_H
+TEST_NODE_END(Textures)
+
+#endif //GL_TEXTURES_H

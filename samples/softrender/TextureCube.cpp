@@ -376,7 +376,7 @@ TEST_NODE_IMP_BEGIN
     TextureCube::~TextureCube() {
     }
 
-    void TextureCube::drawMesh(const Mesh &mesh, const Matrix &mvp) {
+    void TextureCube::drawMesh(const Mesh &mesh, const Matrix &mvp, int varyingCount) {
         const auto &vertices = mesh._vertices;
         const auto &indices = mesh._indices;
         bindTextures(mesh._texture2Ds);
@@ -400,7 +400,6 @@ TEST_NODE_IMP_BEGIN
                 triangleWorld[j] = v0.vec3();
             }
             if (cvvCull(triangle)) {
-                // 简单CVV裁剪，三角形3个点有一个不在cvv立方体内将被裁剪掉
                 // log("cvv cull");
                 continue;
             }
@@ -412,15 +411,40 @@ TEST_NODE_IMP_BEGIN
             }
             // 转换为屏幕坐标
             pointToScreen(triangle);
+//            vec3 norms[] = {
+//                    modelMatrix.applyVector(normals[0]).vec3(),
+//                    modelMatrix.applyVector(normals[1]).vec3(),
+//                    modelMatrix.applyVector(normals[2]).vec3(),
+//            };
+            mat4 matrix = mat4(modelMatrix.m[0][0], modelMatrix.m[0][1], modelMatrix.m[0][2], modelMatrix.m[0][3],
+                               modelMatrix.m[1][0], modelMatrix.m[1][1], modelMatrix.m[1][2], modelMatrix.m[1][3],
+                               modelMatrix.m[2][0], modelMatrix.m[2][1], modelMatrix.m[2][2], modelMatrix.m[2][3],
+                               modelMatrix.m[3][0], modelMatrix.m[3][1], modelMatrix.m[3][2], modelMatrix.m[3][3]);
+            matrix = glm::transpose(glm::inverse(matrix));
+            vec3 norms[] = {
+                    matrix * vec4(normals[0].x, normals[0].y, normals[0].z, 0),
+                    matrix * vec4(normals[1].x, normals[1].y, normals[1].z, 0),
+                    matrix * vec4(normals[2].x, normals[2].y, normals[2].z, 0),
+            };
 
             // 光栅化
-            vec3 v1[] = {};
-            vec3 v2[] = {};
-            vec3 v3[] = {};
+            vec3 v1[3], v2[3], v3[3];
+            if (varyingCount == 1) {
+                v1[0] = triangleWorld[0];
+                v2[0] = triangleWorld[1];
+                v3[0] = triangleWorld[2];
+            } else if (varyingCount == 2) {
+                v1[0] = triangleWorld[0];
+                v2[0] = triangleWorld[1];
+                v3[0] = triangleWorld[2];
+                v1[1] = norms[0];
+                v2[1] = norms[1];
+                v3[1] = norms[2];
+            }
             std::vector<VertexCoords> verts = {
-                    createVertexCoords(triangle[0], uv[0] * triangle[0].w, v1, 0),
-                    createVertexCoords(triangle[1], uv[1] * triangle[1].w, v2, 0),
-                    createVertexCoords(triangle[2], uv[2] * triangle[2].w, v3, 0),
+                    createVertexCoords(triangle[0], uv[0] * triangle[0].w, v1, varyingCount),
+                    createVertexCoords(triangle[1], uv[1] * triangle[1].w, v2, varyingCount),
+                    createVertexCoords(triangle[2], uv[2] * triangle[2].w, v3, varyingCount),
             };
             fill(verts);
         }

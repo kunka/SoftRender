@@ -179,6 +179,7 @@ void main()
                 -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f
         };
 
+        stbi_set_flip_vertically_on_load(false); // flipY
         int width, height, nrChannels;
         unsigned char *data = stbi_load("../res/container.jpg", &width, &height, &nrChannels, 0);
         if (!data) {

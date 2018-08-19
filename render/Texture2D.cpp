@@ -5,16 +5,14 @@
 #include "Texture2D.h"
 #include "stb_image.h"
 #include "MathUtil.h"
+#include <glad/glad.h>
 
 Texture2D::Texture2D() {
     width = height = 0;
     data = nullptr;
     channels = 1;
-    this->filter = TF_NEAREST;
-}
-
-void Texture2D::setFilter(TextureFilter filter) {
-    this->filter = filter;
+    wrap = GL_REPEAT;
+    magFilter = GL_NEAREST;
 }
 
 void Texture2D::load(const std::string &path, int desiredChannels) {
@@ -45,11 +43,13 @@ glm::vec4 Texture2D::_sample(int x, int y) {
 
 glm::vec4 Texture2D::sample(float u, float v) {
     // clamp to 0~1
-    u = u - floor(u);
-    v = v - floor(v);
-    if (this->filter == TF_NEAREST) {
+    if (wrap == GL_REPEAT) {
+        u = u - floor(u);
+        v = v - floor(v);
+    }
+    if (magFilter == GL_NEAREST) {
         return _sample(width * u, height * v);
-    } else if (this->filter == TF_LINEAR) {
+    } else if (magFilter == GL_LINEAR) {
         /*
          * 01 11
          * 00 10
@@ -58,8 +58,8 @@ glm::vec4 Texture2D::sample(float u, float v) {
         float y = MathUtil::clamp(height * v, 0, height - 1);
         int x0 = floor(x);
         int y0 = floor(y);
-        int x1 = MathUtil::clamp(x0 + 1, 0, width - 1);
-        int y1 = MathUtil::clamp(y0 + 1, 0, height - 1);
+        int x1 = x0 < width - 2 ? x0 + 1 : width - 1;
+        int y1 = y0 < height - 2 ? y0 + 1 : height - 1;
         float wx = x - x0;
         float wy = y - y0;
         glm::vec4 xx = _sample(x0, y0) * (1.0f - wx) + _sample(x1, y0) * wx;

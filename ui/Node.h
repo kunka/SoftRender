@@ -48,13 +48,14 @@ public:
 
     virtual const std::vector<Node *> &getChildren() const { return _children; }
 
+    virtual bool init();
+
 protected:
     // Nodes should be created using create();
     Node();
 
     virtual ~Node();
 
-    virtual bool init();
 
     glm::vec3 _position;
     glm::vec3 _rotation;

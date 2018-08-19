@@ -9,11 +9,6 @@
 #include <unordered_map>
 #include <glm/glm.hpp>
 
-typedef enum {
-    TF_NEAREST = 0,
-    TF_LINEAR,
-} TextureFilter;
-
 class Texture2D {
 public:
     Texture2D();
@@ -36,7 +31,11 @@ public:
 
 //    void genMipmaps();
 //
-    void setFilter(TextureFilter filter);
+    void setWrap(int wrap) { this->wrap = wrap; }
+
+    void setMagFilter(int filter) { magFilter = filter; }
+
+    void setMinFilter(int filter) { minFilter = filter; }
 
     std::string type;
 
@@ -47,7 +46,9 @@ private:
     int channels;
     int width;
     int height;
-    TextureFilter filter;
+    int minFilter;
+    int magFilter;
+    int wrap;
     std::string path;
     std::unordered_map<int, unsigned char *> mipmaps;
 };
