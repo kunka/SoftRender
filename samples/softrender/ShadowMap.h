@@ -10,6 +10,9 @@
 
 TEST_NODE_BEGIN2(ShadowMap, TextureCube)
 
+    public:
+        virtual bool init() override;
+
     protected:
 
         virtual void setPixel(int x, int y, float z, float u, float v, vec3 varying[],

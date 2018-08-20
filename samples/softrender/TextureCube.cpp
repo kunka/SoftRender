@@ -149,19 +149,11 @@ TEST_NODE_IMP_BEGIN
             vec4 a, b;
             a.y = b.y = max.y;
             vec2 uv1, uv2;
-            if (max.y == mid.y) {
-//                dda_line(mid, max, midUV, maxUV);
-                dda_line(createVertexCoords(mid, midUV, midVarying, varyingCount),
-                         createVertexCoords(max, maxUV, maxVarying, varyingCount), uniforms);
-            } else {
-//                dda_line(min, mid, minUV, midUV);
-                dda_line(createVertexCoords(min, minUV, minVarying, varyingCount),
-                         createVertexCoords(mid, midUV, midVarying, varyingCount), uniforms);
-            }
+            float dvdy = abs(dy) < FLT_EPSILON ? 0 : (maxUV.y - minUV.y) / dy;
+
             vec3 varyingA[varyingCount];
             vec3 varyingB[varyingCount];
-//            VertexCoords v1,v2;
-            for (int i = 1; i <= dy; i++) {
+            for (int i = 0; i <= dy; i++) {
                 float f = (float) i / dy;
                 if (max.y == mid.y) {
                     a.x = interp(mid.x, min.x, f);
@@ -169,32 +161,23 @@ TEST_NODE_IMP_BEGIN
                     a.w = interp(mid.w, min.w, f);
                     uv1 = interp(midUV, minUV, f);
                     verts[0].interp(varyingA, midVarying, minVarying, f);
-//                    for (int m = 0; m < varyingCount; m++) {
-//                        v1[m].in = interp(midVarying[m], minVarying[m], f));
-//                    }
                 } else {
                     a.x = interp(max.x, mid.x, f);
                     a.z = interp(max.z, mid.z, f);
                     a.w = interp(max.w, mid.w, f);
                     uv1 = interp(maxUV, midUV, f);
                     verts[0].interp(varyingA, maxVarying, midVarying, f);
-//                    for (int m = 0; m < varyingCount; m++) {
-//                        varyingA.push_back(interp(maxVarying[m], midVarying[m], f));
-//                    }
                 }
-                a.y -= 1;
                 b.x = interp(max.x, min.x, f);
                 b.z = interp(max.z, min.z, f);
                 b.w = interp(max.w, min.w, f);
                 uv2 = interp(maxUV, minUV, f);
-                b.y -= 1;
-//                for (int m = 0; m < maxVarying.size(); m++) {
-//                    varyingB.push_back(interp(maxVarying[m], minVarying[m], f));
-//                }
                 verts[0].interp(varyingB, maxVarying, minVarying, f);
 
                 dda_line(createVertexCoords(a, uv1, varyingA, varyingCount),
-                         createVertexCoords(b, uv2, varyingB, varyingCount), uniforms);
+                         createVertexCoords(b, uv2, varyingB, varyingCount), uniforms, dvdy);
+                a.y -= 1;
+                b.y -= 1;
             }
         } else {
             /*
@@ -217,10 +200,6 @@ TEST_NODE_IMP_BEGIN
             vec2 uv = interp(minUV, maxUV, f);
 
             vec3 interpVarying[varyingCount];
-//            std::vector<vec4> interpVarying;
-//            for (int m = 0; m < maxVarying.size(); m++) {
-//                interpVarying.push_back(interp(minVarying[m], maxVarying[m], f));
-//            }
             verts[0].interp(interpVarying, minVarying, maxVarying, f);
             std::vector<VertexCoords> verts1 = {
                     createVertexCoords(max, maxUV, maxVarying, varyingCount),
@@ -236,7 +215,7 @@ TEST_NODE_IMP_BEGIN
     }
 
     void TextureCube::dda_line(const VertexCoords &vert1, const VertexCoords &vert2,
-                               const std::vector<vec3> &uniforms) {
+                               const std::vector<vec3> &uniforms, float dvdy) {
         const vec4 &pa = vert1.p;
         const vec4 &pb = vert2.p;
         const vec2 &uv1 = vert1.uv;
@@ -274,12 +253,6 @@ TEST_NODE_IMP_BEGIN
         p2.z = interp(pa.z, pb.z, f2);
         uv11 = interp(uv1, uv2, f1);
         uv12 = interp(uv1, uv2, f2);
-//        for (int m = 0; m < varyingA.size(); m++) {
-//            varying1[m] = interp(varyingA[m], varyingB[m], f1);
-//        }
-//        for (int m = 0; m < varyingA.size(); m++) {
-//            varying2[m] = interp(varyingA[m], varyingB[m], f2);
-//        }
         vec3 varying1[varyingCount];
         vert1.interp(varying1, varyingA, varyingB, f1);
         vec3 varying2[varyingCount];
@@ -302,24 +275,19 @@ TEST_NODE_IMP_BEGIN
             else
                 stepY = dy > 0 ? fabs(dy / dx) : -fabs(dy / dx);
         }
+        float dudx = abs(dx) < FLT_EPSILON ? 0 : (uv12.x - uv11.x) / dx;
         float x = p1.x, y = p1.y;
-        setPixel(x, y, p1.z, uv11.x / p1.w, uv11.y / p1.w, varying1, uniforms);
         vec3 interpVarying[varyingCount];
-        for (int k = 1; k <= steps; k++) {
-            x += stepX;
-            y += stepY;
+        for (int k = 0; k <= steps; k++) {
             float f = 1.0f * k / steps;
             float z = interp(p1.z, p2.z, f);
             float w = interp(p1.w, p2.w, f);
             vec2 uv0 = interp(uv11, uv12, f);
-//            std::vector<vec4> interpVarying;
-//            for (int m = 0; m < varyingA.size(); m++) {
-//                interpVarying.push_back(interp(varying1[m], varying2[m], f));
-//            }
             vert1.interp(interpVarying, varying1, varying2, f);
-            setPixel(x, y, z, uv0.x / w, uv0.y / w, interpVarying, uniforms);
+            setPixel(x, y, z, uv0.x / w, uv0.y / w, interpVarying, uniforms, dudx / w, dvdy / w);
+            x += stepX;
+            y += stepY;
         }
-        setPixel(p2.x, p2.y, p2.z, uv12.x / p2.w, uv12.y / p2.w, varying2, uniforms);
 
         // Bresenham
 //        float x0 = p1.x, x1 = p2.x, y0 = p1.y, y1 = p2.y;
@@ -371,6 +339,11 @@ TEST_NODE_IMP_BEGIN
                                const std::vector<vec3> &uniforms) {
         const vec4 &color = texture2D.sample(u, v);
         SoftRender::setPixel(x, y, z, color);
+    }
+
+    void TextureCube::setPixel(int x, int y, float z, float u, float v, vec3 varying[],
+                               const std::vector<vec3> &uniforms, float dudx, float dudy) {
+        setPixel(x, y, z, u, v, varying, uniforms);
     }
 
     TextureCube::~TextureCube() {

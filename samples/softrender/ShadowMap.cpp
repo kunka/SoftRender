@@ -7,6 +7,12 @@
 TEST_NODE_IMP_BEGIN
 
     ShadowMap::ShadowMap() {
+        TEX_WIDTH = 1024;
+        TEX_HEIGHT = 1024;
+    }
+
+    bool ShadowMap::init() {
+        SoftRender::init();
         vertices = {
                 // back face
                 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -0.5f, 0.0f, 0.0f, // bottom-left
@@ -73,6 +79,8 @@ TEST_NODE_IMP_BEGIN
 
         texture2DBox.load("../res/container.jpg");
         texture2DPlane.load("../res/net.jpg");
+        texture2DPlane.setWrap(GL_REPEAT);
+        texture2DPlane.setMagFilter(GL_LINEAR);
 
         Mesh *mesh = new Mesh(createVertexs(verticesPlane, 3, 3, 2), indicesPlane);
         planeMeshes.push_back(mesh);

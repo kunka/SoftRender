@@ -3,6 +3,7 @@
 //
 
 #include "Mipmaps.h"
+#include "Input.h"
 
 TEST_NODE_IMP_BEGIN
 
@@ -71,10 +72,9 @@ void main()
         glEnableVertexAttribArray(1);
 
 
-        texture = loadTexture("../res/wood.png");
+        texture = loadTexture("../res/wood.png", false);
+        texture2 = loadTexture("../res/wood.png");
         shader.use();
-//        glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0); // set it manually
-//        shader.setInt("texture2", 1); // or with shader class
         shader.setInt("ourTexture", 0);
         shader.setMat4("projection", projection);
     }
@@ -86,17 +86,36 @@ void main()
 
         shader.use();
         glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
-        glBindTexture(GL_TEXTURE_2D, texture);
+        if (Input::getInstance()->isKeyPressed(GLFW_KEY_SPACE)) {
+            glBindTexture(GL_TEXTURE_2D, texture);
+        } else {
+            glBindTexture(GL_TEXTURE_2D, texture2);
+        }
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
         shader.setMat4("view", view);
-
-        // plane
-        model = glm::mat4();
-        model = glm::scale(model, vec3(5.0f));
-        model = glm::rotate(model, glm::radians(-60.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        shader.setMat4("model", model);
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        std::vector<vec3> ps = {
+                vec3(-1, -1, 1.5),
+//                vec3(-3, 3.5, -5),
+//                vec3(3, 3, -5),
+//                vec3(0, 0, -10),
+//                vec3(-10, 1, -15),
+//                vec3(5, 2, -15),
+//                vec3(8, -2, -12),
+//                vec3(3, -4, -8),
+        };
+        shader.setMat4("view", glm::mat4());
+        shader.setMat4("projection", glm::mat4());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+
+        for (int i = 0; i < ps.size(); i++) {
+            model = glm::mat4();
+            model = glm::scale(model, vec3(1.8, 1.8, 1));
+//            model = glm::translate(model, ps[i]);
+            shader.setMat4("model", model);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
 
         glDisable(GL_DEPTH_TEST);
     }

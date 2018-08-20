@@ -11,10 +11,7 @@ TEST_NODE_BEGIN(TextureFiltering)
 
     protected:
         unsigned int texture;
-
-        unsigned int VAOTR;
-        unsigned int VBOTR;
-        unsigned int EBOTR;
+        unsigned int texture2;
 
 TEST_NODE_END(TextureFiltering)
 

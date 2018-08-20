@@ -60,6 +60,8 @@
 #include "softrender/RastCube.h"
 #include "softrender/TextureCube.h"
 #include "softrender/Textures.h"
+#include "softrender/TextureFilter.h"
+#include "softrender/MipMap.h"
 #include "softrender/Lighting.h"
 #include "softrender/LightingMap.h"
 #include "softrender/LoadModel.h"
@@ -151,8 +153,12 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(ShadowMap);
         ADD_TEST_SCENE(Texture);// opengl
         ADD_TEST_SCENE(Textures);
+        ADD_TEST_SCENE(TextureFiltering);// opengl
+        ADD_TEST_SCENE(TextureFilter);
+        ADD_TEST_SCENE(Mipmaps);// opengl
+        ADD_TEST_SCENE(MipMap);
 
-        auto currentScene = "Textures";
+        auto currentScene = "TextureFilter";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {

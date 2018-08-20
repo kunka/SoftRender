@@ -27,20 +27,24 @@ public:
 
     const unsigned char *getData() const { return data; }
 
-    glm::vec4 sample(float u, float v);
+    glm::vec4 sample(float u, float v, float dudx = 0, float dvdy = 0);
 
 //    void genMipmaps();
 //
     void setWrap(int wrap) { this->wrap = wrap; }
 
+    void setBorderColor(const glm::vec4 &color) { borderColor = color; }
+
     void setMagFilter(int filter) { magFilter = filter; }
 
     void setMinFilter(int filter) { minFilter = filter; }
 
+    void genMipmaps(int maxLv = 10);
+
     std::string type;
 
 private:
-    glm::vec4 _sample(int x, int y);
+    glm::vec4 _sample(int x, int y, int lv = 0);
 
     unsigned char *data;
     int channels;
@@ -50,6 +54,7 @@ private:
     int magFilter;
     int wrap;
     std::string path;
+    glm::vec4 borderColor;
     std::unordered_map<int, unsigned char *> mipmaps;
 };
 

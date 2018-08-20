@@ -27,7 +27,7 @@ TEST_NODE_IMP_BEGIN
         Mesh *mesh = new Mesh(createVertexs(verticesPlane, 3, 0, 2), indicesPlane);
         planeMeshes.push_back(mesh);
 
-        texture2D.load("../res/smile.jpg");
+        texture2D.load("../res/cat.jpg");
         return true;
     }
 
@@ -48,6 +48,39 @@ TEST_NODE_IMP_BEGIN
         for (unsigned int i = 0; i < planeMeshes.size(); i++)
             drawMesh(*planeMeshes[i], m, 2);
 
+        // top right
+        modelMatrix.setIdentity();
+        modelMatrix.translate(Vector(0.5f, 0.5f, 0));
+        m = modelMatrix;
+        m.mult(viewMatrix);
+        m.mult(projectMatrix);
+        bindTextures({&texture2D});
+        texture2D.setWrap(GL_MIRRORED_REPEAT);
+        for (unsigned int i = 0; i < planeMeshes.size(); i++)
+            drawMesh(*planeMeshes[i], m, 2);
+
+        // bottom left
+        modelMatrix.setIdentity();
+        modelMatrix.translate(Vector(-0.5f, -0.5f, 0));
+        m = modelMatrix;
+        m.mult(viewMatrix);
+        m.mult(projectMatrix);
+        bindTextures({&texture2D});
+        texture2D.setWrap(GL_CLAMP_TO_EDGE);
+        for (unsigned int i = 0; i < planeMeshes.size(); i++)
+            drawMesh(*planeMeshes[i], m, 2);
+
+        // bottom right
+        modelMatrix.setIdentity();
+        modelMatrix.translate(Vector(0.5f, -0.5f, 0));
+        m = modelMatrix;
+        m.mult(viewMatrix);
+        m.mult(projectMatrix);
+        bindTextures({&texture2D});
+        texture2D.setWrap(GL_CLAMP_TO_BORDER);
+        texture2D.setBorderColor(vec4(255, 255, 0, 255));
+        for (unsigned int i = 0; i < planeMeshes.size(); i++)
+            drawMesh(*planeMeshes[i], m, 2);
 
         SoftRender::draw(transform);
     }
