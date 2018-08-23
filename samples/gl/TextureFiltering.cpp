@@ -76,7 +76,7 @@ void main()
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
         texture = loadTexture("../res/cat_s.jpg", false);
-        texture2 = loadTexture("../res/cat.jpg", false);
+        texture2 = loadTexture("../res/net.jpg", false);
         shader.use();
         shader.setInt("ourTexture", 0);
     }

@@ -11,7 +11,7 @@ TEST_NODE_BEGIN(Mipmaps)
 
     protected:
         unsigned int texture;
-        unsigned int texture2;
+        unsigned int textureNoMM;
 
 TEST_NODE_END(Mipmaps)
 

@@ -153,8 +153,9 @@ TEST_NODE_IMP_BEGIN
 
             vec3 varyingA[varyingCount];
             vec3 varyingB[varyingCount];
+            float fdy = 1.0f / (max.y - min.y);
             for (int i = 0; i <= dy; i++) {
-                float f = (float) i / dy;
+                float f = (float) i * fdy;
                 if (max.y == mid.y) {
                     a.x = interp(mid.x, min.x, f);
                     a.z = interp(mid.z, min.z, f);
@@ -174,8 +175,13 @@ TEST_NODE_IMP_BEGIN
                 uv2 = interp(maxUV, minUV, f);
                 verts[0].interp(varyingB, maxVarying, minVarying, f);
 
-                dda_line(createVertexCoords(a, uv1, varyingA, varyingCount),
-                         createVertexCoords(b, uv2, varyingB, varyingCount), uniforms, dvdy);
+                if (a == b) {
+                    // point
+                    setPixel(a.x, a.y, a.z, uv1.x / a.w, uv1.y / a.w, varyingA, uniforms, 0, dvdy / a.w);
+                } else {
+                    dda_line(createVertexCoords(a, uv1, varyingA, varyingCount),
+                             createVertexCoords(b, uv2, varyingB, varyingCount), uniforms, dvdy);
+                }
                 a.y -= 1;
                 b.y -= 1;
             }
@@ -263,12 +269,15 @@ TEST_NODE_IMP_BEGIN
         float dx = p2.x - p1.x;
         float stepX, stepY;
         int steps;
+        float fsteps;
         if (abs(dy) > abs(dx)) {
             steps = abs((int) dy);
+            fsteps = 1.0f / abs(dy);
             stepY = dy > 0 ? 1 : -1;
             stepX = dx > 0 ? fabs(dx / dy) : -fabs(dx / dy);
         } else {
             steps = abs((int) dx);
+            fsteps = 1.0f / abs(dx);
             stepX = dx > 0 ? 1 : -1;
             if (dx == 0)
                 stepY = 0;
@@ -279,7 +288,7 @@ TEST_NODE_IMP_BEGIN
         float x = p1.x, y = p1.y;
         vec3 interpVarying[varyingCount];
         for (int k = 0; k <= steps; k++) {
-            float f = 1.0f * k / steps;
+            float f = k * fsteps;
             float z = interp(p1.z, p2.z, f);
             float w = interp(p1.w, p2.w, f);
             vec2 uv0 = interp(uv11, uv12, f);

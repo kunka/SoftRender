@@ -28,7 +28,7 @@ TEST_NODE_IMP_BEGIN
         planeMeshes.push_back(mesh);
 
         texture2D.load("../res/cat_s.jpg");
-        texture2D2.load("../res/cat.jpg");
+        texture2D2.load("../res/net.jpg");
         return true;
     }
 
@@ -68,7 +68,7 @@ TEST_NODE_IMP_BEGIN
         m = modelMatrix;
         m.mult(viewMatrix);
         m.mult(projectMatrix);
-        texture2D2.setMinFilter(GL_LINEAR);
+        texture2D2.setMinFilter(GL_NEAREST);
         for (unsigned int i = 0; i < planeMeshes.size(); i++)
             drawMesh(*planeMeshes[i], m, 2);
 

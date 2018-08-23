@@ -29,9 +29,12 @@ TEST_NODE_IMP_BEGIN
         planeMeshes.push_back(mesh);
 
         texture2D.load("../res/wood.png");
+        texture2D.setWrap(GL_CLAMP_TO_EDGE);
         texture2D.setMinFilter(GL_NEAREST_MIPMAP_NEAREST);
         texture2D.genMipmaps();
-        texture2DMM.load("../res/wood.png");
+        texture2DNoMM.load("../res/wood.png");
+        texture2DNoMM.setWrap(GL_CLAMP_TO_EDGE);
+        texture2DNoMM.setMinFilter(GL_NEAREST);
 
         return true;
     }
@@ -44,28 +47,32 @@ TEST_NODE_IMP_BEGIN
                                     Vector(cameraUp.x, cameraUp.y, cameraUp.z));
 
         if (Input::getInstance()->isKeyPressed(GLFW_KEY_SPACE)) {
-            bindTextures({&texture2DMM});
+            bindTextures({&texture2DNoMM});
         } else {
             bindTextures({&texture2D});
         }
 
+//        modelMatrix.setIdentity();
+//        viewMatrix.setIdentity();
+//        projectMatrix.setIdentity();
+
         std::vector<vec3> ps = {
                 vec3(-1, -1, 1.5),
-//                vec3(-3, 3.5, -5),
-//                vec3(3, 3, -5),
-//                vec3(0, 0, -10),
-//                vec3(-10, 1, -15),
-//                vec3(5, 2, -15),
-//                vec3(8, -2, -12),
-//                vec3(3, -4, -8),
+                vec3(-3, 3.5, -5),
+                vec3(3, 3, -5),
+                vec3(0, 0, -10),
+                vec3(-10, 1, -15),
+                vec3(5, 2, -15),
+                vec3(8, -2, -12),
+                vec3(3, -4, -8),
         };
         for (int i = 0; i < ps.size(); i++) {
             modelMatrix.setIdentity();
-            modelMatrix.scale(Vector(1.8, 1.8, 1));
-//            modelMatrix.translate(ps[i]);
+//            modelMatrix.scale(Vector(1.9, 1.9, 1));
+            modelMatrix.translate(ps[i]);
             Matrix m = modelMatrix;
-//            m.mult(viewMatrix);
-//            m.mult(projectMatrix);
+            m.mult(viewMatrix);
+            m.mult(projectMatrix);
             for (unsigned int i = 0; i < planeMeshes.size(); i++)
                 drawMesh(*planeMeshes[i], m, 2);
         }

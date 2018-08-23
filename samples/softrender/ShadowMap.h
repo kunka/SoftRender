@@ -16,7 +16,7 @@ TEST_NODE_BEGIN2(ShadowMap, TextureCube)
     protected:
 
         virtual void setPixel(int x, int y, float z, float u, float v, vec3 varying[],
-                              const std::vector<vec3> &uniforms = {}) override;
+                              const std::vector<vec3> &uniforms, float dudx, float dvdy) override;
 
         void renderScene(int type, bool faceCulling = false);
 

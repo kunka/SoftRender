@@ -81,6 +81,8 @@ TEST_NODE_IMP_BEGIN
         texture2DPlane.load("../res/net.jpg");
         texture2DPlane.setWrap(GL_REPEAT);
         texture2DPlane.setMagFilter(GL_LINEAR);
+        texture2DPlane.setMinFilter(GL_NEAREST_MIPMAP_NEAREST);
+        texture2DPlane.genMipmaps();
 
         Mesh *mesh = new Mesh(createVertexs(verticesPlane, 3, 3, 2), indicesPlane);
         planeMeshes.push_back(mesh);
@@ -184,10 +186,10 @@ TEST_NODE_IMP_BEGIN
     }
 
     void ShadowMap::setPixel(int x, int y, float z, float u, float v, vec3 varying[],
-                             const std::vector<vec3> &uniforms) {
+                             const std::vector<vec3> &uniforms, float dudx, float dvdy) {
         Texture2D *texture = _bindTextures["texture0"];
         if (texture) {
-            const vec3 &textureColor = texture->sample(u, v);
+            const vec3 &textureColor = texture->sample(u, v, dudx, dvdy);
             vec4 color = vec4(vec3(textureColor), 255);
             SoftRender::setPixel(x, y, z, color);
 //

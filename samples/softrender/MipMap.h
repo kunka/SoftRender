@@ -20,7 +20,7 @@ TEST_NODE_BEGIN2(MipMap, TextureCube)
         std::vector<float> verticesPlane;
         std::vector<unsigned int> indicesPlane;
         std::vector<Mesh *> planeMeshes;
-        Texture2D texture2DMM;
+        Texture2D texture2DNoMM;
 
 
 TEST_NODE_END(TextureFilter)

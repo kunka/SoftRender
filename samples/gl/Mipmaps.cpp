@@ -72,8 +72,8 @@ void main()
         glEnableVertexAttribArray(1);
 
 
-        texture = loadTexture("../res/wood.png", false);
-        texture2 = loadTexture("../res/wood.png");
+        texture = loadTexture("../res/wood.png");
+        textureNoMM = loadTexture("../res/wood.png", false);
         shader.use();
         shader.setInt("ourTexture", 0);
         shader.setMat4("projection", projection);
@@ -87,9 +87,11 @@ void main()
         shader.use();
         glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
         if (Input::getInstance()->isKeyPressed(GLFW_KEY_SPACE)) {
-            glBindTexture(GL_TEXTURE_2D, texture);
+            glBindTexture(GL_TEXTURE_2D, textureNoMM);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         } else {
-            glBindTexture(GL_TEXTURE_2D, texture2);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
         }
         view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
         shader.setMat4("view", view);
@@ -97,22 +99,24 @@ void main()
 
         std::vector<vec3> ps = {
                 vec3(-1, -1, 1.5),
-//                vec3(-3, 3.5, -5),
-//                vec3(3, 3, -5),
-//                vec3(0, 0, -10),
-//                vec3(-10, 1, -15),
-//                vec3(5, 2, -15),
-//                vec3(8, -2, -12),
-//                vec3(3, -4, -8),
+                vec3(-3, 3.5, -5),
+                vec3(3, 3, -5),
+                vec3(0, 0, -10),
+                vec3(-10, 1, -15),
+                vec3(5, 2, -15),
+                vec3(8, -2, -12),
+                vec3(3, -4, -8),
         };
-        shader.setMat4("view", glm::mat4());
-        shader.setMat4("projection", glm::mat4());
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+//        shader.setMat4("view", glm::mat4());
+//        shader.setMat4("projection", glm::mat4());
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         for (int i = 0; i < ps.size(); i++) {
             model = glm::mat4();
-            model = glm::scale(model, vec3(1.8, 1.8, 1));
-//            model = glm::translate(model, ps[i]);
+//            model = glm::scale(model, vec3(1.9, 1.9, 1));
+            model = glm::translate(model, ps[i]);
             shader.setMat4("model", model);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }

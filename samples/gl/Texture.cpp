@@ -78,7 +78,7 @@ void main()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-        texture = loadTexture("../res/cat.jpg");
+        texture = loadTexture("../res/cat.jpg", false);
         shader.use();
 //        glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0); // set it manually
 //        shader.setInt("texture2", 1); // or with shader class
@@ -92,6 +92,8 @@ void main()
         glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
         // top left
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

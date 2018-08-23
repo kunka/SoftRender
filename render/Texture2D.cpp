@@ -16,7 +16,7 @@ Texture2D::Texture2D() {
     channels = 1;
     wrap = GL_REPEAT;
     magFilter = GL_NEAREST;
-    minFilter == GL_NEAREST;
+    minFilter = GL_NEAREST;
 }
 
 void Texture2D::load(const std::string &path, int desiredChannels) {
@@ -26,14 +26,20 @@ void Texture2D::load(const std::string &path, int desiredChannels) {
 
 glm::vec4 Texture2D::_sample(int x, int y, int lv) {
     unsigned char *src;
+    int w, h;
     if (mipmaps.find(lv) != mipmaps.end()) {
         src = mipmaps.at(lv);
+        w = width / (int) pow(2, lv);
+        h = height / (int) pow(2, lv);
     } else {
         src = data;
         lv = 0;
+        w = width;
+        h = height;
     }
-    int w = width / (int) pow(2, lv);
-    int h = height / (int) pow(2, lv);
+//    if (x > w - 1 || x < 0 || y > h - 1 || y < 0) {
+//        log("%d, %d", x, y);
+//    }
     x = MathUtil::clamp(x, 0, w - 1);
     y = MathUtil::clamp(y, 0, h - 1);
     unsigned char *pixel = src + (h * y + x) * channels;
@@ -60,9 +66,9 @@ void Texture2D::genMipmaps(int maxLv) {
         int lv = 1;
         for (int i = width / 2; i > 1 || lv > maxLv; i /= 2) {
             unsigned char *texData = new unsigned char[i * i * channels];
-            for (int x = 0; x < i; x++) {
-                for (int y = 0; y < i; y++) {
-                    vec4 p1 = _sample(x, y * 2, lv - 1);
+            for (int y = 0; y < i; y++) {
+                for (int x = 0; x < i; x++) {
+                    vec4 p1 = _sample(x * 2, y * 2, lv - 1);
                     vec4 p2 = _sample(x * 2 + 1, y * 2, lv - 1);
                     vec4 p3 = _sample(x * 2, y * 2 + 1, lv - 1);
                     vec4 p4 = _sample(x * 2 + 1, y * 2 + 1, lv - 1);
@@ -125,7 +131,7 @@ glm::vec4 Texture2D::sample(float u, float v, float dudx, float dvdy) {
 
     dudx *= width;
     dvdy *= height;
-    if (dudx < 1 || dvdy < 1) {
+    if (dudx < 1 && dvdy < 1) {
         // mag filter
         // filter
         if (magFilter == GL_NEAREST) {
@@ -208,12 +214,6 @@ glm::vec4 Texture2D::sample(float u, float v, float dudx, float dvdy) {
                     int h = height / (int) pow(2, lv);
                     return _sample(w * u, h * v, lv);
                 }
-//            int min = floor(level);
-//            int max = ceil(level);
-
-//            if (min > 1) {
-//                log("level %f", level);
-//            }
             }
         }
     }

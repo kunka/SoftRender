@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(Mipmaps);// opengl
         ADD_TEST_SCENE(MipMap);
 
-        auto currentScene = "TextureFilter";
+        auto currentScene = "ShadowMap";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {

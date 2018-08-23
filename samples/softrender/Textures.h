@@ -15,7 +15,7 @@ TEST_NODE_BEGIN2(Textures, TextureCube)
     protected:
 
         virtual void setPixel(int x, int y, float z, float u, float v, vec3 varying[],
-                              const std::vector<vec3> &uniforms = {}) override;
+                              const std::vector<vec3> &uniforms, float dudx, float dvdy) override;
 
         std::vector<float> verticesPlane;
         std::vector<unsigned int> indicesPlane;
