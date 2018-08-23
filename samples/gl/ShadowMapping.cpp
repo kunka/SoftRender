@@ -60,20 +60,19 @@ void main()
 {
     vec3 color = texture(material.diffuse, fs_in.TexCoords).rgb;
     vec3 ambient = light.ambient * color;
-    FragColor = vec4( color, 1.0);
-//
-//    vec3 norm = normalize(fs_in.Normal);
-//    vec3 lightDir = normalize(light.position - fs_in.FragPos);
-//    float diff = max(dot(norm, lightDir), 0.0);
-//    vec3 diffuse = light.diffuse * diff * color;
-//
-//    vec3 viewDir = normalize(viewPos - fs_in.FragPos);
-//    vec3 halfwayDir = normalize(lightDir + viewDir);
-//    float spec = pow(max(dot(norm, halfwayDir), 0.0), 16.0);
-//    vec3 specular = light.specular * spec;
-//
-////    FragColor = vec4(diffuse + ambient + specular, 1.0);
-//    FragColor = vec4( specular, 1.0);
+//    FragColor = vec4( color, 1.0);
+
+    vec3 norm = normalize(fs_in.Normal);
+    vec3 lightDir = normalize(light.position - fs_in.FragPos);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = light.diffuse * diff * color;
+
+    vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(norm, halfwayDir), 0.0), 16.0);
+    vec3 specular = light.specular * spec;
+
+    FragColor = vec4(diffuse + ambient + specular, 1.0);
 }
 )";
 
@@ -497,24 +496,24 @@ void main()
             glCullFace(GL_FRONT); // fix peter panning
         }
 
-//        glBindVertexArray(VAO);
-//        glActiveTexture(GL_TEXTURE0);
-//        glBindTexture(GL_TEXTURE_2D, texture);
-//        model = glm::mat4();
-//        model = glm::translate(model, glm::vec3(-1.0f, 2.0f, -1.0f));
-//        shader.setMat4("model", model);
-//        glDrawArrays(GL_TRIANGLES, 0, 36);
-//
-//        model = glm::mat4();
-//        model = glm::translate(model, glm::vec3(1.0f, 0.5f, -1.0f));
-//        model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-//        shader.setMat4("model", model);
-//        glDrawArrays(GL_TRIANGLES, 0, 36);
-//
-//        model = glm::mat4();
-//        model = glm::translate(model, glm::vec3(-2.0f, 0.5f, 0.0f));
-//        shader.setMat4("model", model);
-//        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(VAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(-1.0f, 2.0f, -1.0f));
+        shader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(1.0f, 0.5f, -1.0f));
+        model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        shader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(-2.0f, 0.5f, 0.0f));
+        shader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         if (faceCulling) {
             glDisable(GL_CULL_FACE);

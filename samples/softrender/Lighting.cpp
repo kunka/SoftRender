@@ -129,9 +129,9 @@ TEST_NODE_IMP_BEGIN
                     modelMatrix.applyVector(normals[2]).vec3(),
             };
 
-            vec3 v1[] = {triangleWorld[0], norms[0]};
-            vec3 v2[] = {triangleWorld[1], norms[1]};
-            vec3 v3[] = {triangleWorld[2], norms[2]};
+            vec3 v1[] = {triangleWorld[0] * triangle[0].w, norms[0] * triangle[0].w};
+            vec3 v2[] = {triangleWorld[1] * triangle[1].w, norms[1] * triangle[1].w};
+            vec3 v3[] = {triangleWorld[2] * triangle[2].w, norms[2] * triangle[2].w};
             std::vector<VertexCoords> verts = {
                     createVertexCoords(triangle[0], uv[0] * triangle[0].w, v1, 2),
                     createVertexCoords(triangle[1], uv[1] * triangle[1].w, v2, 2),

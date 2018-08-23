@@ -177,6 +177,7 @@ TEST_NODE_IMP_BEGIN
 
                 if (a == b) {
                     // point
+                    verts[0].divideW(varyingA, a.w);
                     setPixel(a.x, a.y, a.z, uv1.x / a.w, uv1.y / a.w, varyingA, uniforms, 0, dvdy / a.w);
                 } else {
                     dda_line(createVertexCoords(a, uv1, varyingA, varyingCount),
@@ -226,10 +227,8 @@ TEST_NODE_IMP_BEGIN
         const vec4 &pb = vert2.p;
         const vec2 &uv1 = vert1.uv;
         const vec2 &uv2 = vert2.uv;
-        vec3 *varyingA = (vec3 *)
-                vert1.varying;
-        vec3 *varyingB = (vec3 *)
-                vert2.varying;
+        vec3 *varyingA = (vec3 *) vert1.varying;
+        vec3 *varyingB = (vec3 *) vert2.varying;
         int varyingCount = vert1.varyingCount;
         vec4 p1 = pa;
         vec4 p2 = pb;
@@ -293,6 +292,7 @@ TEST_NODE_IMP_BEGIN
             float w = interp(p1.w, p2.w, f);
             vec2 uv0 = interp(uv11, uv12, f);
             vert1.interp(interpVarying, varying1, varying2, f);
+            vert1.divideW(interpVarying, w);
             setPixel(x, y, z, uv0.x / w, uv0.y / w, interpVarying, uniforms, dudx / w, dvdy / w);
             x += stepX;
             y += stepY;
@@ -412,16 +412,16 @@ TEST_NODE_IMP_BEGIN
             // 光栅化
             vec3 v1[3], v2[3], v3[3];
             if (varyingCount == 1) {
-                v1[0] = triangleWorld[0];
-                v2[0] = triangleWorld[1];
-                v3[0] = triangleWorld[2];
+                v1[0] = triangleWorld[0] * triangle[0].w;
+                v2[0] = triangleWorld[1] * triangle[1].w;
+                v3[0] = triangleWorld[2] * triangle[2].w;
             } else if (varyingCount == 2) {
-                v1[0] = triangleWorld[0];
-                v2[0] = triangleWorld[1];
-                v3[0] = triangleWorld[2];
-                v1[1] = norms[0];
-                v2[1] = norms[1];
-                v3[1] = norms[2];
+                v1[0] = triangleWorld[0] * triangle[0].w;
+                v2[0] = triangleWorld[1] * triangle[1].w;
+                v3[0] = triangleWorld[2] * triangle[2].w;
+                v1[1] = norms[0] * triangle[0].w;
+                v2[1] = norms[1] * triangle[1].w;
+                v3[1] = norms[2] * triangle[2].w;
             }
             std::vector<VertexCoords> verts = {
                     createVertexCoords(triangle[0], uv[0] * triangle[0].w, v1, varyingCount),

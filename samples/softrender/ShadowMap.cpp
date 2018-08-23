@@ -7,8 +7,8 @@
 TEST_NODE_IMP_BEGIN
 
     ShadowMap::ShadowMap() {
-        TEX_WIDTH = 1024;
-        TEX_HEIGHT = 1024;
+//        TEX_WIDTH = 1024;
+//        TEX_HEIGHT = 1024;
     }
 
     bool ShadowMap::init() {
@@ -106,8 +106,7 @@ TEST_NODE_IMP_BEGIN
 
         renderType = 0;
         vec3 target = cameraPos + cameraDir;
-        viewMatrix = Matrix::lookAt(Vector(cameraPos.x, cameraPos.y, cameraPos.z), Vector(target.x, target.y, target.z),
-                                    Vector(cameraUp.x, cameraUp.y, cameraUp.z));
+        viewMatrix = Matrix::lookAt(cameraPos, target, cameraUp);
 
         switch (renderType) {
             case 0 : {
@@ -144,31 +143,31 @@ TEST_NODE_IMP_BEGIN
             setFaceCull(true);
         }
         // draw box
-//        bindTextures({&texture2DBox});
-//        modelMatrix.setIdentity();
-//        modelMatrix.translate(vec3(-1, 2, -1.0));
+        bindTextures({&texture2DBox});
+        modelMatrix.setIdentity();
+        modelMatrix.translate(vec3(-1, 2, -1.0));
         Matrix m = modelMatrix;
-//        m.mult(viewMatrix);
-//        m.mult(projectMatrix);
-//        for (unsigned int i = 0; i < boxMeshes.size(); i++)
-//            drawMesh(*boxMeshes[i], m, 2);
-//
-//        modelMatrix.setIdentity();
-//        modelMatrix.translate(vec3(1, 0.5, -1.0));
-//        modelMatrix.rotate(Vector(0, 1, 0), radians(-30.0f));
-//        m = modelMatrix;
-//        m.mult(viewMatrix);
-//        m.mult(projectMatrix);
-//        for (unsigned int i = 0; i < boxMeshes.size(); i++)
-//            drawMesh(*boxMeshes[i], m, 2);
-//
-//        modelMatrix.setIdentity();
-//        modelMatrix.translate(vec3(-2, 0.5, 0.0));
-//        m = modelMatrix;
-//        m.mult(viewMatrix);
-//        m.mult(projectMatrix);
-//        for (unsigned int i = 0; i < boxMeshes.size(); i++)
-//            drawMesh(*boxMeshes[i], m, 2);
+        m.mult(viewMatrix);
+        m.mult(projectMatrix);
+        for (unsigned int i = 0; i < boxMeshes.size(); i++)
+            drawMesh(*boxMeshes[i], m, 2);
+
+        modelMatrix.setIdentity();
+        modelMatrix.translate(vec3(1, 0.5, -1.0));
+        modelMatrix.rotate(Vector(0, 1, 0), radians(-30.0f));
+        m = modelMatrix;
+        m.mult(viewMatrix);
+        m.mult(projectMatrix);
+        for (unsigned int i = 0; i < boxMeshes.size(); i++)
+            drawMesh(*boxMeshes[i], m, 2);
+
+        modelMatrix.setIdentity();
+        modelMatrix.translate(vec3(-2, 0.5, 0.0));
+        m = modelMatrix;
+        m.mult(viewMatrix);
+        m.mult(projectMatrix);
+        for (unsigned int i = 0; i < boxMeshes.size(); i++)
+            drawMesh(*boxMeshes[i], m, 2);
 
         if (faceCulling) {
             setFaceCull(false);
@@ -190,30 +189,29 @@ TEST_NODE_IMP_BEGIN
         Texture2D *texture = _bindTextures["texture0"];
         if (texture) {
             const vec3 &textureColor = texture->sample(u, v, dudx, dvdy);
-            vec4 color = vec4(vec3(textureColor), 255);
-            SoftRender::setPixel(x, y, z, color);
-//
-//            vec3 fragPos = varying[0];
-//            vec3 normal = glm::normalize(varying[1]);
-//            vec3 lightDir = glm::normalize(lightPos - fragPos);
-//            float diff = std::max(glm::dot(normal, lightDir), 0.0f);
-//
-//            // ambient
-//            vec3 ambient = vec3(0.2f, 0.2f, 0.2f);
-//            // diffuse
-//            vec3 diffuse = vec3(1.0f, 1.0f, 1.0f) * diff;
-//            // specular
-//            vec3 viewDir = glm::normalize(cameraPos - fragPos);
-//            // BlinnPhong
-//            vec3 halfwayDir = glm::normalize(lightDir + viewDir);
-//            float spec = pow(std::max(glm::dot(normal, halfwayDir), 0.0f), 16.0f);
-//
-//            spec *= 255.0f;
-//            vec3 specular = vec3(0.5f, 0.5f, 0.5f) * spec;
-//
-////            vec4 color = vec4(vec3(textureColor) * (ambient + diffuse) + specular, 255);
-//            vec4 color = vec4(specular, 255);
+//            vec4 color = vec4(vec3(textureColor), 255);
 //            SoftRender::setPixel(x, y, z, color);
+
+            vec3 fragPos = varying[0];
+            vec3 normal = glm::normalize(varying[1]);
+            vec3 lightDir = glm::normalize(lightPos - fragPos);
+            float diff = std::max(glm::dot(normal, lightDir), 0.0f);
+
+            // ambient
+            vec3 ambient = vec3(0.2f, 0.2f, 0.2f);
+            // diffuse
+            vec3 diffuse = vec3(1.0f, 1.0f, 1.0f) * diff;
+            // specular
+            vec3 viewDir = glm::normalize(cameraPos - fragPos);
+            // BlinnPhong
+            vec3 halfwayDir = glm::normalize(lightDir + viewDir);
+            float spec = pow(std::max(glm::dot(normal, halfwayDir), 0.0f), 16.0f);
+
+            spec *= 255.0f;
+            vec3 specular = vec3(0.5f, 0.5f, 0.5f) * spec;
+
+            vec4 color = vec4(vec3(textureColor) * (ambient + diffuse) + specular, 255);
+            SoftRender::setPixel(x, y, z, color);
         }
     }
 

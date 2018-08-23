@@ -166,10 +166,10 @@ void main()
                     a = color.a;
                 }
                 // overflow
-                r = r > 255 ? 255 : r;
-                g = g > 255 ? 255 : g;
-                b = b > 255 ? 255 : b;
-                a = a > 255 ? 255 : a;
+                r = r > 255 ? 255 : (r < 0 ? 0 : r);
+                g = g > 255 ? 255 : (g < 0 ? 0 : g);
+                b = b > 255 ? 255 : (b < 0 ? 0 : b);
+                a = a > 255 ? 255 : (a < 0 ? 0 : a);
 //                texData[y][x][0] = (GLubyte) r;
 //                texData[y][x][1] = (GLubyte) g;
 //                texData[y][x][2] = (GLubyte) b;

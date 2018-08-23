@@ -51,14 +51,25 @@ struct VertexCoords {
             ret[i].z = v1[i].z + (v2[i].z - v1[i].z) * t;
         }
     }
+
+    inline void divideW(vec3 ret[], float w) const {
+        if (w != 0) {
+            for (int i = 0; i < varyingCount; i++) {
+                ret[i] /= w;
+            }
+        }
+    }
 };
 
 static VertexCoords createVertexCoords(const vec4 &p, const vec2 &uv, const vec3 varying[], int varyingCount) {
     VertexCoords v;
     v.p = p;
     v.uv = uv;
-    if (varyingCount > 0) {
-        memcpy(v.varying, varying, sizeof(varying[0]) * varyingCount);
+//    if (varyingCount > 0) {
+//        memcpy(v.varying, varying, sizeof(varying[0]) * varyingCount);
+//    }
+    for (int i = 0; i < varyingCount; i++) {
+        v.varying[i] = varying[i];
     }
     v.varyingCount = varyingCount;
     return v;
