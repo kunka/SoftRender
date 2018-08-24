@@ -78,6 +78,7 @@ void main()
         depthBuff = new float[MAX_TEX_SIZE * MAX_TEX_SIZE];
         _depthTest = false;
         faceCulling = false;
+        faceCullingMode = GL_BACK;
         _blend = false;
         projectMatrix = Matrix::perspective(radians(60.0f), (float) TEX_WIDTH / TEX_HEIGHT, 0.1, 100.0f);
         return true;
@@ -199,6 +200,10 @@ void main()
         this->faceCulling = cull;
     }
 
+    void SoftRender::setFaceCullMode(int mode) {
+        this->faceCullingMode = mode;
+    }
+
     void SoftRender::clearColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a) {
         for (int x = 0; x < TEX_WIDTH; x++)
             for (int y = 0; y < TEX_HEIGHT; y++) {
@@ -214,8 +219,12 @@ void main()
     }
 
     void SoftRender::clearDepth() {
-        for (int i = 0; i < TEX_WIDTH * TEX_HEIGHT; i++)
+        for (int i = 0; i < TEX_WIDTH * TEX_HEIGHT; i++) {
+            if (_depthFBO) {
+                _depthFBO[i] = 1.0f;
+            }
             depthBuff[i] = 1.0f;
+        }
     }
 
     // 简单裁剪，完全不可见三角形
@@ -347,22 +356,17 @@ void main()
         }
     }
 
-    bool SoftRender::faceCull(vec3 triangle[3]) {
+    bool SoftRender::faceCull(vec4 triangle[3]) {
         if (faceCulling) {
-            vec3 v1 = triangle[1] - triangle[0];
-            vec3 v2 = triangle[2] - triangle[0];
+            vec3 v1 = vec3(triangle[1] - triangle[0]);
+            vec3 v2 = vec3(triangle[2] - triangle[0]);
             vec3 normal = glm::cross(v1, v2);
-            vec3 v0 = vec3(triangle[0]) - cameraPos;
-            return glm::dot(v0, normal) >= 0;
-        } else {
-            return false;
-        }
-    }
-
-    bool SoftRender::faceCull(const vec3 &triangle1, const vec3 &normal) {
-        if (faceCulling) {
-            vec3 v0 = vec3(triangle1) - cameraPos;
-            return glm::dot(v0, normal) >= 0;
+            vec3 v0 = vec3(0, 0, -1);//vec3(triangle[0]) - cameraPos;
+            if (faceCullingMode == GL_BACK) {
+                return glm::dot(v0, normal) >= 0;
+            } else if (faceCullingMode == GL_FRONT) {
+                return glm::dot(v0, normal) < 0;
+            }
         } else {
             return false;
         }

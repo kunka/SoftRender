@@ -99,7 +99,7 @@ TEST_NODE_IMP_BEGIN
                 continue;
             }
 
-            if (faceCull(triangleWorld)) {
+            if (faceCull(triangle)) {
                 // 背面剔除
                 // log("backface cull");
                 continue;
@@ -386,7 +386,7 @@ TEST_NODE_IMP_BEGIN
                 continue;
             }
 
-            if (faceCull(triangleWorld)) {
+            if (faceCull(triangle)) {
                 // 背面剔除
                 //  log("backface cull");
                 continue;

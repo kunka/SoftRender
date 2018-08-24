@@ -20,6 +20,8 @@ TEST_NODE_BEGIN2(ShadowMap, TextureCube)
 
         void renderScene(int type, bool faceCulling = false);
 
+        float inShadow(vec4 &fragPosLightSpace, float bias);
+
         std::vector<float> verticesPlane;
         std::vector<float> verticesQuad;
         std::vector<unsigned int> indicesPlane;
@@ -34,6 +36,7 @@ TEST_NODE_BEGIN2(ShadowMap, TextureCube)
         vec3 lightPos;
         float *depthFBO;
         int renderType;
+        Matrix lightSpaceMatrix;
 
 TEST_NODE_END(ShadowMap)
 #endif //GL_SHADOWMAP_H

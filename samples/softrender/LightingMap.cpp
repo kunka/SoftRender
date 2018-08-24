@@ -7,6 +7,12 @@
 TEST_NODE_IMP_BEGIN
 
     LightingMap::LightingMap() {
+        TEX_WIDTH = 1024;
+        TEX_HEIGHT = 1024;
+    }
+
+    bool LightingMap::init() {
+        SoftRender::init();
         diffuseTexture.load("../res/container2.png");
         specularTexture.load("../res/container2_specular.png");
         diffuseTexture.setMagFilter(GL_LINEAR);

@@ -380,7 +380,7 @@ void main()
     void ShadowMapping::draw(const mat4 &transform) {
         glEnable(GL_DEPTH_TEST);
 
-        renderType = 0;
+        renderType = 3;
 
         switch (renderType) {
             case 0 : {
@@ -407,7 +407,7 @@ void main()
                 depthShader.setMat4("projection", pj);
                 depthShader.setMat4("view", vw);
                 depthShader.setInt("visual", 1);
-                renderScene(depthShader);
+                renderScene(depthShader,true);
                 break;
             }
             case 2: {
@@ -517,6 +517,7 @@ void main()
 
         if (faceCulling) {
             glDisable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
         }
 
         // plane

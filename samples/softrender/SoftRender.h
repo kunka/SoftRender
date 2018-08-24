@@ -119,15 +119,15 @@ TEST_NODE_BEGIN(SoftRender)
 
         void setFaceCull(bool cull);
 
+        void setFaceCullMode(int mode);
+
         void clearColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a = 255);
 
         void clearDepth();
 
         bool cvvCull(vec4 triangle[3]);
 
-        bool faceCull(vec3 triangle[3]);
-
-        bool faceCull(const vec3 &triangle1, const vec3 &normal);
+        bool faceCull(vec4 triangle[3]);
 
         bool depthTest(int x, int y, float depth);
 
@@ -146,14 +146,20 @@ TEST_NODE_BEGIN(SoftRender)
             _blendFuncDst = dst;
         }
 
+        void bindDepthBuffer(float *depthFBO) {
+            _depthFBO = depthFBO;
+        }
+
         int TEX_WIDTH;
         int TEX_HEIGHT;
 
         unsigned int texture = -1;
 
         GLubyte *texData;
+        float *_depthFBO = nullptr; // ref
         bool _depthTest;
         bool faceCulling;
+        int faceCullingMode;
         bool _blend;
         int _blendFuncSrc;
         int _blendFuncDst;

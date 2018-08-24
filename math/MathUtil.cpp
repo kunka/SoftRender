@@ -73,6 +73,10 @@ Matrix::Matrix() {
     setIdentity();
 }
 
+Matrix::Matrix(const Matrix &copy) {
+    memcpy(m, copy.m, 16 * sizeof(float));
+}
+
 void Matrix::setIdentity() {
     memset(m, 0, 16 * sizeof(float));
     m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0f;
@@ -276,5 +280,17 @@ Matrix Matrix::perspective(float fovy, float aspect, float near, float far) {
     m[2][2] = -(near + far) / (far - near);
     m[3][2] = 2 * near * far / (near - far);
     m[2][3] = -1.0f;
+    return matrix;
+}
+
+Matrix Matrix::ortho(float left, float right, float bottom, float top, float near, float far) {
+    Matrix matrix;
+    auto &m = matrix.m;
+    m[0][0] = 2 / (right - left);
+    m[1][1] = 2 / (top - bottom);
+    m[3][0] = -(right + left) / (right - left);
+    m[3][1] = -(top + bottom) / (top - bottom);
+    m[2][2] = -2 / (far - near);
+    m[3][2] = -(far + near) / (far - near);
     return matrix;
 }

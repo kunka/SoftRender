@@ -7,8 +7,8 @@
 TEST_NODE_IMP_BEGIN
 
     ShadowMap::ShadowMap() {
-//        TEX_WIDTH = 1024;
-//        TEX_HEIGHT = 1024;
+        TEX_WIDTH = 768;
+        TEX_HEIGHT = 768;
     }
 
     bool ShadowMap::init() {
@@ -102,9 +102,8 @@ TEST_NODE_IMP_BEGIN
 
     void ShadowMap::draw(const mat4 &transform) {
         setDepthTest(true);
-        clearDepth();
 
-        renderType = 0;
+        renderType = 2;
         vec3 target = cameraPos + cameraDir;
         viewMatrix = Matrix::lookAt(cameraPos, target, cameraUp);
 
@@ -112,6 +111,7 @@ TEST_NODE_IMP_BEGIN
             case 0 : {
                 // render origin scene without shadow
                 clearColor(25, 50, 75, 255);
+                clearDepth();
                 renderScene(renderType);
                 // draw light
                 drawPoint(lightPos, vec4(255, 255, 255, 255));
@@ -119,20 +119,40 @@ TEST_NODE_IMP_BEGIN
             }
             case 1: {
                 // visual depth 1
-
+                clearColor(0, 0, 0, 0);
+                clearDepth();
+                projectMatrix = Matrix::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
+                viewMatrix = Matrix::lookAt(lightPos, Vector(0, 0, 0), Vector(0, 1, 0));
+//                renderScene(renderType, true);
+                renderScene(renderType);
                 break;
             }
             case 2: {
-                break;
-            }
-            case 3: {
+                projectMatrix = Matrix::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
+                viewMatrix = Matrix::lookAt(lightPos, Vector(0, 0, 0), Vector(0, 1, 0));
+                bindDepthBuffer(depthFBO);
+                clearDepth();
+//                renderScene(renderType, true);
+                renderScene(renderType);
+                bindDepthBuffer(nullptr);
 
+                clearColor(0, 0, 0, 0);
+                clearDepth();
+                renderType = 3;
+                viewMatrix = Matrix::lookAt(cameraPos, target, cameraUp);
+                projectMatrix = Matrix::perspective(radians(60.0f), (float) TEX_WIDTH / TEX_HEIGHT, 0.1, 100.0f);
+                Matrix pj = Matrix::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
+                Matrix vm = Matrix::lookAt(lightPos, Vector(0, 0, 0), Vector(0, 1, 0));
+                lightSpaceMatrix = vm;
+                lightSpaceMatrix.mult(pj);
+                bindDepthBuffer(depthFBO);
+                renderScene(renderType);
+                bindDepthBuffer(nullptr);
                 break;
             }
             default:
                 break;
         }
-
 
         SoftRender::draw(transform);
         setDepthTest(false);
@@ -141,6 +161,7 @@ TEST_NODE_IMP_BEGIN
     void ShadowMap::renderScene(int type, bool faceCulling) {
         if (faceCulling) {
             setFaceCull(true);
+            setFaceCullMode(GL_FRONT);
         }
         // draw box
         bindTextures({&texture2DBox});
@@ -171,6 +192,7 @@ TEST_NODE_IMP_BEGIN
 
         if (faceCulling) {
             setFaceCull(false);
+            setFaceCullMode(GL_BACK);
         }
 
         // draw plane
@@ -184,8 +206,61 @@ TEST_NODE_IMP_BEGIN
             drawMesh(*planeMeshes[i], m, 2);
     }
 
+    float near = 0.1;
+    float far = 10.0; // use a closer dis, the box isn't too far away.
+    float LinearizeDepth2(float depth) {
+        float z = depth * 2.0 - 1.0; // back to NDC
+        return (2.0 * near * far) / (far + near - z * (far - near));
+    }
+
+    float ShadowMap::inShadow(vec4 &fragPosLightSpace, float bias) {
+        fragPosLightSpace.x /= fragPosLightSpace.w;
+        fragPosLightSpace.y /= fragPosLightSpace.w;
+        fragPosLightSpace.z /= fragPosLightSpace.w;
+        // [-1, 1] --> [0, 1]
+        fragPosLightSpace.x = (fragPosLightSpace.x + 1.0f) * 0.5f;
+        fragPosLightSpace.y = (fragPosLightSpace.y + 1.0f) * 0.5f;
+        fragPosLightSpace.z = (fragPosLightSpace.z + 1.0f) * 0.5f;
+        if (fragPosLightSpace.z > 1.0f) // over sampling
+            return 0;
+
+//        int x = MathUtil::clamp(fragPosLightSpace.x * TEX_WIDTH, 0, TEX_WIDTH - 1);
+//        int y = MathUtil::clamp(fragPosLightSpace.y * TEX_HEIGHT, 0, TEX_HEIGHT - 1);
+//        float depthInDepthMap = _depthFBO[y * TEX_WIDTH + x];
+//        return fragPosLightSpace.z - bias > depthInDepthMap ? 1.0f : 0.0f;
+
+        // PCF
+        float currentDepth = fragPosLightSpace.z;
+        float shadow = 0.0;
+        for (int x = -1; x <= 1; ++x) {
+            for (int y = -1; y <= 1; ++y) {
+                int x0 = MathUtil::clamp(fragPosLightSpace.x * TEX_WIDTH + x, 0, TEX_WIDTH - 1);
+                int y0 = MathUtil::clamp(fragPosLightSpace.y * TEX_HEIGHT + y, 0, TEX_HEIGHT - 1);
+                float depthInDepthMap = _depthFBO[y0 * TEX_WIDTH + x0];
+                shadow += currentDepth - bias > depthInDepthMap ? 1.0 : 0.0;
+            }
+        }
+        shadow /= 9.0;
+        return shadow;
+    }
+
     void ShadowMap::setPixel(int x, int y, float z, float u, float v, vec3 varying[],
                              const std::vector<vec3> &uniforms, float dudx, float dvdy) {
+        if (renderType == 2 && _depthFBO) {
+            if (x >= 0 && y >= 0 && x < TEX_WIDTH && y < TEX_HEIGHT) {
+                int index = y * TEX_WIDTH + x;
+                if (z < _depthFBO[index]) {
+                    _depthFBO[index] = z;
+                }
+            }
+            return;
+        }
+        if (renderType == 1) {
+            vec4 color = vec4(vec3(z) * 255.0f, 255.0);
+            SoftRender::setPixel(x, y, z, color);
+            return;
+        }
+
         Texture2D *texture = _bindTextures["texture0"];
         if (texture) {
             const vec3 &textureColor = texture->sample(u, v, dudx, dvdy);
@@ -210,7 +285,16 @@ TEST_NODE_IMP_BEGIN
             spec *= 255.0f;
             vec3 specular = vec3(0.5f, 0.5f, 0.5f) * spec;
 
-            vec4 color = vec4(vec3(textureColor) * (ambient + diffuse) + specular, 255);
+
+            float shadow = 0;
+            if (renderType == 3 && _depthFBO) {
+                vec4 fragPosLightSpace = lightSpaceMatrix.applyPoint(Vector(fragPos)).vec4();
+                float bias = max(0.05f * (1.0f - glm::dot(normal, lightDir)), 0.005f);
+                shadow = inShadow(fragPosLightSpace, bias);
+            }
+            ambient *= vec3(textureColor);
+            diffuse *= vec3(textureColor);
+            vec4 color = vec4(ambient + (diffuse + specular) * (1.0f - shadow), 255);
             SoftRender::setPixel(x, y, z, color);
         }
     }

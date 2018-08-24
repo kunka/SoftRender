@@ -59,6 +59,8 @@ public:
 
     Matrix();
 
+    Matrix(const Matrix &copy);
+
     void setIdentity();
 
     void setZero();
@@ -84,6 +86,8 @@ public:
     static Matrix lookAt(const Vector &eye, const Vector &target, const Vector &up);
 
     static Matrix perspective(float fovy, float aspect, float near, float far);
+
+    static Matrix ortho(float left, float right, float bottom, float top, float near, float far);
 };
 
 #endif //GL_MATHUTIL_H
