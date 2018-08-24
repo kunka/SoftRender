@@ -68,6 +68,7 @@
 #include "softrender/VisualizeDepth.h"
 #include "softrender/Blend.h"
 #include "softrender/ShadowMap.h"
+#include "softrender/NormalMap.h"
 
 template<typename T>
 Scene *createScene() {
@@ -157,8 +158,10 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(TextureFilter);
         ADD_TEST_SCENE(Mipmaps);// opengl
         ADD_TEST_SCENE(MipMap);
+        ADD_TEST_SCENE(NormalMapping);// opengl
+        ADD_TEST_SCENE(NormalMap);
 
-        auto currentScene = "ShadowMap";
+        auto currentScene = "NormalMap";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {

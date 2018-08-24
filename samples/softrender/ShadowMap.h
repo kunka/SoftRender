@@ -5,7 +5,6 @@
 #ifndef GL_SHADOWMAP_H
 #define GL_SHADOWMAP_H
 
-
 #include "TextureCube.h"
 
 TEST_NODE_BEGIN2(ShadowMap, TextureCube)
@@ -23,7 +22,6 @@ TEST_NODE_BEGIN2(ShadowMap, TextureCube)
         float inShadow(vec4 &fragPosLightSpace, float bias);
 
         std::vector<float> verticesPlane;
-        std::vector<float> verticesQuad;
         std::vector<unsigned int> indicesPlane;
 
         Texture2D texture2DBox;
@@ -31,7 +29,6 @@ TEST_NODE_BEGIN2(ShadowMap, TextureCube)
 
         std::vector<Mesh *> planeMeshes;
         std::vector<Mesh *> boxMeshes;
-        std::vector<Mesh *> quadMeshes;
 
         vec3 lightPos;
         float *depthFBO;

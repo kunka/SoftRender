@@ -68,14 +68,6 @@ TEST_NODE_IMP_BEGIN
                 0, 1, 3, // first triangle
                 1, 2, 3 // second triangle
         };
-        verticesQuad = {
-                // positions       // normals(uselsss) // texture Coords
-                // to use the same vert shader
-                -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-                1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        };
 
         texture2DBox.load("../res/container.jpg");
         texture2DPlane.load("../res/net.jpg");
@@ -89,9 +81,6 @@ TEST_NODE_IMP_BEGIN
 
         mesh = new Mesh(createVertexs(vertices, 3, 3, 2));
         boxMeshes.push_back(mesh);
-
-        mesh = new Mesh(createVertexs(verticesQuad, 3, 3, 2));
-        quadMeshes.push_back(mesh);
 
         cameraPos = vec3(0.3f, 4.0f, 5.0f);
         cameraDir = vec3(0.0f, 2.0f, 0.0f) - cameraPos;
@@ -304,8 +293,6 @@ TEST_NODE_IMP_BEGIN
             delete planeMeshes[i];
         for (unsigned int i = 0; i < boxMeshes.size(); i++)
             delete boxMeshes[i];
-        for (unsigned int i = 0; i < quadMeshes.size(); i++)
-            delete quadMeshes[i];
 
         delete[] depthFBO;
     }
