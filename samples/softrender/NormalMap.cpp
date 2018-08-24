@@ -39,7 +39,7 @@ TEST_NODE_IMP_BEGIN
         planeMeshes.push_back(mesh);
 
         cameraPos = vec3(-0.9f, 0.2f, 0.8f);
-        cameraDir = vec3(0.0f, 0.0f, 0.0f) - cameraPos;
+        cameraDir = vec3(0.3f, 0.0f, 0.0f) - cameraPos;
         lightPos = vec3(0.3f, -0.1f, 0.3f);
     }
 
