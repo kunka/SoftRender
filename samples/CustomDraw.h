@@ -42,12 +42,13 @@ public:
 
     virtual void fixedUpdate(float delta) override;
 
-    unsigned int loadTexture(const std::string &path, bool mipmap = true);
+    unsigned int loadTexture(const std::string &path, bool mipmap = true, bool gammaCorrection = false);
 
     static int currentSceneIndex;
     static std::vector<std::pair<std::string, Scene *(*)()>> testScenes;
 
     virtual bool init() override;
+
 protected:
 
     Shader shader;

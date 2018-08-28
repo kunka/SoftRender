@@ -190,7 +190,7 @@ void main()
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
-        texture = loadTexture("../res/wood.png");
+        texture = loadTexture("../res/wood.png", true, true);
 
         shader.use();
         shader.setInt("ourTexture", 0);
