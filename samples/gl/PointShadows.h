@@ -9,13 +9,10 @@
 
 TEST_NODE_BEGIN(PointShadows)
 
-        unsigned int texture2;
-        unsigned int planeVAO;
-        unsigned int planeVBO;
-        unsigned int planeEBO;
         unsigned int quadVAO;
         unsigned int quadVBO;
         unsigned int depthMapFBO;
+        unsigned int depthCubemap;
         Shader depthShader;
         Shader shadowShader;
 

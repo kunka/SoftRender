@@ -58,7 +58,7 @@ if (APPLE)
     link_directories(external/zlib/mac)
 endif (APPLE)
 
-add_executable(gl ${SOURCE_FILES} samples/softrender/LoadModel.cpp samples/softrender/LoadModel.h samples/softrender/VisualizeDepth.cpp samples/softrender/VisualizeDepth.h samples/softrender/Blend.cpp samples/softrender/Blend.h samples/softrender/ShadowMap.cpp samples/softrender/ShadowMap.h samples/gl/TextureFiltering.cpp samples/gl/TextureFiltering.h samples/gl/Mipmaps.cpp samples/gl/Mipmaps.h samples/softrender/Textures.cpp samples/softrender/Textures.h samples/softrender/TextureFilter.cpp samples/softrender/TextureFilter.h samples/softrender/MipMap.cpp samples/softrender/MipMap.h samples/softrender/NormalMap.cpp samples/softrender/NormalMap.h)
+add_executable(gl ${SOURCE_FILES} samples/softrender/LoadModel.cpp samples/softrender/LoadModel.h samples/softrender/VisualizeDepth.cpp samples/softrender/VisualizeDepth.h samples/softrender/Blend.cpp samples/softrender/Blend.h samples/softrender/ShadowMap.cpp samples/softrender/ShadowMap.h samples/gl/TextureFiltering.cpp samples/gl/TextureFiltering.h samples/gl/Mipmaps.cpp samples/gl/Mipmaps.h samples/softrender/Textures.cpp samples/softrender/Textures.h samples/softrender/TextureFilter.cpp samples/softrender/TextureFilter.h samples/softrender/MipMap.cpp samples/softrender/MipMap.h samples/softrender/NormalMap.cpp samples/softrender/NormalMap.h samples/gl/HDR.cpp samples/gl/HDR.h)
 
 target_link_libraries(gl glfw3.a assimp.a zlibstatic.a)
 

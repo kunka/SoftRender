@@ -302,7 +302,6 @@ void main()
 
         // depth map fbo
         glGenFramebuffers(1, &depthMapFBO);
-        unsigned int depthMap;
         glGenTextures(1, &depthMap);
         glBindTexture(GL_TEXTURE_2D, depthMap);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
@@ -434,7 +433,7 @@ void main()
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, depthMapFBO);
+                glBindTexture(GL_TEXTURE_2D, depthMap);
                 // reset transform
                 depthShader.setMat4("projection", glm::mat4());
                 depthShader.setMat4("view", glm::mat4());
@@ -473,7 +472,7 @@ void main()
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 glActiveTexture(GL_TEXTURE1);
-                glBindTexture(GL_TEXTURE_2D, depthMapFBO);
+                glBindTexture(GL_TEXTURE_2D, depthMap);
                 shadowShader.use();
                 shadowShader.setInt("depthMap", 1);
                 shadowShader.setMat4("lightSpaceMatrix", pj * vw);

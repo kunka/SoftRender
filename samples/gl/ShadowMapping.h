@@ -16,6 +16,7 @@ TEST_NODE_BEGIN(ShadowMapping)
         unsigned int quadVAO;
         unsigned int quadVBO;
         unsigned int depthMapFBO;
+        unsigned int depthMap;
         Shader depthShader;
         Shader shadowShader;
 

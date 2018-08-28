@@ -49,6 +49,7 @@
 #include "gl/ShadowMapping.h"
 #include "gl/PointShadows.h"
 #include "gl/NormalMapping.h"
+#include "gl/HDR.h"
 
 #include "alg/PathFinding.h"
 #include "alg/FunctionDraw.h"
@@ -129,6 +130,7 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(ShadowMapping);
         ADD_TEST_SCENE(PointShadows);
         ADD_TEST_SCENE(NormalMapping);
+        ADD_TEST_SCENE(HDR);
 
         ADD_TEST_SCENE(PathFinding);
         ADD_TEST_SCENE(FunctionDraw);
@@ -161,7 +163,7 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(NormalMapping);// opengl
         ADD_TEST_SCENE(NormalMap);
 
-        auto currentScene = "NormalMap";
+        auto currentScene = "HDR";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {
