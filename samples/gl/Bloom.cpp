@@ -361,7 +361,7 @@ void main()
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                 std::cout << "Framebuffer not complete!" << std::endl;
         }
-
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         blurShader.use();
         blurShader.setInt("image", 0);

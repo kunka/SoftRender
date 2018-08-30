@@ -51,6 +51,7 @@
 #include "gl/NormalMapping.h"
 #include "gl/HDR.h"
 #include "gl/Bloom.h"
+#include "gl/DeferredShading.h"
 
 #include "alg/PathFinding.h"
 #include "alg/FunctionDraw.h"
@@ -133,6 +134,7 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(NormalMapping);
         ADD_TEST_SCENE(HDR);
         ADD_TEST_SCENE(Bloom);
+        ADD_TEST_SCENE(DeferredShading);
 
         ADD_TEST_SCENE(PathFinding);
         ADD_TEST_SCENE(FunctionDraw);
@@ -165,7 +167,7 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(NormalMapping);// opengl
         ADD_TEST_SCENE(NormalMap);
 
-        auto currentScene = "Bloom";
+        auto currentScene = "DeferredShading";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {

@@ -50,6 +50,7 @@ public:
     virtual bool init() override;
 
 protected:
+    void renderCube();
 
     Shader shader;
     unsigned int VAO;
@@ -66,6 +67,8 @@ protected:
     vec3 cameraUp;
     float pitch;
     float yaw;
+    unsigned int cubeVAO = 0;
+    unsigned int cubeVBO = 0;
 };
 
 #endif //GL_CUSTOMDRAW_H
