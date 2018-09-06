@@ -60,8 +60,8 @@ TEST_NODE_IMP_BEGIN
 
         modelMatrix.setIdentity();
 //        modelMatrix.translate(Vector(-0.5f, 0, 0));
-//        modelMatrix.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
-        modelMatrix.rotate(Vector(0, 1, 0), radians(10.0f));
+        modelMatrix.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
+//        modelMatrix.rotate(Vector(0, 1, 0), radians(10.0f));
         vec3 target = cameraPos + cameraDir;
         viewMatrix = Matrix::lookAt(Vector(cameraPos.x, cameraPos.y, cameraPos.z), Vector(target.x, target.y, target.z),
                                     Vector(cameraUp.x, cameraUp.y, cameraUp.z));
