@@ -1,3 +1,8 @@
+=======
+# SoftRender
+To learn OpenGL, Implement basic graphics by OpenGL and my SoftRender at the same time.
+
+##Win10
 Build Assimp + Zlib
 CMake + MINGW32
 
@@ -7,6 +12,7 @@ Configuring done
 
 cmake --build cmake-build-debug --target assimp -- -j 8
 
-OSX
+##OSX
 CMake
 Add CMAKE_BUILD_TYPE  Release
+
