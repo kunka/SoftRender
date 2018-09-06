@@ -12,11 +12,12 @@ TEST_NODE_IMP_BEGIN
     }
 
     bool LightingMap::init() {
-        SoftRender::init();
+        Lighting::init();
         diffuseTexture.load("../res/container2.png");
         specularTexture.load("../res/container2_specular.png");
         diffuseTexture.setMagFilter(GL_LINEAR);
         specularTexture.setMagFilter(GL_LINEAR);
+        return true;
     }
 
     void LightingMap::draw(const mat4 &transform) {

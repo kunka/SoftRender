@@ -66,10 +66,10 @@ TEST_NODE_IMP_BEGIN
         clearDepth();
 
         modelMatrix.setIdentity();
-        modelMatrix.translate(Vector(0.5, -0.5, 0));
+//        modelMatrix.translate(Vector(0.5, -0.5, 0));
         modelMatrix.rotate(Vector(0, 1, 0), 2 * 3.14f * sin(glfwGetTime() / 4));
         modelMatrix.rotate(Vector(1, 0, 0), radians(30.0f));
-        modelMatrix.scale(Vector(1.5f, 2, 0.5));
+//        modelMatrix.scale(Vector(1.5f, 1, 0.5));
         vec3 target = cameraPos + cameraDir;
         viewMatrix = Matrix::lookAt(Vector(cameraPos.x, cameraPos.y, cameraPos.z), Vector(target.x, target.y, target.z),
                                     Vector(cameraUp.x, cameraUp.y, cameraUp.z));

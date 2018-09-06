@@ -7,6 +7,7 @@
 TEST_NODE_IMP_BEGIN
 
     VisualizeDepth::VisualizeDepth() {
+
     }
 
     void VisualizeDepth::draw(const mat4 &transform) {

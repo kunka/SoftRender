@@ -8,6 +8,12 @@
 TEST_NODE_IMP_BEGIN
 
     Lighting::Lighting() {
+        TEX_WIDTH = 1024;
+        TEX_HEIGHT = 1024;
+    }
+
+    bool Lighting::init() {
+        SoftRender::init();
         vertices = {
                 // positions          // normals           // texture coords
                 // back face
@@ -60,6 +66,7 @@ TEST_NODE_IMP_BEGIN
 
         lightPos = vec3(0.0, 1.0, 0.0);
         lightColor = vec3(1.0, 1.0, 1.0);
+        return true;
     }
 
     // pitch and yaw

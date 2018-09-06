@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
         ADD_TEST_SCENE(NormalMapping);// opengl
         ADD_TEST_SCENE(NormalMap);
 
-        auto currentScene = "Rast2DPoint";
+        auto currentScene = "Rast2DLine";
         int index = 0;
         for (auto pair :  CustomDraw::testScenes) {
             if (pair.first == currentScene) {

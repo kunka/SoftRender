@@ -8,6 +8,8 @@
 TEST_NODE_IMP_BEGIN
 
     Blend::Blend() {
+        TEX_WIDTH = 1024;
+        TEX_HEIGHT = 1024;
     }
 
     bool Blend::init() {
